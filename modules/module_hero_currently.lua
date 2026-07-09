@@ -346,6 +346,7 @@ local SK_PREVENT_CROP  = "hero_currently_prevent_crop"
 local SK_CROP_THRESHOLD = "hero_currently_crop_threshold"
 local SK_DESC_SOURCE   = "hero_currently_desc_source"
 local SK_DESC_FS_SCALE = "hero_currently_desc_fs_scale"
+local SK_COVER_SCALE   = "hero_currently_cover_scale"
 
 -- ---------------------------------------------------------------------------
 -- Description-source setting helper: "description" (default) shows the book
@@ -355,6 +356,12 @@ local SK_DESC_FS_SCALE = "hero_currently_desc_fs_scale"
 local function getDescFsScale(pfx)
     local S = getSettings()
     local v = S and tonumber(S:readSetting(pfx .. SK_DESC_FS_SCALE))
+    return (v and v > 0) and (v / 100.0) or 1.0
+end
+
+local function getCoverScale(pfx)
+    local S = getSettings()
+    local v = S and tonumber(S:readSetting(pfx .. SK_COVER_SCALE))
     return (v and v > 0) and (v / 100.0) or 1.0
 end
 
@@ -475,7 +482,7 @@ function M.build(w, ctx)
     local scale = Config.getModuleScale("hero_currently", pfx)
     local PAD   = UI.PAD
 
-    local COVER_W = math.floor(w * 0.30)      -- bookshelf: hero_cover_w = content_w * 0.30
+    local COVER_W = math.floor(w * 0.30 * getCoverScale(pfx))  -- bookshelf: hero_cover_w = content_w * 0.30, scaled by user setting
     local COVER_H = math.floor(COVER_W * 1.5)  -- bookshelf: hero_cover_h = hero_cover_w * 1.5
 
     local cover_gap  = math.max(0, math.floor(_BASE_COVER_GAP  * scale))
@@ -904,9 +911,9 @@ function M.getHeight(ctx)
     local scale = Config.getModuleScale("hero_currently", pfx)
     local PAD   = UI.PAD
 
-    -- Right column height = cover height = 30% of content width × 1.5
+    -- Right column height = cover height = 30% of content width × 1.5, scaled by user setting
     local approx_content_w = Screen:getWidth() - PAD * 2
-    local content_h = math.floor(approx_content_w * 0.30 * 1.5)
+    local content_h = math.floor(approx_content_w * 0.30 * getCoverScale(pfx) * 1.5)
 
     local show_frame = Settings and Settings:isTrue(pfx .. "hero_currently_show_frame")
     local solid_bg   = Settings and Settings:isTrue(pfx .. "hero_currently_solid_bg")
@@ -1042,6 +1049,43 @@ function M.getMenuItems(ctx_menu)
                     callback        = function(spin_widget)
                         if S then
                             S:saveSetting(pfx .. SK_DESC_FS_SCALE, spin_widget.value)
+                        end
+                        UIManager:close(spin)
+                        refresh()
+                    end,
+                }
+                UIManager:show(spin)
+            end,
+        },
+        {
+            text_func = function()
+                local S = getSettings()
+                local v = S and S:readSetting(pfx .. SK_COVER_SCALE)
+                v = v and tonumber(v) or 100
+                return v == 100
+                    and _lc("Cover Size")
+                    or  string.format("%s (%d%%)", _lc("Cover Size"), v)
+            end,
+            keep_menu_open = true,
+            callback = function()
+                local SpinWidget = require("ui/widget/spinwidget")
+                local UIManager  = require("ui/uimanager")
+                local S = getSettings()
+                local current = (S and tonumber(S:readSetting(pfx .. SK_COVER_SCALE))) or 100
+                local spin
+                spin = SpinWidget:new{
+                    title_text      = _lc("Cover Size"),
+                    info_text       = _lc("Scales the hero card's book cover relative to default, independently of the card's text Scale setting.\nAspect ratio (3:2) is preserved; the text column resizes to fit."),
+                    value           = current,
+                    value_min       = 50,
+                    value_max       = 150,
+                    value_step      = 5,
+                    value_hold_step = 25,
+                    unit            = "%",
+                    ok_text         = _lc("Set"),
+                    callback        = function(spin_widget)
+                        if S then
+                            S:saveSetting(pfx .. SK_COVER_SCALE, spin_widget.value)
                         end
                         UIManager:close(spin)
                         refresh()
