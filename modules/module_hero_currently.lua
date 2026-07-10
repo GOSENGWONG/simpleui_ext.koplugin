@@ -555,8 +555,26 @@ function M.build(w, ctx)
         fgcolor   = CLR_TEXT,
         bold      = true,
     }
-    right_top[#right_top + 1] = (ctx.has_wallpaper and UI and UI.makeAlphaTextBox(title_args))
-                                  or TextBoxWidget:new(title_args)
+    local title_widget = (ctx.has_wallpaper and UI and UI.makeAlphaTextBox(title_args))
+                          or TextBoxWidget:new(title_args)
+
+    -- Tappable wrapper: tapping the title also opens the book, same as the
+    -- cover image (right-handed users tend to reach for the title text,
+    -- which sits closer to their thumb than the cover on the left).
+    local TitleTap = InputContainer:extend{}
+    function TitleTap:onTap()
+        if ctx.open_fn then ctx.open_fn(fp) end
+        return true
+    end
+    local title_size = title_widget:getSize()
+    local title_tap = TitleTap:new{
+        dimen = Geom:new{ w = title_size.w, h = title_size.h },
+        title_widget,
+    }
+    title_tap.ges_events = {
+        Tap = { GestureRange:new{ ges = "tap", range = title_tap.dimen } },
+    }
+    right_top[#right_top + 1] = title_tap
     if bd.authors and bd.authors ~= "" then
         right_top[#right_top + 1] = VerticalSpan:new{ width = author_gap }
         right_top[#right_top + 1] = TextWidget:new{
