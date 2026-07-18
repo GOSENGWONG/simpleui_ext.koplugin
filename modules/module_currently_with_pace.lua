@@ -658,7 +658,7 @@ function M.build(w, ctx)
             if bar_style == "with_pct" then
                 meta[#meta+1] = buildProgressBarWithPct(tw, bd.percent, bar_h, scale, lbl_scale, face_inlinepct, _CLR_DARK_EFF)
             else
-                meta[#meta+1] = SH.progressBar(tw, bd.percent, bar_h)
+                meta[#meta+1] = UI.progressBar(tw, bd.percent, bar_h)
             end
             meta_has_content = true
             _next_gap = bar_gap_after  -- next element uses the larger post-bar gap

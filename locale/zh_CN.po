@@ -510,7 +510,7 @@ msgstr "简介内容"
 #: modules/module_hero_currently.lua:1054
 #: modules/module_hero_currently.lua:1064
 msgid "Description Text Size"
-msgstr "书籍简介字号"
+msgstr "简介字号"
 
 #: main.lua:429 main.lua:465
 msgid "disabled"

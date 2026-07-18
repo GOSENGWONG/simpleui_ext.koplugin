@@ -739,7 +739,7 @@ local function _buildWidget(w, ctx, pfx, SH, bd, cover, stats, D, scale, lbl_sca
 
     local bar_widget
     if bar_style == "simple" then
-        bar_widget = SH.progressBar(tw, bd.percent, bar_h)
+        bar_widget = UI.progressBar(tw, bd.percent, bar_h)
     else
         bar_widget = buildCustomProgressBar(tw, bd.percent, bar_h, scale, lbl_scale, face_inlinepct, _CLR_DARK_EFF, bar_style)
     end
