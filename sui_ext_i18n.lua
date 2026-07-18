@@ -136,7 +136,10 @@ local function parsePO(path)
             for line in header:gmatch("([^\n]*)\n?") do
                 local plural_line = line:match("^Plural%-Forms:%s*(.-)%s*$")
                 if plural_line then
-                    pluralizer = parsePluralExpression(plural_line)
+                    -- plural_line is the whole "nplurals=N; plural=EXPR;" field;
+                    -- only EXPR is a valid Lua expression once compiled.
+                    local expr = plural_line:match("plural%s*=%s*(.-)%s*;?%s*$")
+                    pluralizer = expr and parsePluralExpression(expr)
                     break
                 end
             end
@@ -272,7 +275,15 @@ local function ngettext(msgid, msgid_plural, n)
         if type(entry) == "table" then
             local idx = 0
             if t.plural then
-                idx = t.plural(n) or 0
+                -- Simple two-form expressions (e.g. "n != 1") compile down to a
+                -- Lua boolean rather than 0/1; only CLDR-style ternary chains
+                -- (e.g. Russian's) come back as an integer already.
+                local raw = t.plural(n)
+                if type(raw) == "boolean" then
+                    idx = raw and 1 or 0
+                elseif type(raw) == "number" then
+                    idx = raw
+                end
             else
                 idx = (n == 1) and 0 or 1
             end
