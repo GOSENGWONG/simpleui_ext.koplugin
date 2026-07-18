@@ -98,10 +98,20 @@ msgstr[1] "剩 %d 天"
 msgid "%dh %02d min"
 msgstr "%d 时 %02d 分"
 
+#: modules/module_currently_with_pace.lua:187
+#: modules/module_hero_currently.lua:113
+msgid "%dh %dm"
+msgstr "%d 时 %d 分"
+
 #: modules/module_currently_with_pace.lua:715
 #: modules/module_currently_with_pace.lua:858
 msgid "%dh %dm/day"
 msgstr "%d 时 %d 分/天"
+
+#: modules/module_currently_with_pace.lua:188
+#: modules/module_hero_currently.lua:114
+msgid "%dh"
+msgstr "%d 时"
 
 #: modules/module_currently_with_pace.lua:716
 #: modules/module_currently_with_pace.lua:859
@@ -112,6 +122,11 @@ msgstr "%d 时/天"
 #: modules/module_currently_with_pace.lua:860
 msgid "%dm/day"
 msgstr "%d 分/天"
+
+#: modules/module_currently_with_pace.lua:189
+#: modules/module_hero_currently.lua:115
+msgid "%dm"
+msgstr "%d 分"
 
 #: modules/module_currently_with_pace.lua:702
 #: modules/module_currently_with_pace.lua:706
@@ -131,6 +146,11 @@ msgstr "已读时长 %s"
 #: modules/module_currently_yanllsama_v1.lua:250
 msgid "0 min"
 msgstr "0 分钟"
+
+#: modules/module_currently_with_pace.lua:184
+#: modules/module_hero_currently.lua:110
+msgid "0m"
+msgstr "0 分"
 
 #: modules/module_currently_yanllsama_v1.lua:528
 msgid ""

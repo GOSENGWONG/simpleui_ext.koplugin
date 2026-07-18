@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: simpleui_ext 1.12.3\n"
 "POT-Creation-Date: 2026-07-18 04:52+0800\n"
-"PO-Revision-Date: 2026-07-18 12:00+0800\n"
+"PO-Revision-Date: 2026-07-18 13:00+0800\n"
 "Last-Translator: \n"
 "Language-Team: German\n"
 "Language: de\n"
@@ -97,10 +97,20 @@ msgstr[1] "%dT verbleibend"
 msgid "%dh %02d min"
 msgstr "%dSt %02dMin"
 
+#: modules/module_currently_with_pace.lua:187
+#: modules/module_hero_currently.lua:113
+msgid "%dh %dm"
+msgstr "%dSt %dMin"
+
 #: modules/module_currently_with_pace.lua:715
 #: modules/module_currently_with_pace.lua:858
 msgid "%dh %dm/day"
 msgstr "%dSt %dMin/Tag"
+
+#: modules/module_currently_with_pace.lua:188
+#: modules/module_hero_currently.lua:114
+msgid "%dh"
+msgstr "%dSt"
 
 #: modules/module_currently_with_pace.lua:716
 #: modules/module_currently_with_pace.lua:859
@@ -111,6 +121,11 @@ msgstr "%dSt/Tag"
 #: modules/module_currently_with_pace.lua:860
 msgid "%dm/day"
 msgstr "%dMin/Tag"
+
+#: modules/module_currently_with_pace.lua:189
+#: modules/module_hero_currently.lua:115
+msgid "%dm"
+msgstr "%dMin"
 
 #: modules/module_currently_with_pace.lua:702
 #: modules/module_currently_with_pace.lua:706
@@ -130,6 +145,11 @@ msgstr "%s gelesen"
 #: modules/module_currently_yanllsama_v1.lua:250
 msgid "0 min"
 msgstr "0 Min"
+
+#: modules/module_currently_with_pace.lua:184
+#: modules/module_hero_currently.lua:110
+msgid "0m"
+msgstr "0Min"
 
 #: modules/module_currently_yanllsama_v1.lua:528
 msgid "[V1/Legacy] Enhanced reading dashboard with dynamic grid (1-4 cols, 1-6 rows), customizable headers, rich statistics (10 metrics), and 6 progress bar styles. Tap book/author for description."

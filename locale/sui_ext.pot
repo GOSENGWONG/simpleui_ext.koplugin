@@ -92,9 +92,19 @@ msgstr[1] ""
 msgid "%dh %02d min"
 msgstr ""
 
+#: modules/module_currently_with_pace.lua:187
+#: modules/module_hero_currently.lua:113
+msgid "%dh %dm"
+msgstr ""
+
 #: modules/module_currently_with_pace.lua:715
 #: modules/module_currently_with_pace.lua:858
 msgid "%dh %dm/day"
+msgstr ""
+
+#: modules/module_currently_with_pace.lua:188
+#: modules/module_hero_currently.lua:114
+msgid "%dh"
 msgstr ""
 
 #: modules/module_currently_with_pace.lua:716
@@ -105,6 +115,11 @@ msgstr ""
 #: modules/module_currently_with_pace.lua:717
 #: modules/module_currently_with_pace.lua:860
 msgid "%dm/day"
+msgstr ""
+
+#: modules/module_currently_with_pace.lua:189
+#: modules/module_hero_currently.lua:115
+msgid "%dm"
 msgstr ""
 
 #: modules/module_currently_with_pace.lua:702
@@ -124,6 +139,11 @@ msgstr ""
 
 #: modules/module_currently_yanllsama_v1.lua:250
 msgid "0 min"
+msgstr ""
+
+#: modules/module_currently_with_pace.lua:184
+#: modules/module_hero_currently.lua:110
+msgid "0m"
 msgstr ""
 
 #: modules/module_currently_yanllsama_v1.lua:528

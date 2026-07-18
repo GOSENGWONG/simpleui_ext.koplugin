@@ -181,12 +181,12 @@ end
 -- Formats a duration in seconds as "Xh Ym", "Xh", or "Ym".
 local function fmtTime(secs)
     secs = math.floor(secs or 0)
-    if secs <= 0 then return "0m" end
+    if secs <= 0 then return _("0m") end
     local h = math.floor(secs / 3600)
     local m = math.floor((secs % 3600) / 60)
-    if h > 0 and m > 0 then return string.format("%dh %dm", h, m)
-    elseif h > 0        then return string.format("%dh", h)
-    else                     return string.format("%dm", m) end
+    if h > 0 and m > 0 then return string.format(_("%dh %dm"), h, m)
+    elseif h > 0        then return string.format(_("%dh"), h)
+    else                     return string.format(_("%dm"), m) end
 end
 
 

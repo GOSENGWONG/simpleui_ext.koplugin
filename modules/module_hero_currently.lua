@@ -107,12 +107,12 @@ end
 -- ---------------------------------------------------------------------------
 local function fmtTime(secs)
     secs = math.floor(secs or 0)
-    if secs <= 0 then return "0m" end
+    if secs <= 0 then return _("0m") end
     local h = math.floor(secs / 3600)
     local m = math.floor((secs % 3600) / 60)
-    if h > 0 and m > 0 then return string.format("%dh %dm", h, m)
-    elseif h > 0        then return string.format("%dh", h)
-    else                     return string.format("%dm", m) end
+    if h > 0 and m > 0 then return string.format(_("%dh %dm"), h, m)
+    elseif h > 0        then return string.format(_("%dh"), h)
+    else                     return string.format(_("%dm"), m) end
 end
 
 -- ---------------------------------------------------------------------------
@@ -624,8 +624,18 @@ function M.build(w, ctx)
         if bd.pages and bd.pages > 0 then
             local cur  = math.floor(pct * bd.pages)
             prog_left  = string.format("%d / %d", cur, bd.pages)  -- no "p." prefix (matches bookshelf)
-            local tl   = SH.formatTimeLeft(pct, bd.pages, avg_time)
-            if tl then prog_right = string.format(_("%s left"), tl) end
+            -- Computed locally (rather than via SH.formatTimeLeft) so the
+            -- "Xh Ym" text goes through our own translatable fmtTime();
+            -- the base plugin's helper hardcodes English h/m.
+            if avg_time and avg_time > 0 then
+                local remaining = math.floor(bd.pages * (1.0 - pct))
+                if remaining > 0 then
+                    local secs_left = math.floor(remaining * avg_time)
+                    if secs_left > 0 then
+                        prog_right = string.format(_("%s left"), fmtTime(secs_left))
+                    end
+                end
+            end
         else
             prog_left = string.format("%.0f%%", pct * 100)
         end
