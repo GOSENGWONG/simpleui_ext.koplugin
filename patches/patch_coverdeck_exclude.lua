@@ -29,6 +29,7 @@
 --   pfx .. "coverdeck_exclude_paths"   (comma/newline-separated path fragments)
 
 local logger = require("logger")
+local _      = require("sui_ext_i18n").translate
 
 -- ---------------------------------------------------------------------------
 -- PATCH_ID must match the filename: patch_<PATCH_ID>.lua
@@ -39,8 +40,8 @@ local PATCH_ID = "coverdeck_exclude"
 
 local P = {}
 P.id              = PATCH_ID
-P.name            = "Cover Deck Exclude Paths"
-P.description     = "Filter out specific paths from Cover Deck's recent books carousel"
+P.name            = _("Cover Deck Exclude Paths")
+P.description     = _("Filter out specific paths from Cover Deck's recent books carousel")
 P.default_enabled = false  -- Opt-in: patches default to disabled
 local _applied   = false
 
@@ -62,7 +63,7 @@ end
 
 local function _isExcluded(fp, excludes)
     if not fp or #excludes == 0 then return false end
-    for _, frag in ipairs(excludes) do
+    for _i, frag in ipairs(excludes) do
         if fp:find(frag, 1, true) then return true end
     end
     return false
@@ -125,7 +126,7 @@ function P.apply()
                     end
                     if RH.hist then
                         local filled = {}
-                        for _, e in ipairs(RH.hist) do
+                        for _i, e in ipairs(RH.hist) do
                             if e and e.file
                                 and (not ok_lfs or lfs.attributes(e.file, "mode") == "file")
                                 and not _isExcluded(e.file, excludes)
@@ -139,7 +140,7 @@ function P.apply()
                 else
                     -- ReadHistory unavailable — fall back to simple filter.
                     local filtered = {}
-                    for _, fp in ipairs(orig_recent_fps or {}) do
+                    for _i, fp in ipairs(orig_recent_fps or {}) do
                         if (not ok_lfs or lfs.attributes(fp, "mode") == "file")
                             and not _isExcluded(fp, excludes)
                         then
@@ -167,7 +168,6 @@ function P.apply()
         local items   = orig_getMenuItems(ctx_menu) or {}
         local pfx     = ctx_menu.pfx or ""
         local refresh = ctx_menu.refresh
-        local _lc     = ctx_menu._ or function(x) return x end
         local ok2, SUISettings = pcall(require, "sui_store")
 
         items[#items + 1] = {
@@ -175,11 +175,11 @@ function P.apply()
                 local raw = ok2 and SUISettings
                             and SUISettings:readSetting(pfx .. PATCH_ID)
                 if not raw or raw == "" then
-                    return _lc("Exclude Paths from Recent")
+                    return _("Exclude Paths from Recent")
                 end
                 local n = 0
-                for _ in raw:gmatch("[^,\n]+") do n = n + 1 end
-                return string.format("%s (%d)", _lc("Exclude Paths from Recent"), n)
+                for _i in raw:gmatch("[^,\n]+") do n = n + 1 end
+                return string.format("%s (%d)", _("Exclude Paths from Recent"), n)
             end,
             callback = function()
                 local InputDialog = require("ui/widget/inputdialog")
@@ -188,18 +188,18 @@ function P.apply()
                              and SUISettings:readSetting(pfx .. PATCH_ID)) or ""
                 local dlg
                 dlg = InputDialog:new{
-                    title       = _lc("Exclude Paths from Recent"),
+                    title       = _("Exclude Paths from Recent"),
                     input       = raw,
                     input_hint  = "/mnt/onboard/rss, instapaper",
-                    description = _lc("Comma-separated path fragments.\nBooks whose path contains any fragment will be skipped."),
-                    allow_newline    = false,
+                    description = _("Comma-separated path fragments.\nBooks whose path contains any fragment will be skipped."),
+                    allow_newline = false,
                     buttons = {{
                         {
-                            text     = _lc("Cancel"),
+                            text = _("Cancel"),
                             callback = function() UIManager:close(dlg) end,
                         },
                         {
-                            text             = _lc("Save"),
+                            text = _("Save"),
                             is_enter_default = true,
                             callback = function()
                                 local val = dlg:getInputText()

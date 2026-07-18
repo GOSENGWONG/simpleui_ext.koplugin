@@ -9,8 +9,8 @@
 -- External dependencies
 local Device  = require("device")
 local Screen  = Device.screen
-local _ = require("sui_i18n").translate
-local N_ = require("sui_i18n").ngettext
+local _ = require("sui_ext_i18n").translate
+local N_ = require("sui_ext_i18n").ngettext
 local logger  = require("logger")
 
 local Blitbuffer      = require("ffi/blitbuffer")
@@ -322,10 +322,10 @@ local function _resolveElemOrder(saved)
         return _ELEM_DEFAULT_ORDER
     end
     local seen, result = {}, {}
-    for _, v in ipairs(saved) do
+    for _i, v in ipairs(saved) do
         if _ELEM_LABELS[v] then seen[v] = true; result[#result+1] = v end
     end
-    for _, v in ipairs(_ELEM_DEFAULT_ORDER) do
+    for _i, v in ipairs(_ELEM_DEFAULT_ORDER) do
         if not seen[v] then result[#result+1] = v end
     end
     return result
@@ -341,7 +341,7 @@ local M = {}
 
 M.id              = "currently_with_pace"
 M.name            = _("Currently Reading (with Pace)")
-M.description     = "Currently reading book with pace statistics (avg time/day, pages/min, %/day)"
+M.description     = _("Currently reading book with pace statistics (avg time/day, pages/min, %/day)")
 M.default_enabled = false  -- Opt-in module (disabled by default)
 M.label           = _("Currently Reading (with Pace)")
 M.enabled_key     = "currently_with_pace"
@@ -461,7 +461,7 @@ end
 -- Helper: check if a filepath matches any exclude fragment
 local function isExcluded(fp, excludes)
     if not fp or #excludes == 0 then return false end
-    for _, frag in ipairs(excludes) do
+    for _i, frag in ipairs(excludes) do
         if fp:find(frag, 1, true) then return true end
     end
     return false
@@ -480,7 +480,7 @@ local function _getCurrentFP(ctx, pfx)
         pcall(function() RH:reload() end)
     end
     if not RH.hist then return nil end
-    for _, e in ipairs(RH.hist) do
+    for _i, e in ipairs(RH.hist) do
         if e and e.file and not isExcluded(e.file, excludes) then
             return e.file
         end
@@ -658,7 +658,7 @@ function M.build(w, ctx)
             if bar_style == "with_pct" then
                 meta[#meta+1] = buildProgressBarWithPct(tw, bd.percent, bar_h, scale, lbl_scale, face_inlinepct, _CLR_DARK_EFF)
             else
-                meta[#meta+1] = SH.progressBar(tw, bd.percent, bar_h)
+                meta[#meta+1] = UI.progressBar(tw, bd.percent, bar_h)
             end
             meta_has_content = true
             _next_gap = bar_gap_after  -- next element uses the larger post-bar gap
@@ -712,28 +712,28 @@ function M.build(w, ctx)
                             local avg_per_day = bstats.total_secs / bstats.days
                             local h = math.floor(avg_per_day / 3600)
                             local m = math.floor((avg_per_day % 3600) / 60)
-                            local time_str = (h > 0 and m > 0) and string.format("%dh %dm/day", h, m)
-                                             or (h > 0) and string.format("%dh/day", h)
-                                             or string.format("%dm/day", m)
+                            local time_str = (h > 0 and m > 0) and string.format(_("%dh %dm/day"), h, m)
+                                             or (h > 0) and string.format(_("%dh/day"), h)
+                                             or string.format(_("%dm/day"), m)
                             return time_str, true
                         else
-                            return "—/day", false
+                            return _("—/day"), false
                         end
                     elseif e == "pages_per_minute" and show.pages_per_minute then
                         local has_data = bstats and bstats.avg_time and bstats.avg_time > 0
                         if has_data then
                             local ppm = 60 / bstats.avg_time
-                            return (ppm >= 1) and string.format("%.0fwpm", ppm) or string.format("%.1fwpm", ppm), true
+                            return (ppm >= 1) and string.format(_("%.0fwpm"), ppm) or string.format(_("%.1fwpm"), ppm), true
                         else
-                            return "—wpm", false
+                            return _("—wpm"), false
                         end
                     elseif e == "percent_per_day" and show.percent_per_day then
                         local has_data = bstats and bstats.days and bstats.days > 0 and bd.percent and bd.percent > 0
                         if has_data then
                             local pct_per_day = (bd.percent * 100) / bstats.days
-                            return string.format("%.1f%%/day", pct_per_day), true
+                            return string.format(_("%.1f%%/day"), pct_per_day), true
                         else
-                            return "—%/day", false
+                            return _("—%/day"), false
                         end
                     elseif e == "days_remaining" and show.days_remain then
                         local has_data = bstats and bstats.days and bstats.days > 0 and bd.percent and bd.percent > 0 and bd.percent < 1.0
@@ -743,7 +743,7 @@ function M.build(w, ctx)
                             local days_left = math.ceil(pct_left / pct_per_day)
                             return string.format(N_("%dd to go", "%dd to go", days_left), days_left), true
                         else
-                            return "—d to go", false
+                            return _("—d to go"), false
                         end
                     end
                     return nil, false
@@ -751,7 +751,7 @@ function M.build(w, ctx)
                 
                 -- Collect all stats in order
                 local stats_to_render = {}
-                for _, e in ipairs(elem_order) do
+                for _i, e in ipairs(elem_order) do
                     local text, has_data = buildStatText(e)
                     if text then
                         stats_to_render[#stats_to_render+1] = { text = text, has_data = has_data }
@@ -762,7 +762,7 @@ function M.build(w, ctx)
                 if #stats_to_render > 0 then
                     if stats_grouping == "none" then
                         -- One stat per line
-                        for _, stat in ipairs(stats_to_render) do
+                        for _i, stat in ipairs(stats_to_render) do
                             gap_before(pct_gap)
                             local stat_widget
                             if ctx.has_wallpaper then
@@ -855,17 +855,17 @@ function M.build(w, ctx)
                         local avg_per_day = bstats.total_secs / bstats.days
                         local h = math.floor(avg_per_day / 3600)
                         local m = math.floor((avg_per_day % 3600) / 60)
-                        local time_str = (h > 0 and m > 0) and string.format("%dh %dm/day", h, m)
-                                         or (h > 0) and string.format("%dh/day", h)
-                                         or string.format("%dm/day", m)
+                        local time_str = (h > 0 and m > 0) and string.format(_("%dh %dm/day"), h, m)
+                                         or (h > 0) and string.format(_("%dh/day"), h)
+                                         or string.format(_("%dm/day"), m)
                         parts[#parts+1] = { text = time_str, placeholder = false }
                     elseif e == "pages_per_minute" and show.pages_per_minute and bstats and bstats.avg_time and bstats.avg_time > 0 then
                         local ppm = 60 / bstats.avg_time
-                        local wpm_str = (ppm >= 1) and string.format("%.0fwpm", ppm) or string.format("%.1fwpm", ppm)
+                        local wpm_str = (ppm >= 1) and string.format(_("%.0fwpm"), ppm) or string.format(_("%.1fwpm"), ppm)
                         parts[#parts+1] = { text = wpm_str, placeholder = false }
                     elseif e == "percent_per_day" and show.percent_per_day and bstats and bstats.days and bstats.days > 0 and bd.percent and bd.percent > 0 then
                         local pct_per_day = (bd.percent * 100) / bstats.days
-                        parts[#parts+1] = { text = string.format("%.1f%%/day", pct_per_day), placeholder = false }
+                        parts[#parts+1] = { text = string.format(_("%.1f%%/day"), pct_per_day), placeholder = false }
                     elseif e == "days_remaining" and show.days_remain and bstats and bstats.days and bstats.days > 0 and bd.percent and bd.percent > 0 and bd.percent < 1.0 then
                         local pct_per_day = bd.percent / bstats.days
                         local pct_left = 1.0 - bd.percent
@@ -1012,7 +1012,7 @@ function M.updateCovers(widget, _ctx)
     if not SH then return true end
 
     local all_done = true
-    for _, slot in ipairs(tappable._cover_slots) do
+    for _i, slot in ipairs(tappable._cover_slots) do
         local new_cover = SH.getBookCover(slot.fp, slot.w, slot.h, slot.align, slot.stretch)
         if new_cover then
             slot.container[slot.idx] = new_cover
@@ -1117,12 +1117,11 @@ end
 -- Settings menu helpers (scale, text size, cover size).
 local function _makeScaleItem(ctx_menu)
     local pfx = ctx_menu.pfx
-    local _lc = ctx_menu._
     return Config.makeScaleItem({
-        text_func    = function() return _lc("Scale") end,
+        text_func    = function() return _("Scale") end,
         enabled_func = function() return not Config.isScaleLinked() end,
-        title        = _lc("Scale"),
-        info         = _lc("Scale for this module.\n100% is the default size."),
+        title        = _("Scale"),
+        info         = _("Scale for this module.\n100% is the default size."),
         get          = function() return Config.getModuleScalePct("currently_with_pace", pfx) end,
         set          = function(v) Config.setModuleScale(v, "currently_with_pace", pfx) end,
         refresh      = ctx_menu.refresh,
@@ -1131,11 +1130,10 @@ end
 
 local function _makeThumbScaleItem(ctx_menu)
     local pfx = ctx_menu.pfx
-    local _lc = ctx_menu._
     return Config.makeScaleItem({
-        text_func = function() return _lc("Cover size") end,
-        title     = _lc("Cover size"),
-        info      = _lc("Scale for the cover thumbnail only.\n100% is the default size."),
+        text_func = function() return _("Cover Size") end,
+        title     = _("Cover Size"),
+        info      = _("Scale for the cover thumbnail only.\n100% is the default size."),
         get       = function() return Config.getThumbScalePct("currently_with_pace", pfx) end,
         set       = function(v) Config.setThumbScale(v, "currently_with_pace", pfx) end,
         refresh   = ctx_menu.refresh,
@@ -1144,11 +1142,10 @@ end
 
 local function _makeTextScaleItem(ctx_menu)
     local pfx = ctx_menu.pfx
-    local _lc = ctx_menu._
     return Config.makeScaleItem({
-        text_func = function() return _lc("Text Size") end,
-        title     = _lc("Text Size"),
-        info      = _lc("Scale for all text elements (title, author, progress, time).\n100% is the default size."),
+        text_func = function() return _("Text Size") end,
+        title     = _("Text Size"),
+        info      = _("Scale for all text elements (title, author, progress, time).\n100% is the default size."),
         get       = function() return Config.getItemLabelScalePct("currently_with_pace", pfx) end,
         set       = function(v) Config.setItemLabelScale(v, "currently_with_pace", pfx) end,
         refresh   = ctx_menu.refresh,
@@ -1158,17 +1155,16 @@ end
 
 local function _makeCoverGapItem(ctx_menu)
     local pfx = ctx_menu.pfx
-    local _lc = ctx_menu._
     return Config.makeScaleItem({
         text_func = function()
             local pct = getCoverGapPct(pfx)
             return pct == 100
-                and _lc("Cover Spacing")
-                or  string.format("%s (%d%%)", _lc("Cover Spacing"), pct)
+                and _("Cover Spacing")
+                or  string.format("%s (%d%%)", _("Cover Spacing"), pct)
         end,
         separator = true,
-        title     = _lc("Cover Spacing"),
-        info      = _lc("Horizontal space between the cover and the text.\n100% is the default spacing."),
+        title     = _("Cover Spacing"),
+        info      = _("Horizontal space between the cover and the text.\n100% is the default spacing."),
         get       = function() return getCoverGapPct(pfx) end,
         set       = function(v) SUISettings:saveSetting(pfx .. COVER_GAP_KEY, v) end,
         refresh   = ctx_menu.refresh,
@@ -1183,11 +1179,10 @@ end
 function M.getMenuItems(ctx_menu)
     local pfx     = ctx_menu.pfx
     local refresh = ctx_menu.refresh
-    local _lc     = ctx_menu._
 
     local function toggle_item(label, key)
         return {
-            text_func    = function() return _lc(label) end,
+            text_func    = function() return _(label) end,
             checked_func = function() return _showElem(pfx, key) end,
             keep_menu_open = true,
             callback     = function()
@@ -1208,12 +1203,12 @@ function M.getMenuItems(ctx_menu)
     local items_submenu = {
         -- Arrange Items: drag-to-reorder the visible elements. Disabled when fewer than 2 are active.
         {
-            text           = _lc("Arrange Items"),
+            text           = _("Arrange Items"),
             keep_menu_open = true,
             separator      = true,
             enabled_func   = function()
                 local active = 0
-                for _, key in ipairs(_ELEM_DEFAULT_ORDER) do
+                for _i, key in ipairs(_ELEM_DEFAULT_ORDER) do
                     if _showElem(pfx, key) then
                         active = active + 1
                         if active >= 2 then return true end
@@ -1223,27 +1218,27 @@ function M.getMenuItems(ctx_menu)
             end,
             callback = function()
                 local sort_items = {}
-                for _, key in ipairs(_getElemOrder(pfx)) do
+                for _i, key in ipairs(_getElemOrder(pfx)) do
                     if _showElem(pfx, key) then
                         sort_items[#sort_items+1] = {
-                            text      = _lc(_ELEM_LABELS[key]),
+                            text      = _(_ELEM_LABELS[key]),
                             orig_item = key,
                         }
                     end
                 end
                 _UIManager:show(SortWidget:new{
-                    title             = _lc("Arrange Items"),
+                    title             = _("Arrange Items"),
                     item_table        = sort_items,
                     covers_fullscreen = true,
                     callback          = function()
                         local new_order = {}
-                        for _, item in ipairs(sort_items) do
+                        for _i, item in ipairs(sort_items) do
                             new_order[#new_order+1] = item.orig_item
                         end
                         -- Append inactive elements at the tail so their position is stable.
                         local active_set = {}
-                        for _, k in ipairs(new_order) do active_set[k] = true end
-                        for _, k in ipairs(_getElemOrder(pfx)) do
+                        for _i, k in ipairs(new_order) do active_set[k] = true end
+                        for _i, k in ipairs(_getElemOrder(pfx)) do
                             if not active_set[k] then new_order[#new_order+1] = k end
                         end
                         SUISettings:saveSetting(pfx .. ELEM_ORDER_KEY, new_order)
@@ -1253,10 +1248,10 @@ function M.getMenuItems(ctx_menu)
             end,
         },
         -- Visibility toggles (alphabetical order).
-        toggle_item("Author",          "author"),
-        toggle_item("Days of reading", "book_days"),
+        toggle_item(_("Author"),          "author"),
+        toggle_item(_("Days of reading"), "book_days"),
         {
-            text_func      = function() return _lc("Percentage read") end,
+            text_func      = function() return _("Percentage read") end,
             -- Greyed out when with_pct bar style is active (percentage is already in the bar).
             enabled_func   = function() return getBarStyle(pfx) == "simple" end,
             checked_func   = function() return _showElem(pfx, "percent") end,
@@ -1266,12 +1261,12 @@ function M.getMenuItems(ctx_menu)
                 refresh()
             end,
         },
-        toggle_item("Progress bar", "progress"),
+        toggle_item(_("Progress bar"), "progress"),
         {
-            text = _lc("Progress bar style"),
+            text = _("Progress bar style"),
             sub_item_table = {
                 {
-                    text           = _lc("Simple"),
+                    text           = _("Simple"),
                     radio          = true,
                     keep_menu_open = true,
                     checked_func   = function() return getBarStyle(pfx) == "simple" end,
@@ -1281,7 +1276,7 @@ function M.getMenuItems(ctx_menu)
                     end,
                 },
                 {
-                    text           = _lc("With percentage"),
+                    text           = _("With percentage"),
                     radio          = true,
                     keep_menu_open = true,
                     checked_func   = function() return getBarStyle(pfx) == "with_pct" end,
@@ -1292,18 +1287,18 @@ function M.getMenuItems(ctx_menu)
                 },
             },
         },
-        toggle_item("Time read",         "book_time"),
-        toggle_item("Time remaining",    "book_remaining"),
-        toggle_item("Days to finish",    "days_remaining"),
-        toggle_item("Avg time per day",  "avg_time_per_day"),
-        toggle_item("Reading speed (WPM)", "pages_per_minute"),
-        toggle_item("%/day",             "percent_per_day"),
-        toggle_item("Title",             "title"),
+        toggle_item(_("Time read"),           "book_time"),
+        toggle_item(_("Time remaining"),      "book_remaining"),
+        toggle_item(_("Days to finish"),      "days_remaining"),
+        toggle_item(_("Avg time per day"),    "avg_time_per_day"),
+        toggle_item(_("Reading speed (WPM)"), "pages_per_minute"),
+        toggle_item(_("%/day"),               "percent_per_day"),
+        toggle_item(_("Title"),               "title"),
         {
-            text = _lc("Stats layout"),
+            text = _("Stats layout"),
             sub_item_table = {
                 {
-                    text           = _lc("Default"),
+                    text           = _("Default"),
                     radio          = true,
                     keep_menu_open = true,
                     checked_func   = function() return getStatsStyle(pfx) == "default" end,
@@ -1313,7 +1308,7 @@ function M.getMenuItems(ctx_menu)
                     end,
                 },
                 {
-                    text           = _lc("Compact"),
+                    text           = _("Compact"),
                     radio          = true,
                     keep_menu_open = true,
                     checked_func   = function() return getStatsStyle(pfx) == "compact" end,
@@ -1325,11 +1320,11 @@ function M.getMenuItems(ctx_menu)
             },
         },
         {
-            text = _lc("Stats grouping (Default mode)"),
+            text = _("Stats grouping (Default mode)"),
             enabled_func = function() return getStatsStyle(pfx) == "default" end,
             sub_item_table = {
                 {
-                    text           = _lc("None (one per line)"),
+                    text           = _("None (one per line)"),
                     radio          = true,
                     keep_menu_open = true,
                     checked_func   = function() return getStatsGrouping(pfx) == "none" end,
@@ -1339,7 +1334,7 @@ function M.getMenuItems(ctx_menu)
                     end,
                 },
                 {
-                    text           = _lc("Pairs (2 per line)"),
+                    text           = _("Pairs (2 per line)"),
                     radio          = true,
                     keep_menu_open = true,
                     checked_func   = function() return getStatsGrouping(pfx) == "pairs" end,
@@ -1349,7 +1344,7 @@ function M.getMenuItems(ctx_menu)
                     end,
                 },
                 {
-                    text           = _lc("Triples (3 per line)"),
+                    text           = _("Triples (3 per line)"),
                     radio          = true,
                     keep_menu_open = true,
                     checked_func   = function() return getStatsGrouping(pfx) == "triples" end,
@@ -1367,20 +1362,20 @@ function M.getMenuItems(ctx_menu)
         _makeTextScaleItem(ctx_menu),
         thumb,
         gap_item,
-        Config.makeLabelToggleItem("currently_with_pace", _("Currently Reading (with Pace)"), refresh, _lc),
+        Config.makeLabelToggleItem("currently_with_pace", _("Currently Reading (with Pace)"), refresh, _),
         {
-            text           = _lc("Items"),
+            text           = _("Items"),
             sub_item_table = items_submenu,
         },
         {
             text_func = function()
                 local raw = SUISettings:readSetting(pfx .. EXCLUDE_PATHS_KEY)
                 if not raw or raw == "" then
-                    return _lc("Exclude Paths from Recent")
+                    return _("Exclude Paths from Recent")
                 end
                 local n = 0
-                for _ in raw:gmatch("[^,\n]+") do n = n + 1 end
-                return string.format("%s (%d)", _lc("Exclude Paths from Recent"), n)
+                for _i in raw:gmatch("[^,\n]+") do n = n + 1 end
+                return string.format("%s (%d)", _("Exclude Paths from Recent"), n)
             end,
             callback = function()
                 local InputDialog = require("ui/widget/inputdialog")
@@ -1388,10 +1383,10 @@ function M.getMenuItems(ctx_menu)
                 local raw = SUISettings:readSetting(pfx .. EXCLUDE_PATHS_KEY) or ""
                 local dlg
                 dlg = InputDialog:new{
-                    title       = _lc("Exclude Paths from Recent"),
+                    title       = _("Exclude Paths from Recent"),
                     input       = raw,
                     input_hint  = "/mnt/onboard/rss,instapaper,cache",
-                    description = _lc("Comma-separated path fragments.\nBooks whose path contains any fragment will be skipped."),
+                    description = _("Comma-separated path fragments.\nBooks whose path contains any fragment will be skipped."),
                     buttons     = {
                         {
                             {

@@ -34,6 +34,7 @@ local LuaSettings = require("luasettings")
 local SQ3 = require("lua-ljsqlite3/init")
 local util = require("util")
 local lfs = require("libs/libkoreader-lfs")
+local _ = require("sui_ext_i18n").translate
 
 -- Inline reading data provider (shared cache with 2-reading-insights-popup.lua)
 local db_path = DataStorage:getSettingsDir() .. "/statistics.sqlite3"
@@ -346,10 +347,10 @@ local function buildStreaksWidget(w, ctx, data)
     local val_fs = math.max(16, math.floor(base_val_fs * scale))
     local face_val = Font:getFace("NotoSerif-Bold.ttf", val_fs) or Font:getFace("tfont", val_fs)
     
-    local col1 = mkStreakColumn(streaks.weeks.current, "CURR. WEEKS", col_w, face_val, has_wp, UI)
-    local col2 = mkStreakColumn(streaks.days.current, "CURR. DAYS", col_w, face_val, has_wp, UI)
-    local col3 = mkStreakColumn(streaks.weeks.best, "BEST WEEKS", col_w, face_val, has_wp, UI)
-    local col4 = mkStreakColumn(streaks.days.best, "BEST DAYS", col_w, face_val, has_wp, UI)
+    local col1 = mkStreakColumn(streaks.weeks.current, _("CURR. WEEKS"), col_w, face_val, has_wp, UI)
+    local col2 = mkStreakColumn(streaks.days.current, _("CURR. DAYS"), col_w, face_val, has_wp, UI)
+    local col3 = mkStreakColumn(streaks.weeks.best, _("BEST WEEKS"), col_w, face_val, has_wp, UI)
+    local col4 = mkStreakColumn(streaks.days.best, _("BEST DAYS"), col_w, face_val, has_wp, UI)
     
     local cols_h = math.max(col1:getSize().h, col2:getSize().h, col3:getSize().h, col4:getSize().h)
     
@@ -384,16 +385,16 @@ end
 
 -- Kept separate from module.label: applyLabelToggle() mutates module.label to
 -- nil when the section label is hidden, so it can't also serve as its own default.
-local _DEFAULT_LABEL = "Reading Streaks"
+local _DEFAULT_LABEL = _("Reading Streaks")
 
 local module = {
-    id = "reading_streaks",
-    name = "Reading Streaks",
-    description = "Current and best reading streaks (days and weeks)",
+    id              = "reading_streaks",
+    name            = _("Reading Streaks"),
+    description     = _("Current and best reading streaks (days and weeks)"),
     default_enabled = true,   -- Loaded by simpleui_ext by default
-    label = _DEFAULT_LABEL,
-    enabled_key = "reading_streaks",
-    default_on = false,
+    label           = _DEFAULT_LABEL,
+    enabled_key     = "reading_streaks",
+    default_on      = false,
 }
 
 function module.build(w, ctx)
@@ -420,20 +421,19 @@ function module.getMenuItems(ctx_menu)
     
     local pfx = ctx_menu.pfx
     local refresh = ctx_menu.refresh
-    local _lc = ctx_menu._ or function(x) return x end
-    
+
     return {
-        Config.makeLabelToggleItem(module.id, module.name, refresh, _lc),
+        Config.makeLabelToggleItem(module.id, module.name, refresh, _),
         Config.makeScaleItem({
             text_func = function()
                 local pct = Config.getModuleScalePct("reading_streaks", pfx)
                 return pct == 100
-                    and _lc("Scale")
-                    or string.format("%s (%d%%)", _lc("Scale"), pct)
+                    and _("Scale")
+                    or string.format("%s (%d%%)", _("Scale"), pct)
             end,
             enabled_func = function() return not Config.isScaleLinked() end,
-            title = _lc("Scale"),
-            info = _lc("Scale for this module.\n100% is the default size."),
+            title = _("Scale"),
+            info  = _("Scale for this module.\n100% is the default size."),
             get = function() return Config.getModuleScalePct("reading_streaks", pfx) end,
             set = function(v) Config.setModuleScale(v, "reading_streaks", pfx) end,
             refresh = refresh,

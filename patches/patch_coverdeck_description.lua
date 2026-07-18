@@ -55,6 +55,7 @@
 --   coverdeck_desc_font_size  number  — base font size in pt (default 8; multiplied by module scale)
 
 local logger = require("logger")
+local _      = require("sui_ext_i18n").translate
 
 -- ---------------------------------------------------------------------------
 -- PATCH_ID must match the filename: patch_<PATCH_ID>.lua
@@ -65,8 +66,8 @@ local PATCH_ID = "coverdeck_description"
 
 local P = {}
 P.id              = PATCH_ID
-P.name            = "Cover Deck Description"
-P.description     = "Show the active book's description below (or above) the Cover Deck carousel"
+P.name            = _("Cover Deck Description")
+P.description     = _("Show the active book's description below (or above) the Cover Deck carousel")
 P.default_enabled = false  -- Opt-in: patches default to disabled
 
 local SK_ENABLED    = "coverdeck_desc_enabled"
@@ -354,7 +355,7 @@ local function _buildFps(ctx)
     if ctx.recent_fps then
         local seen = {}
         if ctx.current_fp then seen[ctx.current_fp] = true end
-        for _, fp in ipairs(ctx.recent_fps) do
+        for _i, fp in ipairs(ctx.recent_fps) do
             if not seen[fp] then
                 fps[#fps + 1] = fp
                 seen[fp] = true
@@ -640,15 +641,14 @@ function P.apply()
         local items   = orig_getMenuItems(ctx_menu) or {}
         local pfx     = ctx_menu.pfx or ""
         local refresh = ctx_menu.refresh
-        local _lc     = ctx_menu._ or function(x) return x end
         local S       = _getS()
 
         local desc_menu = {
-            text = _lc("Description"),
+            text = _("Description"),
             sub_item_table = {
                 -- Enable / Disable
                 {
-                    text           = _lc("Enable Description"),
+                    text           = _("Enable Description"),
                     checked_func   = function() return _isEnabled(pfx, S) end,
                     keep_menu_open = true,
                     callback       = function()
@@ -661,10 +661,10 @@ function P.apply()
 
                 -- Position (default: "below")
                 {
-                    text = _lc("Position"),
+                    text = _("Position"),
                     sub_item_table = {
                         {
-                            text         = _lc("Below"),
+                            text         = _("Below"),
                             radio        = true,
                             checked_func = function() return _getPosition(pfx, S) == "below" end,
                             callback     = function()
@@ -673,7 +673,7 @@ function P.apply()
                             end,
                         },
                         {
-                            text         = _lc("Above"),
+                            text         = _("Above"),
                             radio        = true,
                             checked_func = function() return _getPosition(pfx, S) == "above" end,
                             callback     = function()
@@ -686,10 +686,10 @@ function P.apply()
 
                 -- Text Alignment (default: "center")
                 {
-                    text = _lc("Text Alignment"),
+                    text = _("Text Alignment"),
                     sub_item_table = {
                         {
-                            text         = _lc("Left"),
+                            text         = _("Left"),
                             radio        = true,
                             checked_func = function() return _getAlign(pfx, S) == "left" end,
                             callback     = function()
@@ -698,7 +698,7 @@ function P.apply()
                             end,
                         },
                         {
-                            text         = _lc("Center"),
+                            text         = _("Center"),
                             radio        = true,
                             checked_func = function() return _getAlign(pfx, S) == "center" end,
                             callback     = function()
@@ -707,7 +707,7 @@ function P.apply()
                             end,
                         },
                         {
-                            text         = _lc("Right"),
+                            text         = _("Right"),
                             radio        = true,
                             checked_func = function() return _getAlign(pfx, S) == "right" end,
                             callback     = function()
@@ -716,7 +716,7 @@ function P.apply()
                             end,
                         },
                         {
-                            text         = _lc("Justify"),
+                            text         = _("Justify"),
                             radio        = true,
                             checked_func = function() return _getAlign(pfx, S) == "justify" end,
                             callback     = function()
@@ -729,13 +729,13 @@ function P.apply()
 
                 -- Text Size (base pt, multiplied by module scale at render time)
                 {
-                    text = _lc("Text Size"),
+                    text = _("Text Size"),
                     sub_item_table = (function()
                         local sizes = { 7, 8, 9, 10, 11, 12 }
                         local t = {}
-                        for _, sz in ipairs(sizes) do
+                        for _i, sz in ipairs(sizes) do
                             t[#t + 1] = {
-                                text         = string.format("%d pt", sz),
+                                text         = string.format(_("%d pt"), sz),
                                 radio        = true,
                                 checked_func = function() return _getFontSize(pfx, S) == sz end,
                                 callback     = function()
@@ -751,10 +751,10 @@ function P.apply()
 
                 -- Limit Mode (max_length or fixed_lines)
                 {
-                    text = _lc("Limit Mode"),
+                    text = _("Limit Mode"),
                     sub_item_table = {
                         {
-                            text         = _lc("Max Length"),
+                            text         = _("Max Length"),
                             radio        = true,
                             checked_func = function() return _getLimitMode(pfx, S) == "max_length" end,
                             callback     = function()
@@ -764,7 +764,7 @@ function P.apply()
                             end,
                         },
                         {
-                            text         = _lc("Fixed Line Count"),
+                            text         = _("Fixed Line Count"),
                             radio        = true,
                             checked_func = function() return _getLimitMode(pfx, S) == "fixed_lines" end,
                             callback     = function()
@@ -780,7 +780,7 @@ function P.apply()
                 {
                     text_func = function()
                         local v = S and tonumber(S:readSetting(pfx .. SK_MAX_LEN)) or 500
-                        return string.format("%s: %d", _lc("Max Length"), v)
+                        return string.format("%s: %d", _("Max Length"), v)
                     end,
                     enabled_func = function() return _getLimitMode(pfx, S) == "max_length" end,
                     keep_menu_open = true,
@@ -791,17 +791,17 @@ function P.apply()
                             S and tonumber(S:readSetting(pfx .. SK_MAX_LEN)) or 500)
                         local dlg
                         dlg = InputDialog:new{
-                            title       = _lc("Max Description Length"),
+                            title       = _("Max Description Length"),
                             input       = current,
                             input_type  = "number",
-                            description = _lc("Maximum number of characters shown in the strip.\nDefault: 500"),
+                            description = _("Maximum number of characters shown in the strip.\nDefault: 500"),
                             buttons = {{
                                 {
-                                    text     = _lc("Cancel"),
+                                    text = _("Cancel"),
                                     callback = function() UIManager:close(dlg) end,
                                 },
                                 {
-                                    text             = _lc("Save"),
+                                    text = _("Save"),
                                     is_enter_default = true,
                                     callback = function()
                                         local val = tonumber(dlg:getInputText())
@@ -824,12 +824,12 @@ function P.apply()
 
                 -- Line Count (radio buttons 1-5, only shown when limit_mode = "fixed_lines")
                 {
-                    text = _lc("Line Count"),
+                    text = _("Line Count"),
                     enabled_func = function() return _getLimitMode(pfx, S) == "fixed_lines" end,
                     sub_item_table = (function()
                         local counts = { 1, 2, 3, 4, 5 }
                         local t = {}
-                        for _, cnt in ipairs(counts) do
+                        for _i, cnt in ipairs(counts) do
                             t[#t + 1] = {
                                 text         = tostring(cnt),
                                 radio        = true,

@@ -15,6 +15,7 @@
 local WidgetContainer = require("ui/widget/container/widgetcontainer")
 local LuaSettings     = require("luasettings")
 local logger          = require("logger")
+local _ = require("sui_ext_i18n").translate
 
 -- Settings file path helper - computed at runtime to ensure consistency
 local function getSettingsFilePath()
@@ -166,7 +167,7 @@ function SimpleUIExtPlugin:_register()
     local module_states = self:_getSettings():readSetting("module_states") or {}
     local existing_modules = {}  -- Track which modules exist (for cleanup later)
     
-    for _, path in ipairs(discover_modules(self.path)) do
+    for _i, path in ipairs(discover_modules(self.path)) do
         -- Extract module_id from path (e.g., "modules/module_hero_currently" -> "hero_currently")
         -- Note: [%w_]+ matches alphanumeric + underscore (not just %w which excludes underscore)
         local module_id = path:match("module_([%w_]+)$")
@@ -188,7 +189,7 @@ function SimpleUIExtPlugin:_register()
                     name = module_id:gsub("_", " "):gsub("(%a)([%w_']*)", function(first, rest)
                         return first:upper() .. rest:lower()
                     end),
-                    description = "Disabled module (enable to load)",
+                    description = _("Disabled module (enable to load)"),
                     default_enabled = true,
                 }
                 goto continue_module
@@ -245,7 +246,7 @@ function SimpleUIExtPlugin:_register()
     local patch_states = self:_getSettings():readSetting("patch_states") or {}
     local existing_patches = {}  -- Track which patches exist (for cleanup later)
     
-    for _, path in ipairs(discover_patches(self.path)) do
+    for _i, path in ipairs(discover_patches(self.path)) do
         -- Extract patch_id from path (e.g., "patches/patch_coverdeck_exclude" -> "coverdeck_exclude")
         -- Note: [%w_]+ matches alphanumeric + underscore (not just %w which excludes underscore)
         local patch_id = path:match("patch_([%w_]+)$")
@@ -269,7 +270,7 @@ function SimpleUIExtPlugin:_register()
                     name = patch_id:gsub("_", " "):gsub("(%a)([%w_']*)", function(first, rest)
                         return first:upper() .. rest:lower()
                     end),
-                    description = "Disabled patch (enable to load)",
+                    description = _("Disabled patch (enable to load)"),
                     default_enabled = false,
                 }
                 goto continue_patch
@@ -306,7 +307,7 @@ function SimpleUIExtPlugin:_register()
                     name = patch_id:gsub("_", " "):gsub("(%a)([%w_']*)", function(first, rest)
                         return first:upper() .. rest:lower()
                     end),
-                    description = "Disabled patch (enable to load)",
+                    description = _("Disabled patch (enable to load)"),
                     default_enabled = false,
                 }
                 goto continue_patch
@@ -366,7 +367,7 @@ end
 -- Invalidates any module caches so the homescreen shows fresh data
 -- the moment the user returns (instead of waiting for the TTL to expire).
 function SimpleUIExtPlugin:onCloseDocument()
-    for _, mod in ipairs(self._mods) do
+    for _i, mod in ipairs(self._mods) do
         if type(mod.invalidateCache) == "function" then
             mod.invalidateCache()
         end
@@ -375,7 +376,7 @@ end
 
 function SimpleUIExtPlugin:onClosePlugin()
     if self._registry then
-        for _, id in ipairs(self._mod_ids) do
+        for _i, id in ipairs(self._mod_ids) do
             self._registry.unregister(id)
         end
     end
@@ -391,15 +392,15 @@ end
 -- ---------------------------------------------------------------------------
 function SimpleUIExtPlugin:addToMainMenu(menu_list)
     menu_list["simpleui_ext"] = {
-        text = "SimpleUI Extra",
+        text = _("SimpleUI Extra"),
         sorting_hint = "tools",
         sub_item_table = {
             {
-                text = "Patches",
+                text = _("Patches"),
                 sub_item_table_func = function() return self:_buildPatchMenu() end,
             },
             {
-                text = "Modules",
+                text = _("Modules"),
                 sub_item_table_func = function() return self:_buildModuleMenu() end,
             },
         },
@@ -412,7 +413,7 @@ function SimpleUIExtPlugin:_buildPatchMenu()
     local InfoMessage = require("ui/widget/infomessage")
     
     local menu = {}
-    for _, patch in ipairs(self._patches_meta) do
+    for _i, patch in ipairs(self._patches_meta) do
         table.insert(menu, {
             text = patch.name or patch.id,
             help_text = patch.description,
@@ -424,9 +425,8 @@ function SimpleUIExtPlugin:_buildPatchMenu()
                 self:_setPatchEnabled(patch.id, not currently_enabled)
                 
                 UIManager:show(InfoMessage:new{
-                    text = "Patch '" .. (patch.name or patch.id) .. "' " ..
-                           (currently_enabled and "disabled" or "enabled") .. ".\n\n" ..
-                           "Please restart KOReader for changes to take effect.",
+                    text = string.format(_("Patch '%s' %s.\n\nPlease restart KOReader for changes to take effect."),
+                            patch.name or patch.id, currently_enabled and _("disabled") or _("enabled")),
                     timeout = 3,
                 })
             end,
@@ -435,7 +435,7 @@ function SimpleUIExtPlugin:_buildPatchMenu()
     
     if #menu == 0 then
         table.insert(menu, {
-            text = "No patches available",
+            text = _("No patches available"),
             enabled = false,
         })
     end
@@ -449,7 +449,7 @@ function SimpleUIExtPlugin:_buildModuleMenu()
     local InfoMessage = require("ui/widget/infomessage")
     
     local menu = {}
-    for _, mod in ipairs(self._modules_meta) do
+    for _i, mod in ipairs(self._modules_meta) do
         table.insert(menu, {
             text = mod.name or mod.id,
             help_text = mod.description,
@@ -461,9 +461,8 @@ function SimpleUIExtPlugin:_buildModuleMenu()
                 self:_setModuleEnabled(mod.id, not currently_enabled)
                 
                 UIManager:show(InfoMessage:new{
-                    text = "Module '" .. (mod.name or mod.id) .. "' " ..
-                           (currently_enabled and "disabled" or "enabled") .. ".\n\n" ..
-                           "Please restart KOReader for changes to take effect.",
+                    text = string.format(_("Module '%s' %s.\n\nPlease restart KOReader for changes to take effect."),
+                            mod.name or mod.id, currently_enabled and _("disabled") or _("enabled")),
                     timeout = 3,
                 })
             end,
@@ -472,7 +471,7 @@ function SimpleUIExtPlugin:_buildModuleMenu()
     
     if #menu == 0 then
         table.insert(menu, {
-            text = "No modules available",
+            text = _("No modules available"),
             enabled = false,
         })
     end

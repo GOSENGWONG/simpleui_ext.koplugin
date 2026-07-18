@@ -48,6 +48,7 @@ local VerticalGroup   = require("ui/widget/verticalgroup")
 local VerticalSpan    = require("ui/widget/verticalspan")
 local util            = require("util")
 local logger          = require("logger")
+local _ = require("sui_ext_i18n").translate
 
 -- ---------------------------------------------------------------------------
 -- Lazy-loaded SimpleUI helpers (unavailable until SimpleUI is fully loaded)
@@ -126,7 +127,7 @@ end
 -- Returns true when fp contains any of the exclude fragments (plain substring).
 local function isExcluded(fp, excludes)
     if not fp or #excludes == 0 then return false end
-    for _, frag in ipairs(excludes) do
+    for _i, frag in ipairs(excludes) do
         if fp:find(frag, 1, true) then return true end
     end
     return false
@@ -154,17 +155,17 @@ end
 local function fmtTimeHuman(secs)
     if not secs or secs ~= secs then return emptyVal() end
     if secs <= 0 then
-        return { value = fmtCount(0), unit = "minutes" }
+        return { value = fmtCount(0), unit = _("minutes") }
     end
     local mins = Math.round(secs / 60)
     if mins <= 0 then
-        return { value = fmtCount(0), unit = "minutes" }
+        return { value = fmtCount(0), unit = _("minutes") }
     elseif mins < 60 then
-        return { value = fmtCount(mins), unit = mins == 1 and "minute" or "minutes" }
+        return { value = fmtCount(mins), unit = mins == 1 and _("minute") or _("minutes") }
     end
     local h = mins / 60
     local val = (h < 100) and string.format("%.1f", h) or string.format("%.0f", h)
-    return { value = val, unit = h < 2 and "hour" or "hours" }
+    return { value = val, unit = h < 2 and _("hour") or _("hours") }
 end
 
 local function fmtTimeXhym(secs)
@@ -198,14 +199,14 @@ local function humanDayCount(days, kind)
     end
     local labels = {
         reading = {
-            day   = { "day reading",   "days reading"   },
-            week  = { "week reading",  "weeks reading"  },
-            month = { "month reading", "months reading" },
+            day   = { _("day reading"),   _("days reading")   },
+            week  = { _("week reading"),  _("weeks reading")  },
+            month = { _("month reading"), _("months reading") },
         },
         to_go = {
-            day   = { "day to go",   "days to go"   },
-            week  = { "week to go",  "weeks to go"  },
-            month = { "month to go", "months to go" },
+            day   = { _("day to go"),   _("days to go")   },
+            week  = { _("week to go"),  _("weeks to go")  },
+            month = { _("month to go"), _("months to go") },
         },
     }
     local group = labels[kind] or labels.to_go
@@ -311,7 +312,7 @@ local function getMostRecentBook(excludes)
     if not RH.hist then return nil end
     -- Walk history and return the first entry whose path is not excluded.
     local entry
-    for _, e in ipairs(RH.hist) do
+    for _i, e in ipairs(RH.hist) do
         if e and e.file and not isExcluded(e.file, excludes) then
             entry = e
             break
@@ -359,7 +360,7 @@ local function gatherStats(book, pfx, conn_ext)
         book_time_spent  = zero,
         book_time_left   = zero,
         avg_time_per_day = zero,
-        pages_per_minute = { value = fmtCount(0), unit = "pages/min" },
+        pages_per_minute = { value = fmtCount(0), unit = _("pages/min") },
         days_reading     = humanDayCount(0, "reading"),
         days_to_go       = humanDayCount(0, "to_go"),
     }
@@ -414,7 +415,7 @@ local function gatherStats(book, pfx, conn_ext)
         s.pages_per_minute = {
             value = (ppm >= 1) and string.format("%.1f", ppm)
                                or  string.format("%.2f", ppm),
-            unit  = (ppm < 2) and "page per minute" or "pages per minute",
+            unit  = (ppm < 2) and _("page per minute") or _("pages per minute"),
         }
     end
 
@@ -565,11 +566,11 @@ local M = {}
 
 -- Kept separate from M.label: applyLabelToggle() mutates M.label to nil when
 -- the section label is hidden, so it can't also serve as its own default.
-local _DEFAULT_LABEL = "Recent Book Stats"
+local _DEFAULT_LABEL = _("Recent Book Stats")
 
 M.id              = "recent_book_stats"
-M.name            = "Recent Book Stats"
-M.description     = "Statistics cards for recently read books with progress and reading time"
+M.name            = _("Recent Book Stats")
+M.description     = _("Statistics cards for recently read books with progress and reading time")
 M.default_enabled = true   -- Loaded by simpleui_ext by default
 M.label           = _DEFAULT_LABEL
 M.enabled_key     = "recent_book_stats"
@@ -713,11 +714,11 @@ function M.build(w, ctx)
     local tb_title = book and (book.title or "") or ""
     local tb_header_text
     do
-        local prefix   = "BOOK: "
-        local ellipsis = "\u{2026}"
+        local prefix   = _("BOOK: ")
+        local ellipsis = "\xE2\x80\xA6"
         local avail_w  = panel_w - Size.padding.large
         if tb_title == "" then
-            tb_header_text = "BOOK"
+            tb_header_text = _("BOOK")
         else
             -- Check if the full header fits
             local tw = TextWidget:new{ text = prefix .. tb_title, face = sec_fs }
@@ -736,7 +737,7 @@ function M.build(w, ctx)
                     if s == "" then break end
                     tw = TextWidget:new{ text = prefix .. s .. ellipsis, face = sec_fs }
                 until tw:getSize().w <= avail_w
-                tb_header_text = (s ~= "") and (prefix .. s .. ellipsis) or "BOOK"
+                tb_header_text = (s ~= "") and (prefix .. s .. ellipsis) or _("BOOK")
             end
         end
     end
@@ -749,18 +750,18 @@ function M.build(w, ctx)
     tb_panel[#tb_panel+1] = ptrow(pvline(stats.book_progress, ""), pvline(stats.book_pages_read, ""))
     tb_panel[#tb_panel+1] = VerticalSpan:new{ height = Size.padding.default }
     -- Row 2: time spent | time left
-    tb_panel[#tb_panel+1] = ptrow(pvline(stats.book_time_spent, "read"), pvline(stats.book_time_left, "to go"))
+    tb_panel[#tb_panel+1] = ptrow(pvline(stats.book_time_spent, _("read")), pvline(stats.book_time_left, _("to go")))
     tb_panel[#tb_panel+1] = VerticalSpan:new{ height = Size.padding.default }
 
     -- ── PACE panel ────────────────────────────────────────────────────────────
     local pa_panel = VerticalGroup:new{ align = "left" }
-    pa_panel[#pa_panel+1] = mkSectionHeader(sec_fs, "PACE", panel_w, CLR_HDR_BG, nil, has_wp)
+    pa_panel[#pa_panel+1] = mkSectionHeader(sec_fs, _("PACE"), panel_w, CLR_HDR_BG, nil, has_wp)
     pa_panel[#pa_panel+1] = VerticalSpan:new{ height = Size.padding.default }
     -- Row 3: days reading | days to go
     pa_panel[#pa_panel+1] = ptrow(pvline(stats.days_reading, ""), pvline(stats.days_to_go, ""))
     pa_panel[#pa_panel+1] = VerticalSpan:new{ height = Size.padding.default }
     -- Row 4: avg time/day | pages/min
-    pa_panel[#pa_panel+1] = ptrow(pvline(stats.avg_time_per_day, "per day"), pvline(stats.pages_per_minute, ""))
+    pa_panel[#pa_panel+1] = ptrow(pvline(stats.avg_time_per_day, _("per day")), pvline(stats.pages_per_minute, ""))
     pa_panel[#pa_panel+1] = VerticalSpan:new{ height = Size.padding.default }
 
     -- Combine panels with a thin vertical separator (same style as inner col separators)
@@ -839,24 +840,23 @@ function M.getMenuItems(ctx_menu)
 
     local pfx     = ctx_menu.pfx
     local refresh = ctx_menu.refresh
-    local _lc     = ctx_menu._ or function(x) return x end
     local S       = getSettings()
 
     return {
         -- 1. Label visibility toggle
-        Config.makeLabelToggleItem(M.id, M.name, refresh, _lc),
+        Config.makeLabelToggleItem(M.id, M.name, refresh, _),
 
         -- 2. Scale slider
         Config.makeScaleItem({
             text_func    = function()
                 local pct = Config.getModuleScalePct("recent_book_stats", pfx)
                 return pct == 100
-                    and _lc("Scale")
-                    or  string.format("%s (%d%%)", _lc("Scale"), pct)
+                    and _("Scale")
+                    or  string.format("%s (%d%%)", _("Scale"), pct)
             end,
             enabled_func = function() return not Config.isScaleLinked() end,
-            title        = _lc("Scale"),
-            info         = _lc("Scale for this module.\n100% is the default size."),
+            title        = _("Scale"),
+            info         = _("Scale for this module.\n100% is the default size."),
             get          = function()
                 return Config.getModuleScalePct("recent_book_stats", pfx)
             end,
@@ -870,12 +870,12 @@ function M.getMenuItems(ctx_menu)
         {
             text_func = function()
                 local fmt = getTimeFmt(pfx)
-                local lbl = (fmt == FMT_XHYM) and "XhYm" or _lc("Human")
-                return string.format("%s \u{2014} %s", _lc("Time Format"), lbl)
+                local lbl = (fmt == FMT_XHYM) and _("XhYm") or _("Human")
+                return string.format("%s — %s", _("Time Format"), lbl)
             end,
             sub_item_table = {
                 {
-                    text           = _lc("Human (e.g. 3.5 hours)"),
+                    text           = _("Human (e.g. 3.5 hours)"),
                     radio          = true,
                     checked_func   = function() return getTimeFmt(pfx) ~= FMT_XHYM end,
                     keep_menu_open = true,
@@ -885,7 +885,7 @@ function M.getMenuItems(ctx_menu)
                     end,
                 },
                 {
-                    text           = "XhYm (e.g. 3h30m)",
+                    text           = _("XhYm (e.g. 3h30m)"),
                     radio          = true,
                     checked_func   = function() return getTimeFmt(pfx) == FMT_XHYM end,
                     keep_menu_open = true,
@@ -899,7 +899,7 @@ function M.getMenuItems(ctx_menu)
 
         -- 4. Tap to open book
         {
-            text_func      = function() return _lc("Tap to Open Book") end,
+            text_func      = function() return _("Tap to Open Book") end,
             checked_func   = function() return isTappable(pfx) end,
             keep_menu_open = true,
             callback       = function()
@@ -915,11 +915,11 @@ function M.getMenuItems(ctx_menu)
             text_func = function()
                 local raw = S and S:readSetting(pfx .. SK_EXCLUDE_PATHS)
                 if not raw or raw == "" then
-                    return _lc("Exclude Paths from Recent")
+                    return _("Exclude Paths from Recent")
                 end
                 local n = 0
-                for _ in raw:gmatch("[^,\n]+") do n = n + 1 end
-                return string.format("%s (%d)", _lc("Exclude Paths from Recent"), n)
+                for _i in raw:gmatch("[^,\n]+") do n = n + 1 end
+                return string.format("%s (%d)", _("Exclude Paths from Recent"), n)
             end,
             callback = function()
                 local InputDialog = require("ui/widget/inputdialog")
@@ -927,18 +927,18 @@ function M.getMenuItems(ctx_menu)
                 local raw = (S and S:readSetting(pfx .. SK_EXCLUDE_PATHS)) or ""
                 local dlg
                 dlg = InputDialog:new{
-                    title       = _lc("Exclude Paths from Recent"),
+                    title       = _("Exclude Paths from Recent"),
                     input       = raw,
                     input_hint  = "/mnt/onboard/rss, instapaper",
-                    description = _lc("Comma-separated path fragments.\nBooks whose path contains any fragment will be skipped."),
+                    description = _("Comma-separated path fragments.\nBooks whose path contains any fragment will be skipped."),
                     allow_newline    = false,
                     buttons = {{
                         {
-                            text     = _lc("Cancel"),
+                            text = _("Cancel"),
                             callback = function() UIManager:close(dlg) end,
                         },
                         {
-                            text             = _lc("Save"),
+                            text = _("Save"),
                             is_enter_default = true,
                             callback = function()
                                 local val = dlg:getInputText()

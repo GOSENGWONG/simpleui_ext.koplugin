@@ -47,8 +47,8 @@
 --   screensaver_simpleui_hs_page   number  — page to show (default 1)
 
 local logger = require("logger")
-local _ = require("gettext")
-local T = require("ffi/util").template
+local _      = require("sui_ext_i18n").translate
+local T      = require("ffi/util").template
 
 local PATCH_ID   = "screensaver_homescreen"
 local TYPE_VALUE = "simpleui_homescreen"   -- value stored in screensaver_type
@@ -58,8 +58,8 @@ local PFX        = "simpleui_hs_"
 
 local P = {}
 P.id              = PATCH_ID
-P.name            = "Sleep Screen: SimpleUI Home"
-P.description     = "Adds a 'Show SimpleUI Home Screen' option to the sleep screen Wallpaper settings"
+P.name            = _("Sleep Screen: SimpleUI Home")
+P.description     = _("Adds a 'Show SimpleUI Home Screen' option to the sleep screen Wallpaper settings")
 P.default_enabled = false   -- Opt-in
 
 local _applied = false
@@ -342,10 +342,10 @@ function P.apply()
         local pages_of_ids = {}
         local layout = live_SUISettings:readSetting("simpleui_layout")
         if layout and type(layout.pages) == "table" then
-            for _, page in ipairs(layout.pages) do
+            for _i, page in ipairs(layout.pages) do
                 local page_ids = {}
                 if type(page.modules) == "table" then
-                    for _, mod_id in ipairs(page.modules) do
+                    for _i, mod_id in ipairs(page.modules) do
                         page_ids[#page_ids + 1] = mod_id
                     end
                 end
@@ -354,7 +354,7 @@ function P.apply()
         else
             local raw_order = live_Registry.loadOrder(PFX)
             local cur_page = {}
-            for _, id in ipairs(raw_order) do
+            for _i, id in ipairs(raw_order) do
                 if id == PAGE_BREAK_ID then
                     pages_of_ids[#pages_of_ids + 1] = cur_page
                     cur_page = {}
@@ -384,7 +384,7 @@ function P.apply()
         local page_ids = pages_of_ids[page_idx] or {}
 
         local mods = {}
-        for _, mod_id in ipairs(page_ids) do
+        for _i, mod_id in ipairs(page_ids) do
             local mod = live_Registry.get(mod_id)
             if mod and live_Registry.isEnabled(mod, PFX) then
                 mods[#mods + 1] = mod
@@ -411,7 +411,7 @@ function P.apply()
         -- Render module widgets.
         local body  = VerticalGroup:new{ align = "left" }
         local first = true
-        for _, mod in ipairs(mods) do
+        for _i, mod in ipairs(mods) do
             local ok_w, widget = pcall(mod.build, inner_w, ctx)
             if ok_w and widget then
                 if first then

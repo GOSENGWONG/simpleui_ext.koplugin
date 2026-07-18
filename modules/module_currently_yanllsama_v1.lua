@@ -24,8 +24,8 @@
 
 local Device  = require("device")
 local Screen  = Device.screen
-local _       = require("sui_i18n").translate
-local N_      = require("sui_i18n").ngettext
+local _       = require("sui_ext_i18n").translate
+local N_      = require("sui_ext_i18n").ngettext
 local logger  = require("logger")
 
 local Blitbuffer      = require("ffi/blitbuffer")
@@ -176,7 +176,7 @@ end
 
 local function isExcluded(fp, excludes)
     if not fp or #excludes == 0 then return false end
-    for _, frag in ipairs(excludes) do
+    for _i, frag in ipairs(excludes) do
         if fp:find(frag, 1, true) then return true end
     end
     return false
@@ -193,7 +193,7 @@ local function _getCurrentFP(ctx, pfx)
         pcall(function() RH:reload() end)
     end
     if not RH.hist then return nil end
-    for _, e in ipairs(RH.hist) do
+    for _i, e in ipairs(RH.hist) do
         if e and e.file and not isExcluded(e.file, excludes) then
             return e.file
         end
@@ -213,10 +213,10 @@ end
 local function _resolveStatOrder(saved)
     if type(saved) ~= "table" or #saved == 0 then return _DEFAULT_STAT_ORDER end
     local seen, result = {}, {}
-    for _, v in ipairs(saved) do
+    for _i, v in ipairs(saved) do
         if _STAT_LABELS[v] and not seen[v] then seen[v] = true; table.insert(result, v) end
     end
-    for _, v in ipairs(_DEFAULT_STAT_ORDER) do
+    for _i, v in ipairs(_DEFAULT_STAT_ORDER) do
         if not seen[v] then seen[v] = true; table.insert(result, v) end
     end
     return result
@@ -337,7 +337,7 @@ local function gatherStats(book, pfx, conn_ext)
     local pages    = book.pages   or 0
     local cur_page = (pages > 0) and math.max(1, math.floor(pct * pages)) or 0
 
-    if pct > 0 then s.book_progress = { value = string.format("%%%.0f", pct * 100), unit = "" } end
+    if pct > 0 then s.book_progress = { value = string.format("%.0f%%", pct * 100), unit = "" } end
     if pages > 0 then s.book_pages_read = { value = fmtFraction(cur_page, pages), unit = _("read") } end
 
     local conn = conn_ext or openStatsDB()
@@ -693,7 +693,7 @@ local function _buildWidget(w, ctx, pfx, SH, bd, cover, stats, D, scale, lbl_sca
     }
     function info_tap_container:onTap()
         local InfoMessage = require("ui/widget/infomessage")
-        local desc = (bd.description and bd.description ~= "") and bd.description or _("Bu kitap hakkında ek açıklama bulunmamaktadır.")
+        local desc = (bd.description and bd.description ~= "") and bd.description or _("No additional description available for this book.")
         UIManager:show(InfoMessage:new{ text = desc })
         return true
     end
@@ -713,19 +713,19 @@ local function _buildWidget(w, ctx, pfx, SH, bd, cover, stats, D, scale, lbl_sca
         book_time_spent    = { data = stats.book_time_spent, extra = _("read") },
         book_pages_read    = { data = stats.book_pages_read, extra = "" },
         book_time_left     = { data = stats.book_time_left,  extra = _("left") },
-        pages_left         = { data = pages_left_data,       extra = _("left") },
-        days_reading       = { data = stats.days_reading,    extra = "" },
-        days_to_go         = { data = stats.days_to_go,      extra = "" },
-        avg_time_per_day   = { data = stats.avg_time_per_day,extra = _("a day") },
-        pages_per_minute   = { data = stats.pages_per_minute,extra = "" },
-        mins_per_session   = { data = stats.mins_per_session,extra = "" },
+        pages_left         = { data = pages_left_data, extra = _("left") },
+        days_reading       = { data = stats.days_reading, extra = "" },
+        days_to_go         = { data = stats.days_to_go, extra = "" },
+        avg_time_per_day   = { data = stats.avg_time_per_day, extra = _("a day") },
+        pages_per_minute   = { data = stats.pages_per_minute, extra = "" },
+        mins_per_session   = { data = stats.mins_per_session, extra = "" },
         pages_last_session = { data = stats.pages_last_session, extra = "" },
     }
 
     local active_items = {}
     local active_dict = getActiveStatsDict(pfx)
     local max_items = cols * rows
-    for _, key in ipairs(_resolveStatOrder(SUISettings:readSetting(pfx .. STAT_ORDER_KEY))) do
+    for _i, key in ipairs(_resolveStatOrder(SUISettings:readSetting(pfx .. STAT_ORDER_KEY))) do
         if stat_defs[key] and active_dict[key] and #active_items < max_items then
             table.insert(active_items, pvline(stat_defs[key].data, stat_defs[key].extra))
         end
@@ -739,7 +739,7 @@ local function _buildWidget(w, ctx, pfx, SH, bd, cover, stats, D, scale, lbl_sca
 
     local bar_widget
     if bar_style == "simple" then
-        bar_widget = SH.progressBar(tw, bd.percent, bar_h)
+        bar_widget = UI.progressBar(tw, bd.percent, bar_h)
     else
         bar_widget = buildCustomProgressBar(tw, bd.percent, bar_h, scale, lbl_scale, face_inlinepct, _CLR_DARK_EFF, bar_style)
     end
@@ -791,7 +791,7 @@ function M.updateCovers(widget, _ctx)
     if not SH then return true end
 
     local all_done = true
-    for _, slot in ipairs(tappable._cover_slots) do
+    for _i, slot in ipairs(tappable._cover_slots) do
         local new_cover = SH.getBookCover(slot.fp, slot.w, slot.h, slot.align, slot.stretch)
         if new_cover then slot.container[slot.idx] = new_cover
         elseif not Config.isCoverMissing(slot.fp) then all_done = false end
@@ -845,7 +845,6 @@ end
 function M.getMenuItems(ctx_menu)
     local pfx     = ctx_menu.pfx or ""
     local refresh = ctx_menu.refresh
-    local _lc     = ctx_menu._
     local SortWidget = require("ui/widget/sortwidget")
     local InputDialog = require("ui/widget/inputdialog")
     local UIManager = require("ui/uimanager")
@@ -854,12 +853,12 @@ function M.getMenuItems(ctx_menu)
         { name = "NotoSerif", label = "Noto Serif" },
         { name = "NotoSans", label = "Noto Sans" },
         { name = "LinLibertine", label = "Linux Libertine" },
-        { name = "tfont", label = _lc("System UI Font") }
+        { name = "tfont", label = _("System UI Font") }
     }
     
     local function makeFontMenu(key_name, default_val)
         local sub = {}
-        for _, opt in ipairs(font_options) do
+        for _i, opt in ipairs(font_options) do
             table.insert(sub, {
                 text = opt.label, radio = true, keep_menu_open = true,
                 checked_func = function() return (SUISettings:readSetting(pfx .. key_name) or default_val) == opt.name end,
@@ -873,7 +872,7 @@ function M.getMenuItems(ctx_menu)
         local sub = {}
         for fs = 12, (max_val or 44), (step or 2) do
             table.insert(sub, {
-                text = tostring(fs) .. (fs == default_val and _lc(" (Default)") or ""), radio = true, keep_menu_open = true,
+                text = tostring(fs) .. (fs == default_val and _(" (Default)") or ""), radio = true, keep_menu_open = true,
                 checked_func = function() return (tonumber(SUISettings:readSetting(pfx .. key_name)) or default_val) == fs end,
                 callback = function() SUISettings:saveSetting(pfx .. key_name, fs) refresh() end,
             })
@@ -885,7 +884,7 @@ function M.getMenuItems(ctx_menu)
         local sub = {}
         for n = min_val, max_val do
             table.insert(sub, {
-                text = tostring(n) .. (n == default_val and _lc(" (Default)") or ""), radio = true, keep_menu_open = true,
+                text = tostring(n) .. (n == default_val and _(" (Default)") or ""), radio = true, keep_menu_open = true,
                 checked_func = function() return (tonumber(SUISettings:readSetting(pfx .. key_name)) or default_val) == n end,
                 callback = function() SUISettings:saveSetting(pfx .. key_name, n) refresh() end,
             })
@@ -895,7 +894,7 @@ function M.getMenuItems(ctx_menu)
 
     local toggle_items = {}
     local active_dict = getActiveStatsDict(pfx)
-    for _, key in ipairs(_resolveStatOrder(SUISettings:readSetting(pfx .. STAT_ORDER_KEY))) do
+    for _i, key in ipairs(_resolveStatOrder(SUISettings:readSetting(pfx .. STAT_ORDER_KEY))) do
         table.insert(toggle_items, {
             text_func = function()
                 local d = getActiveStatsDict(pfx)
@@ -913,58 +912,58 @@ function M.getMenuItems(ctx_menu)
 
     return {
         Config.makeScaleItem({
-            text_func    = function() return _lc("Scale") end, enabled_func = function() return not Config.isScaleLinked() end,
-            title        = _lc("Scale"), info = _lc("Scale for this module.\n100% is the default size."),
+            text_func    = function() return _("Scale") end, enabled_func = function() return not Config.isScaleLinked() end,
+            title        = _("Scale"), info = _("Scale for this module.\n100% is the default size."),
             get          = function() return Config.getModuleScalePct("currently_yanllsama_v1", pfx) end, set = function(v) Config.setModuleScale(v, "currently_yanllsama_v1", pfx) end, refresh = refresh,
         }),
         Config.makeScaleItem({
-            text_func = function() return _lc("Cover size") end, title = _lc("Cover size"), info = _lc("Scale for the cover thumbnail only.\n100% is the default size."),
+            text_func = function() return _("Cover Size") end, title = _("Cover Size"), info = _("Scale for the cover thumbnail only.\n100% is the default size."),
             get       = function() return Config.getThumbScalePct("currently_yanllsama_v1", pfx) end, set = function(v) Config.setThumbScale(v, "currently_yanllsama_v1", pfx) end, refresh   = refresh,
         }),
         Config.makeScaleItem({
-            text_func = function() local pct = getCoverGapPct(pfx); return pct == 100 and _lc("Cover Spacing") or string.format("%s (%d%%)", _lc("Cover Spacing"), pct) end,
-            separator = true, title = _lc("Cover Spacing"), info = _lc("Horizontal space between the cover and the text.\n100% is the default spacing."),
+            text_func = function() local pct = getCoverGapPct(pfx); return pct == 100 and _("Cover Spacing") or string.format("%s (%d%%)", _("Cover Spacing"), pct) end,
+            separator = true, title = _("Cover Spacing"), info = _("Horizontal space between the cover and the text.\n100% is the default spacing."),
             get       = function() return getCoverGapPct(pfx) end, set = function(v) SUISettings:saveSetting(pfx .. COVER_GAP_KEY, v) end, refresh   = refresh, value_min = 0, value_max = 300, value_step = 10, default_value = 100,
         }),
-        Config.makeLabelToggleItem("currently_yanllsama_v1", _("Currently Reading"), refresh, _lc),
+        Config.makeLabelToggleItem("currently_yanllsama_v1", _("Currently Reading"), refresh, _),
         
         {
-            text = _lc("Statistics Layout & Appearance"),
+            text = _("Statistics Layout & Appearance"),
             sub_item_table = {
                 {
-                    text = _lc("Progress bar style"),
+                    text = _("Progress bar style"),
                     sub_item_table = {
-                        { text = _lc("Simple"), radio = true, keep_menu_open = true, checked_func = function() return getBarStyle(pfx) == "simple" end, callback = function() SUISettings:saveSetting(pfx .. BAR_STYLE_KEY, "simple") refresh() end },
-                        { text = _lc("With percentage"), radio = true, keep_menu_open = true, checked_func = function() return getBarStyle(pfx) == "with_pct" end, callback = function() SUISettings:saveSetting(pfx .. BAR_STYLE_KEY, "with_pct") refresh() end },
-                        { text = _lc("Bold"), radio = true, keep_menu_open = true, checked_func = function() return getBarStyle(pfx) == "bold" end, callback = function() SUISettings:saveSetting(pfx .. BAR_STYLE_KEY, "bold") refresh() end },
-                        { text = _lc("Minimal"), radio = true, keep_menu_open = true, checked_func = function() return getBarStyle(pfx) == "minimal" end, callback = function() SUISettings:saveSetting(pfx .. BAR_STYLE_KEY, "minimal") refresh() end },
-                        { text = _lc("Outline"), radio = true, keep_menu_open = true, checked_func = function() return getBarStyle(pfx) == "outline" end, callback = function() SUISettings:saveSetting(pfx .. BAR_STYLE_KEY, "outline") refresh() end },
-                        { text = _lc("Segmented"), radio = true, keep_menu_open = true, checked_func = function() return getBarStyle(pfx) == "segmented" end, callback = function() SUISettings:saveSetting(pfx .. BAR_STYLE_KEY, "segmented") refresh() end },
+                        { text = _("Simple"), radio = true, keep_menu_open = true, checked_func = function() return getBarStyle(pfx) == "simple" end, callback = function() SUISettings:saveSetting(pfx .. BAR_STYLE_KEY, "simple") refresh() end },
+                        { text = _("With percentage"), radio = true, keep_menu_open = true, checked_func = function() return getBarStyle(pfx) == "with_pct" end, callback = function() SUISettings:saveSetting(pfx .. BAR_STYLE_KEY, "with_pct") refresh() end },
+                        { text = _("Bold"), radio = true, keep_menu_open = true, checked_func = function() return getBarStyle(pfx) == "bold" end, callback = function() SUISettings:saveSetting(pfx .. BAR_STYLE_KEY, "bold") refresh() end },
+                        { text = _("Minimal"), radio = true, keep_menu_open = true, checked_func = function() return getBarStyle(pfx) == "minimal" end, callback = function() SUISettings:saveSetting(pfx .. BAR_STYLE_KEY, "minimal") refresh() end },
+                        { text = _("Outline"), radio = true, keep_menu_open = true, checked_func = function() return getBarStyle(pfx) == "outline" end, callback = function() SUISettings:saveSetting(pfx .. BAR_STYLE_KEY, "outline") refresh() end },
+                        { text = _("Segmented"), radio = true, keep_menu_open = true, checked_func = function() return getBarStyle(pfx) == "segmented" end, callback = function() SUISettings:saveSetting(pfx .. BAR_STYLE_KEY, "segmented") refresh() end },
                     },
                 },
                 {
-                    text_func = function() local fmt = getTimeFmt(pfx); local lbl = (fmt == FMT_XHYM) and "XhYm" or _lc("Readable"); return string.format("%s \u{2014} %s", _lc("Time Format"), lbl) end,
+                    text_func = function() local fmt = getTimeFmt(pfx); local lbl = (fmt == FMT_XHYM) and _("XhYm") or _("Readable"); return string.format("%s — %s", _("Time Format"), lbl) end,
                     sub_item_table = {
-                        { text = _lc("Readable (e.g., 3.5 hours)"), radio = true, keep_menu_open = true, checked_func = function() return getTimeFmt(pfx) ~= FMT_XHYM end, callback = function() SUISettings:saveSetting(pfx .. SK_TIME_FMT, FMT_NICKEL) refresh() end },
-                        { text = _lc("XhYm (e.g., 3h 30 min)"), radio = true, keep_menu_open = true, checked_func = function() return getTimeFmt(pfx) == FMT_XHYM end, callback = function() SUISettings:saveSetting(pfx .. SK_TIME_FMT, FMT_XHYM) refresh() end },
+                        { text = _("Readable (e.g. 3.5h)"), radio = true, keep_menu_open = true, checked_func = function() return getTimeFmt(pfx) ~= FMT_XHYM end, callback = function() SUISettings:saveSetting(pfx .. SK_TIME_FMT, FMT_NICKEL) refresh() end },
+                        { text = _("XhYm (e.g. 3h30m)"), radio = true, keep_menu_open = true, checked_func = function() return getTimeFmt(pfx) == FMT_XHYM end, callback = function() SUISettings:saveSetting(pfx .. SK_TIME_FMT, FMT_XHYM) refresh() end },
                     },
                 },
                 {
-                    text = _lc("Edit Items"),
+                    text = _("Edit Items"),
                     sub_item_table = {
-                        { text = _lc("Toggle Visibility"), sub_item_table = toggle_items },
+                        { text = _("Toggle Visibility"), sub_item_table = toggle_items },
                         {
-                            text = _lc("Sort Items"), keep_menu_open = true,
+                            text = _("Sort Items"), keep_menu_open = true,
                             callback = function()
                                 local sort_items = {}
-                                for _, key in ipairs(_resolveStatOrder(SUISettings:readSetting(pfx .. STAT_ORDER_KEY))) do
+                                for _i, key in ipairs(_resolveStatOrder(SUISettings:readSetting(pfx .. STAT_ORDER_KEY))) do
                                     table.insert(sort_items, { text = _STAT_LABELS[key] or key, orig_item = key })
                                 end
                                 UIManager:show(SortWidget:new{
-                                    title = _lc("Sort Statistics"), item_table = sort_items, covers_fullscreen = true,
+                                    title = _("Sort Statistics"), item_table = sort_items, covers_fullscreen = true,
                                     callback = function()
                                         local new_order = {}
-                                        for _, item in ipairs(sort_items) do table.insert(new_order, item.orig_item) end
+                                        for _i, item in ipairs(sort_items) do table.insert(new_order, item.orig_item) end
                                         SUISettings:saveSetting(pfx .. STAT_ORDER_KEY, new_order) refresh()
                                     end,
                                 })
@@ -973,29 +972,29 @@ function M.getMenuItems(ctx_menu)
                     }
                 },
                 {
-                    text = _lc("Category Headers"),
+                    text = _("Category Headers"),
                     sub_item_table = {
                         {
-                            text_func = function() return getShowHeaders(pfx) and _lc("Show Headers: On") or _lc("Show Headers: Off") end,
+                            text_func = function() return getShowHeaders(pfx) and _("Show Headers: On") or _("Show Headers: Off") end,
                             keep_menu_open = true, callback = function() SUISettings:saveSetting(pfx .. SHOW_HEADERS_KEY, not getShowHeaders(pfx)) refresh() end,
                         },
                         {
-                            text = _lc("Header Thickness"),
+                            text = _("Header Thickness"),
                             sub_item_table = {
-                                { text = _lc("Thin"), radio = true, keep_menu_open = true, checked_func = function() return getHeaderWeight(pfx) == "thin" end, callback = function() SUISettings:saveSetting(pfx .. HEADER_WEIGHT_KEY, "thin") refresh() end },
-                                { text = _lc("Medium"), radio = true, keep_menu_open = true, checked_func = function() return getHeaderWeight(pfx) == "medium" end, callback = function() SUISettings:saveSetting(pfx .. HEADER_WEIGHT_KEY, "medium") refresh() end },
-                                { text = _lc("Bold"), radio = true, keep_menu_open = true, checked_func = function() return getHeaderWeight(pfx) == "bold" end, callback = function() SUISettings:saveSetting(pfx .. HEADER_WEIGHT_KEY, "bold") refresh() end },
+                                { text = _("Thin"), radio = true, keep_menu_open = true, checked_func = function() return getHeaderWeight(pfx) == "thin" end, callback = function() SUISettings:saveSetting(pfx .. HEADER_WEIGHT_KEY, "thin") refresh() end },
+                                { text = _("Medium"), radio = true, keep_menu_open = true, checked_func = function() return getHeaderWeight(pfx) == "medium" end, callback = function() SUISettings:saveSetting(pfx .. HEADER_WEIGHT_KEY, "medium") refresh() end },
+                                { text = _("Bold"), radio = true, keep_menu_open = true, checked_func = function() return getHeaderWeight(pfx) == "bold" end, callback = function() SUISettings:saveSetting(pfx .. HEADER_WEIGHT_KEY, "bold") refresh() end },
                             }
                         },
                         {
-                            text = _lc("Change Column 1 Header"),
+                            text = _("Change Column 1 Header"),
                             callback = function()
                                 local dlg
                                 dlg = InputDialog:new{
-                                    title = _lc("Column 1 Header"), input = getHeaderTxt(pfx, 1),
+                                    title = _("Column 1 Header"), input = getHeaderTxt(pfx, 1),
                                     buttons = {{
-                                        { text = _lc("Cancel"), callback = function() UIManager:close(dlg) end },
-                                        { text = _lc("Save"), is_enter_default = true, callback = function() SUISettings:saveSetting(pfx .. HEADER_TXT_PFX .. "1", dlg:getInputText()); UIManager:close(dlg); refresh() end },
+                                        { text = _("Cancel"), callback = function() UIManager:close(dlg) end },
+                                        { text = _("Save"), is_enter_default = true, callback = function() SUISettings:saveSetting(pfx .. HEADER_TXT_PFX .. "1", dlg:getInputText()); UIManager:close(dlg); refresh() end },
                                     }},
                                 }
                                 UIManager:show(dlg)
@@ -1003,14 +1002,14 @@ function M.getMenuItems(ctx_menu)
                             end,
                         },
                         {
-                            text = _lc("Change Column 2 Header"),
+                            text = _("Change Column 2 Header"),
                             callback = function()
                                 local dlg
                                 dlg = InputDialog:new{
-                                    title = _lc("Column 2 Header"), input = getHeaderTxt(pfx, 2),
+                                    title = _("Column 2 Header"), input = getHeaderTxt(pfx, 2),
                                     buttons = {{
-                                        { text = _lc("Cancel"), callback = function() UIManager:close(dlg) end },
-                                        { text = _lc("Save"), is_enter_default = true, callback = function() SUISettings:saveSetting(pfx .. HEADER_TXT_PFX .. "2", dlg:getInputText()); UIManager:close(dlg); refresh() end },
+                                        { text = _("Cancel"), callback = function() UIManager:close(dlg) end },
+                                        { text = _("Save"), is_enter_default = true, callback = function() SUISettings:saveSetting(pfx .. HEADER_TXT_PFX .. "2", dlg:getInputText()); UIManager:close(dlg); refresh() end },
                                     }},
                                 }
                                 UIManager:show(dlg)
@@ -1018,14 +1017,14 @@ function M.getMenuItems(ctx_menu)
                             end,
                         },
                         {
-                            text = _lc("Change Column 3 Header"),
+                            text = _("Change Column 3 Header"),
                             callback = function()
                                 local dlg
                                 dlg = InputDialog:new{
-                                    title = _lc("Column 3 Header"), input = getHeaderTxt(pfx, 3),
+                                    title = _("Column 3 Header"), input = getHeaderTxt(pfx, 3),
                                     buttons = {{
-                                        { text = _lc("Cancel"), callback = function() UIManager:close(dlg) end },
-                                        { text = _lc("Save"), is_enter_default = true, callback = function() SUISettings:saveSetting(pfx .. HEADER_TXT_PFX .. "3", dlg:getInputText()); UIManager:close(dlg); refresh() end },
+                                        { text = _("Cancel"), callback = function() UIManager:close(dlg) end },
+                                        { text = _("Save"), is_enter_default = true, callback = function() SUISettings:saveSetting(pfx .. HEADER_TXT_PFX .. "3", dlg:getInputText()); UIManager:close(dlg); refresh() end },
                                     }},
                                 }
                                 UIManager:show(dlg)
@@ -1033,14 +1032,14 @@ function M.getMenuItems(ctx_menu)
                             end,
                         },
                         {
-                            text = _lc("Change Column 4 Header"),
+                            text = _("Change Column 4 Header"),
                             callback = function()
                                 local dlg
                                 dlg = InputDialog:new{
-                                    title = _lc("Column 4 Header"), input = getHeaderTxt(pfx, 4),
+                                    title = _("Column 4 Header"), input = getHeaderTxt(pfx, 4),
                                     buttons = {{
-                                        { text = _lc("Cancel"), callback = function() UIManager:close(dlg) end },
-                                        { text = _lc("Save"), is_enter_default = true, callback = function() SUISettings:saveSetting(pfx .. HEADER_TXT_PFX .. "4", dlg:getInputText()); UIManager:close(dlg); refresh() end },
+                                        { text = _("Cancel"), callback = function() UIManager:close(dlg) end },
+                                        { text = _("Save"), is_enter_default = true, callback = function() SUISettings:saveSetting(pfx .. HEADER_TXT_PFX .. "4", dlg:getInputText()); UIManager:close(dlg); refresh() end },
                                     }},
                                 }
                                 UIManager:show(dlg)
@@ -1050,35 +1049,35 @@ function M.getMenuItems(ctx_menu)
                     }
                 },
                 {
-                    text = _lc("Grid Dimensions"),
+                    text = _("Grid Dimensions"),
                     sub_item_table = {
-                        { text = _lc("Columns"), sub_item_table = makeCountMenu(GRID_COLS_KEY, 1, 4, 2) },
-                        { text = _lc("Rows"), sub_item_table = makeCountMenu(GRID_ROWS_KEY, 1, 6, 4) },
+                        { text = _("Columns"), sub_item_table = makeCountMenu(GRID_COLS_KEY, 1, 4, 2) },
+                        { text = _("Rows"), sub_item_table = makeCountMenu(GRID_ROWS_KEY, 1, 6, 4) },
                     },
                 },
                 {
-                    text = _lc("Book and Author Settings"), separator = true,
+                    text = _("Book and Author Settings"), separator = true,
                     sub_item_table = {
-                        { text = _lc("Book Title Font"), sub_item_table = makeFontMenu(TITLE_FONT_KEY, "NotoSerif") },
-                        { text = _lc("Book Title Size"), sub_item_table = makeSizeMenu(TITLE_FS_KEY, 24, 60, 2) },
-                        { text = _lc("Author Name Font"), sub_item_table = makeFontMenu(AUTHOR_FONT_KEY, "NotoSerif") },
-                        { text = _lc("Author Name Size"), sub_item_table = makeSizeMenu(AUTHOR_FS_KEY, 20, 60, 2) },
+                        { text = _("Book Title Font"), sub_item_table = makeFontMenu(TITLE_FONT_KEY, "NotoSerif") },
+                        { text = _("Book Title Size"), sub_item_table = makeSizeMenu(TITLE_FS_KEY, 24, 60, 2) },
+                        { text = _("Author Name Font"), sub_item_table = makeFontMenu(AUTHOR_FONT_KEY, "NotoSerif") },
+                        { text = _("Author Name Size"), sub_item_table = makeSizeMenu(AUTHOR_FS_KEY, 20, 60, 2) },
                     }
                 },
                 {
-                    text = _lc("Number (Data) Settings"),
+                    text = _("Number (Data) Settings"),
                     sub_item_table = {
-                        { text = _lc("Number Font"), sub_item_table = makeFontMenu(VAL_FONT_KEY, "NotoSerif") },
-                        { text = _lc("Number Size"), sub_item_table = makeSizeMenu(VAL_FS_KEY, 30, 60, 2) },
-                        { text_func = function() return getValBold(pfx) and _lc("Weight: Bold") or _lc("Weight: Normal") end, keep_menu_open = true, callback = function() SUISettings:saveSetting(pfx .. VAL_BOLD_KEY, not getValBold(pfx)) refresh() end },
+                        { text = _("Number Font"), sub_item_table = makeFontMenu(VAL_FONT_KEY, "NotoSerif") },
+                        { text = _("Number Size"), sub_item_table = makeSizeMenu(VAL_FS_KEY, 30, 60, 2) },
+                        { text_func = function() return getValBold(pfx) and _("Weight: Bold") or _("Weight: Normal") end, keep_menu_open = true, callback = function() SUISettings:saveSetting(pfx .. VAL_BOLD_KEY, not getValBold(pfx)) refresh() end },
                     }
                 },
                 {
-                    text = _lc("Label (Text) Settings"),
+                    text = _("Label (Text) Settings"),
                     sub_item_table = {
-                        { text = _lc("Label Font"), sub_item_table = makeFontMenu(LBL_FONT_KEY, "x_smallinfofont") },
-                        { text = _lc("Label Size"), sub_item_table = makeSizeMenu(LBL_FS_KEY, 16, 60, 2) },
-                        { text_func = function() return getLblBold(pfx) and _lc("Weight: Bold") or _lc("Weight: Normal") end, keep_menu_open = true, callback = function() SUISettings:saveSetting(pfx .. LBL_BOLD_KEY, not getLblBold(pfx)) refresh() end },
+                        { text = _("Label Font"), sub_item_table = makeFontMenu(LBL_FONT_KEY, "x_smallinfofont") },
+                        { text = _("Label Size"), sub_item_table = makeSizeMenu(LBL_FS_KEY, 16, 60, 2) },
+                        { text_func = function() return getLblBold(pfx) and _("Weight: Bold") or _("Weight: Normal") end, keep_menu_open = true, callback = function() SUISettings:saveSetting(pfx .. LBL_BOLD_KEY, not getLblBold(pfx)) refresh() end },
                     }
                 }
             }
@@ -1086,31 +1085,31 @@ function M.getMenuItems(ctx_menu)
         {
             text_func = function()
                 local raw = SUISettings:readSetting(pfx .. SK_EXCLUDE_PATHS) or ""
-                if raw == "" then return _lc("Exclude Paths from Recents") end
-                local n = 0; for _ in raw:gmatch("[^,\n]+") do n = n + 1 end
-                return string.format("%s (%d)", _lc("Exclude Paths from Recents"), n)
+                if raw == "" then return _("Exclude Paths from Recent") end
+                local n = 0; for _i in raw:gmatch("[^,\n]+") do n = n + 1 end
+                return string.format("%s (%d)", _("Exclude Paths from Recent"), n)
             end,
             callback = function()
                 local InputDialog = require("ui/widget/inputdialog")
                 local raw = SUISettings:readSetting(pfx .. SK_EXCLUDE_PATHS) or ""
                 local dlg
                 dlg = InputDialog:new{
-                    title       = _lc("Exclude Paths from Recents"),
+                    title       = _("Exclude Paths from Recent"),
                     input       = raw,
                     input_hint  = "/mnt/onboard/rss, instapaper",
-                    description = _lc("Comma separated path fragments.\nBooks containing any of these fragments in their path will be skipped."),
+                    description = _("Comma-separated path fragments.\nBooks whose path contains any fragment will be skipped."),
                     allow_newline = false,
                     buttons = {
                         {
                             {
-                                text = _lc("Cancel"),
+                                text = _("Cancel"),
                                 background = Blitbuffer.COLOR_WHITE,
                                 callback = function()
                                     UIManager:close(dlg)
                                 end,
                             },
                             {
-                                text = _lc("Save"),
+                                text = _("Save"),
                                 background = Blitbuffer.COLOR_WHITE,
                                 is_enter_default = true,
                                 callback = function()
