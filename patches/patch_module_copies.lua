@@ -1,14 +1,14 @@
 local logger = require("logger")
+local _ = require("sui_ext_i18n").translate
 
 local patch = {
     id = "module_copies",
-    name = "Module Copies",
-    description = "Adds 'Number of Copies' setting to all SimpleUI modules, allowing the same module to be placed on multiple pages.",
+    name = _("Module Copies"),
+    description = _("Adds 'Number of Copies' setting to all SimpleUI modules, allowing the same module to be placed on multiple pages."),
     default_enabled = false  -- Opt-in: patches default to disabled
 }
 
 function patch.apply()
-    local _ = require("gettext")
     local ok_reg, Registry = pcall(require, "desktop_modules/moduleregistry")
     if not ok_reg or not Registry then
         logger.warn("simpleui_ext: patch_module_copies: moduleregistry not available")
@@ -95,8 +95,6 @@ function patch.apply()
     Registry.list = function()
         local mods = original_list()
 
-        local _ = require("gettext")
-
         for _mi, mod in ipairs(mods or {}) do
             if not mod._module_copies_enhanced then
                 local original_getMenuItems = mod.getMenuItems
@@ -105,7 +103,7 @@ function patch.apply()
                     local original_items = original_getMenuItems and original_getMenuItems(ctx_menu) or {}
 
                     local enhanced_items = {}
-                    for _, item in ipairs(original_items) do
+                    for _i, item in ipairs(original_items) do
                         enhanced_items[#enhanced_items + 1] = item
                     end
 
@@ -140,9 +138,9 @@ function patch.apply()
                                         local new_pages    = {}
                                         local found_original = false
 
-                                        for _, page in ipairs(layout.pages) do
+                                        for _i, page in ipairs(layout.pages) do
                                             local new_modules = {}
-                                            for _, order_id in ipairs(page.modules or {}) do
+                                            for _i, order_id in ipairs(page.modules or {}) do
                                                 if order_id == mod.id then
                                                     found_original = true
                                                     new_modules[#new_modules + 1] = order_id
@@ -194,7 +192,7 @@ function patch.apply()
                                         local new_order   = {}
                                         local found_original = false
 
-                                        for _, order_id in ipairs(saved_order) do
+                                        for _i, order_id in ipairs(saved_order) do
                                             if order_id == PAGE_BREAK then
                                                 new_order[#new_order + 1] = order_id
                                             elseif order_id == mod.id then
@@ -265,8 +263,8 @@ function patch.apply()
                         if not on then
                             local layout = SUISettings:readSetting("simpleui_layout")
                             if layout and type(layout.pages) == "table" then
-                                for _, pg in ipairs(layout.pages) do
-                                    for _, pid in ipairs(pg.modules or {}) do
+                                for _i, pg in ipairs(layout.pages) do
+                                    for _i, pid in ipairs(pg.modules or {}) do
                                         if _isCopyOf(pid, _base_id) then
                                             _orig_se(pfx, true)
                                             return
@@ -283,8 +281,8 @@ function patch.apply()
                         if not on then
                             local layout = SUISettings:readSetting("simpleui_layout")
                             if layout and type(layout.pages) == "table" then
-                                for _, pg in ipairs(layout.pages) do
-                                    for _, pid in ipairs(pg.modules or {}) do
+                                for _i, pg in ipairs(layout.pages) do
+                                    for _i, pid in ipairs(pg.modules or {}) do
                                         if _isCopyOf(pid, _base_id) then
                                             SUISettings:saveSetting(pfx .. _ek, true)
                                             return
@@ -306,11 +304,11 @@ function patch.apply()
         -- copies 2..N.  The picker's active_set is keyed on raw layout IDs
         -- (e.g. "clock#2"), so giving copies their own id lets the filter work.
         local result = {}
-        for _, m in ipairs(mods or {}) do
+        for _i, m in ipairs(mods or {}) do
             result[#result + 1] = m
         end
         local hs_pfx = "simpleui_hs_"
-        for _, m in ipairs(mods or {}) do
+        for _i, m in ipairs(mods or {}) do
             if not m.id:find("#", 1, true) then
                 local copies = SUISettings:readSetting(
                     hs_pfx .. "module_" .. m.id .. "_copies") or 1

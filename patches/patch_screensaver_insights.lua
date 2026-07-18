@@ -22,7 +22,7 @@
 --   screensaver_insights_page     0–3  (0 = random each time, default 0)
 
 local logger = require("logger")
-local _      = require("gettext")
+local _      = require("sui_ext_i18n").translate
 local T      = require("ffi/util").template
 
 local PATCH_ID   = "screensaver_insights"
@@ -33,8 +33,8 @@ local MAX_PAGE   = 3
 
 local P = {}
 P.id              = PATCH_ID
-P.name            = "Sleep Screen: Reading Insights"
-P.description     = "Adds a 'Show Reading Insights' option to the sleep screen Wallpaper settings"
+P.name            = _("Sleep Screen: Reading Insights")
+P.description     = _("Adds a 'Show Reading Insights' option to the sleep screen Wallpaper settings")
 P.default_enabled = false
 
 local _applied = false
@@ -629,7 +629,7 @@ function P.apply()
         local cur_mo  = os.date("%Y-%m")
         local sel_yr  = getYearRange().max_year
         local max_val = 1
-        for _, m in ipairs(monthly) do
+        for _i, m in ipairs(monthly) do
             local v = tonumber(m.days) or 0; if v > max_val then max_val = v end
         end
         local bar_h  = math.max(Screen:scaleBySize(20),
@@ -716,14 +716,14 @@ function P.apply()
                 end
 
                 local sd = streaks.days;  local sw = streaks.weeks
-                local cur_d  = string.format(plural(sd.current, "%d day",  "%d days"),  sd.current)
-                local best_d = string.format(plural(sd.best,    "%d day",  "%d days"),  sd.best)
+                local cur_d  = string.format(plural(sd.current, _("%d day"),  _("%d days")),  sd.current)
+                local best_d = string.format(plural(sd.best,    _("%d day"),  _("%d days")),  sd.best)
                 local best_d_sub = (sd.best > 1 and sd.best_start > 0)
-                    and (fmtDate(sd.best_start) .. " – " .. fmtDate(sd.best_end)) or nil
-                local cur_w  = string.format(plural(sw.current, "%d week", "%d weeks"), sw.current)
-                local best_w = string.format(plural(sw.best,    "%d week", "%d weeks"), sw.best)
+                    and (string.format("%s – %s", fmtDate(sd.best_start), fmtDate(sd.best_end))) or nil
+                local cur_w  = string.format(plural(sw.current, _("%d week"), _("%d weeks")), sw.current)
+                local best_w = string.format(plural(sw.best,    _("%d week"), _("%d weeks")), sw.best)
                 local best_w_sub = (sw.best > 1 and sw.best_start > 0)
-                    and (fmtDate(sw.best_start) .. " – " .. fmtDate(sw.best_end)) or nil
+                    and (string.format("%s – %s", fmtDate(sw.best_start), fmtDate(sw.best_end))) or nil
 
                 local streak_row  = iconBlock(inner_w, {
                     iconRow(inner_w, SUIStyle.icon("calendar"), _("Current streak"), cur_d),

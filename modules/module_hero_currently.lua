@@ -29,6 +29,7 @@ local VerticalGroup    = require("ui/widget/verticalgroup")
 local VerticalSpan     = require("ui/widget/verticalspan")
 local Size             = require("ui/size")
 local logger           = require("logger")
+local _                = require("sui_ext_i18n").translate
 
 -- ---------------------------------------------------------------------------
 -- Lazy-loaded SimpleUI helpers (not available until SimpleUI is loaded)
@@ -201,7 +202,7 @@ local function getBookHighlights(fp)
     if type(annotations) ~= "table" or #annotations == 0 then return nil end
 
     local result = {}
-    for _, a in ipairs(annotations) do
+    for _i, a in ipairs(annotations) do
         if a.drawer and _HIGHLIGHT_DRAWERS[a.drawer]
            and type(a.text) == "string" and a.text ~= "" then
             local t = normalizeHighlightText(a.text)
@@ -224,13 +225,19 @@ end
 --   “Some highlighted text.”
 --
 --   — Chapter 3 · p. 42
-local _LEADING_QUOTES  = '^["\'\u{201C}\u{2018}\u{201E}\u{201A}\u{00AB}\u{2039}%s]+'
-local _TRAILING_QUOTES = '["\'\u{201D}\u{2019}\u{201E}\u{201A}\u{00BB}\u{203A}%s]+$'
+--
+-- U+201C ", U+201D ", U+2018 ', U+2019 ', U+201E „, U+201A ‚
+-- U+00AB «, U+00BB », U+2039 ‹, U+203A ›
+-- U+2014 — (em dash), U+2013 – (en dash)
+-- U+00B7 · (middle dot)
+
+local _LEADING_QUOTES  = '^["\'\xE2\x80\x9C\xE2\x80\x98\xE2\x80\x9E\xE2\x80\x9A\xC2\xAB\xE2\x80\xB9%s]+'
+local _TRAILING_QUOTES = '["\'\xE2\x80\x9D\xE2\x80\x99\xE2\x80\x9E\xE2\x80\x9A\xC2\xBB\xE2\x80\xBA%s]+$'
 
 local function formatHighlight(h)
     local text = h.text:gsub(_LEADING_QUOTES, ''):gsub(_TRAILING_QUOTES, '')
-    text = text:gsub('^[\u{2014}\u{2013}]%s*', '')
-    local quoted = "\u{201C}" .. text .. "\u{201D}"
+    text = text:gsub('^[\xE2\x80\x94\xE2\x80\x93]%s*', '')
+    local quoted = "\xE2\x80\x9C" .. text .. "\xE2\x80\x9D"
 
     local meta = {}
     if h.chapter then meta[#meta + 1] = h.chapter end
@@ -238,7 +245,7 @@ local function formatHighlight(h)
     if pn then meta[#meta + 1] = "p. " .. tostring(pn) end
 
     if #meta > 0 then
-        return quoted .. "\n\n\u{2014} " .. table.concat(meta, " \u{00B7} ")
+        return quoted .. "\n\n\xE2\x80\x94 " .. table.concat(meta, " \xC2\xB7 ")
     end
     return quoted
 end
@@ -395,7 +402,7 @@ end
 
 local function isExcluded(fp, excludes)
     if not fp or #excludes == 0 then return false end
-    for _, frag in ipairs(excludes) do
+    for _i, frag in ipairs(excludes) do
         if fp:find(frag, 1, true) then return true end
     end
     return false
@@ -408,11 +415,11 @@ local M = {}
 
 -- Kept separate from M.label: applyLabelToggle() mutates M.label to nil when
 -- the section label is hidden, so it can't also serve as its own default.
-local _DEFAULT_LABEL = "Currently Reading"
+local _DEFAULT_LABEL = _("Currently Reading")
 
 M.id              = "hero_currently"
-M.name            = "Hero Currently Reading"
-M.description     = "Large hero card showing currently reading book with cover, progress, and details"
+M.name            = _("Hero Currently Reading")
+M.description     = _("Large hero card showing currently reading book with cover, progress, and details")
 M.default_enabled = true   -- Loaded by simpleui_ext by default
 M.label           = _DEFAULT_LABEL
 M.enabled_key     = "hero_currently"
@@ -449,7 +456,7 @@ local function _getCurrentFP(ctx, excludes)
         pcall(function() RH:reload() end)
     end
     if not RH.hist then return nil end
-    for _, e in ipairs(RH.hist) do
+    for _i, e in ipairs(RH.hist) do
         if e and e.file and not isExcluded(e.file, excludes) then
             return e.file
         end
@@ -618,7 +625,7 @@ function M.build(w, ctx)
             local cur  = math.floor(pct * bd.pages)
             prog_left  = string.format("%d / %d", cur, bd.pages)  -- no "p." prefix (matches bookshelf)
             local tl   = SH.formatTimeLeft(pct, bd.pages, avg_time)
-            if tl then prog_right = tl .. " left" end
+            if tl then prog_right = string.format(_("%s left"), tl) end
         else
             prog_left = string.format("%.0f%%", pct * 100)
         end
@@ -664,10 +671,10 @@ function M.build(w, ctx)
             local parts = {}
             if bstats.days and bstats.days > 0 then
                 parts[#parts+1] = string.format(
-                    bstats.days == 1 and "%d day" or "%d days", bstats.days)
+                    bstats.days == 1 and _("%d day") or _("%d days"), bstats.days)
             end
             if bstats.total_secs and bstats.total_secs > 0 then
-                parts[#parts+1] = fmtTime(bstats.total_secs) .. " read"
+                parts[#parts+1] = string.format(_("%s read"), fmtTime(bstats.total_secs))
             end
             if #parts > 0 then
                 local stats_row = HorizontalGroup:new{ align = "center" }
@@ -903,7 +910,7 @@ function M.updateCovers(widget, _ctx)
     if not SH then return true end
 
     local all_done = true
-    for _, slot in ipairs(tappable._cover_slots) do
+    for _i, slot in ipairs(tappable._cover_slots) do
         local new_cover = SH.getBookCover(slot.fp, slot.w, slot.h, slot.align, slot.stretch)
         if new_cover then
             slot.container[slot.idx] = new_cover
@@ -951,12 +958,11 @@ function M.getMenuItems(ctx_menu)
 
     local pfx      = ctx_menu.pfx
     local refresh  = ctx_menu.refresh
-    local _lc      = ctx_menu._ or function(x) return x end
     local Settings = getSettings()
 
     local function toggle_item(label, key)
         return {
-            text_func      = function() return _lc(label) end,
+            text_func      = function() return _(label) end,
             checked_func   = function()
                 return Settings and Settings:isTrue(pfx .. key)
             end,
@@ -974,7 +980,7 @@ function M.getMenuItems(ctx_menu)
     -- Default-on toggle: nil (unset) is treated as true.
     local function toggle_item_on(label, key)
         return {
-            text_func      = function() return _lc(label) end,
+            text_func      = function() return _(label) end,
             checked_func   = function()
                 return not Settings or Settings:readSetting(pfx .. key) ~= false
             end,
@@ -990,30 +996,30 @@ function M.getMenuItems(ctx_menu)
     end
 
     return {
-        Config.makeLabelToggleItem(M.id, M.name, refresh, _lc),
+        Config.makeLabelToggleItem(M.id, M.name, refresh, _),
         Config.makeScaleItem({
             text_func    = function()
                 local pct = Config.getModuleScalePct("hero_currently", pfx)
                 return pct == 100
-                    and _lc("Scale")
-                    or  string.format("%s (%d%%)", _lc("Scale"), pct)
+                    and _("Scale")
+                    or  string.format("%s (%d%%)", _("Scale"), pct)
             end,
             enabled_func = function() return not Config.isScaleLinked() end,
-            title        = _lc("Scale"),
-            info         = _lc("Scale for this module.\n100% is the default size."),
+            title        = _("Scale"),
+            info         = _("Scale for this module.\n100% is the default size."),
             get          = function() return Config.getModuleScalePct("hero_currently", pfx) end,
             set          = function(v) Config.setModuleScale(v, "hero_currently", pfx) end,
             refresh      = refresh,
         }),
         {
-            text_func  = function() return _lc("Description Content") end,
+            text_func  = function() return _("Description Content") end,
             value_func = function()
                 return (getDescSource(pfx) == "highlight")
-                    and _lc("Highlight") or _lc("Description")
+                    and _("Highlight") or _("Description")
             end,
             sub_item_table = {
                 {
-                    text           = _lc("Description"),
+                    text           = _("Description"),
                     radio          = true,
                     checked_func   = function() return getDescSource(pfx) == "description" end,
                     keep_menu_open = true,
@@ -1025,7 +1031,7 @@ function M.getMenuItems(ctx_menu)
                     end,
                 },
                 {
-                    text           = _lc("Highlight (random, falls back to description)"),
+                    text           = _("Highlight (random, falls back to description)"),
                     radio          = true,
                     checked_func   = function() return getDescSource(pfx) == "highlight" end,
                     keep_menu_open = true,
@@ -1044,8 +1050,8 @@ function M.getMenuItems(ctx_menu)
                 local v = S and S:readSetting(pfx .. SK_DESC_FS_SCALE)
                 v = v and tonumber(v) or 100
                 return v == 100
-                    and _lc("Description Text Size")
-                    or  string.format("%s (%d%%)", _lc("Description Text Size"), v)
+                    and _("Description Text Size")
+                    or  string.format("%s (%d%%)", _("Description Text Size"), v)
             end,
             keep_menu_open = true,
             callback = function()
@@ -1055,15 +1061,15 @@ function M.getMenuItems(ctx_menu)
                 local current = (S and tonumber(S:readSetting(pfx .. SK_DESC_FS_SCALE))) or 100
                 local spin
                 spin = SpinWidget:new{
-                    title_text      = _lc("Description Text Size"),
-                    info_text       = _lc("Scales the description font size relative to default.\nLarger text shows fewer lines; smaller shows more."),
+                    title_text      = _("Description Text Size"),
+                    info_text       = _("Scales the description font size relative to default.\nLarger text shows fewer lines; smaller shows more."),
                     value           = current,
                     value_min       = 50,
                     value_max       = 300,
                     value_step      = 5,
                     value_hold_step = 25,
                     unit            = "%",
-                    ok_text         = _lc("Set"),
+                    ok_text         = _("Set"),
                     callback        = function(spin_widget)
                         if S then
                             S:saveSetting(pfx .. SK_DESC_FS_SCALE, spin_widget.value)
@@ -1081,8 +1087,8 @@ function M.getMenuItems(ctx_menu)
                 local v = S and S:readSetting(pfx .. SK_COVER_SCALE)
                 v = v and tonumber(v) or 100
                 return v == 100
-                    and _lc("Cover Size")
-                    or  string.format("%s (%d%%)", _lc("Cover Size"), v)
+                    and _("Cover Size")
+                    or  string.format("%s (%d%%)", _("Cover Size"), v)
             end,
             keep_menu_open = true,
             callback = function()
@@ -1092,15 +1098,15 @@ function M.getMenuItems(ctx_menu)
                 local current = (S and tonumber(S:readSetting(pfx .. SK_COVER_SCALE))) or 100
                 local spin
                 spin = SpinWidget:new{
-                    title_text      = _lc("Cover Size"),
-                    info_text       = _lc("Scales the hero card's book cover relative to default, independently of the card's text Scale setting.\nAspect ratio (3:2) is preserved; the text column resizes to fit."),
+                    title_text      = _("Cover Size"),
+                    info_text       = _("Scales the hero card's book cover relative to default, independently of the card's text Scale setting.\nAspect ratio (3:2) is preserved; the text column resizes to fit."),
                     value           = current,
                     value_min       = 50,
                     value_max       = 150,
                     value_step      = 5,
                     value_hold_step = 25,
                     unit            = "%",
-                    ok_text         = _lc("Set"),
+                    ok_text         = _("Set"),
                     callback        = function(spin_widget)
                         if S then
                             S:saveSetting(pfx .. SK_COVER_SCALE, spin_widget.value)
@@ -1112,18 +1118,18 @@ function M.getMenuItems(ctx_menu)
                 UIManager:show(spin)
             end,
         },
-        toggle_item("Show Frame",        "hero_currently_show_frame"),
-        toggle_item("Solid Background",  "hero_currently_solid_bg"),
-        toggle_item_on("Show Progress Bar", SK_SHOW_PROGRESS),
-        toggle_item("Show Statistics",   SK_SHOW_STATS),
-        toggle_item_on("Prevent Cover Cropping", SK_PREVENT_CROP),
+        toggle_item(   _("Show Frame"), "hero_currently_show_frame"),
+        toggle_item(   _("Solid Background"), "hero_currently_solid_bg"),
+        toggle_item_on(_("Show Progress Bar"), SK_SHOW_PROGRESS),
+        toggle_item(   _("Show Statistics"), SK_SHOW_STATS),
+        toggle_item_on(_("Prevent Cover Cropping"), SK_PREVENT_CROP),
         {
             text_func = function()
                 if Settings:readSetting(pfx .. SK_PREVENT_CROP) == false then
-                    return _lc("Crop Threshold (disabled)")
+                    return _("Crop Threshold (disabled)")
                 end
                 local threshold = Settings:readSetting(pfx .. SK_CROP_THRESHOLD) or 50
-                return string.format("%s (%d%%)", _lc("Crop Threshold"), threshold)
+                return string.format("%s (%d%%)", _("Crop Threshold"), threshold)
             end,
             enabled_func = function()
                 return Settings:readSetting(pfx .. SK_PREVENT_CROP) ~= false
@@ -1135,15 +1141,15 @@ function M.getMenuItems(ctx_menu)
                 local threshold = Settings:readSetting(pfx .. SK_CROP_THRESHOLD) or 50
                 local spin
                 spin = SpinWidget:new{
-                    title_text = _lc("Crop Threshold"),
-                    info_text  = _lc("Maximum aspect ratio distortion to prevent cropping.\n0% = always crop, 100% = never crop (allow stretching)"),
+                    title_text = _("Crop Threshold"),
+                    info_text  = _("Maximum aspect ratio distortion to prevent cropping.\n0% = always crop, 100% = never crop (allow stretching)"),
                     value      = threshold,
                     value_min  = 0,
                     value_max  = 100,
                     value_step = 5,
                     value_hold_step = 10,
                     unit       = "%",
-                    ok_text    = _lc("Set"),
+                    ok_text    = _("Set"),
                     callback   = function(spin_widget)
                         if Settings then
                             Settings:saveSetting(pfx .. SK_CROP_THRESHOLD, spin_widget.value)
@@ -1161,11 +1167,11 @@ function M.getMenuItems(ctx_menu)
             text_func = function()
                 local raw = Settings and Settings:readSetting(pfx .. SK_EXCLUDE_PATHS)
                 if not raw or raw == "" then
-                    return _lc("Exclude Paths from Recent")
+                    return _("Exclude Paths from Recent")
                 end
                 local n = 0
-                for _ in raw:gmatch("[^,\n]+") do n = n + 1 end
-                return string.format("%s (%d)", _lc("Exclude Paths from Recent"), n)
+                for _i in raw:gmatch("[^,\n]+") do n = n + 1 end
+                return string.format("%s (%d)", _("Exclude Paths from Recent"), n)
             end,
             callback = function()
                 local InputDialog = require("ui/widget/inputdialog")
@@ -1173,18 +1179,18 @@ function M.getMenuItems(ctx_menu)
                 local raw = (Settings and Settings:readSetting(pfx .. SK_EXCLUDE_PATHS)) or ""
                 local dlg
                 dlg = InputDialog:new{
-                    title       = _lc("Exclude Paths from Recent"),
+                    title       = _("Exclude Paths from Recent"),
                     input       = raw,
                     input_hint  = "/mnt/onboard/rss,instapaper,cache",
-                    description = _lc("Comma-separated path fragments.\nBooks whose path contains any fragment will be skipped."),
+                    description = _("Comma-separated path fragments.\nBooks whose path contains any fragment will be skipped."),
                     allow_newline    = false,
                     buttons = {{
                         {
-                            text     = _lc("Cancel"),
+                            text = _("Cancel"),
                             callback = function() UIManager:close(dlg) end,
                         },
                         {
-                            text             = _lc("Save"),
+                            text = _("Save"),
                             is_enter_default = true,
                             callback = function()
                                 local val = dlg:getInputText()

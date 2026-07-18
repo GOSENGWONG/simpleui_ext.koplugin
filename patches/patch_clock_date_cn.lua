@@ -10,12 +10,13 @@
 
 local logger = require "logger"
 local hotfix = require "utils/hotfix"
+local _      = require("sui_ext_i18n").translate
 
 
-local P        = {
+local P = {
     id              = "clock_date_cn",
-    name            = "Clock: Chinese Date Format",
-    description     = [[Shows the homescreen clock date as "6月3日 星期三" instead of "Wednesday, 3 June"]],
+    name            = _("Clock: Chinese Date Format"),
+    description     = _([[Shows the homescreen clock date as "2025年 6月3日 星期三" instead of "Wednesday, 3 June"]]),
     default_enabled = false,
 }
 
@@ -25,7 +26,7 @@ local function _localDateCN()
     local t = os.date("*t", os.time())
     if not t or not t.day then return os.date "%m月%d日" end
     local w = _CN_WDAY[t.wday] or "??"
-    return string.format("%d月%d日 周%s", t.month, t.day, w)
+    return string.format("%d年 %d月%d日 星期%s", t.year, t.month, t.day, w)
 end
 
 -- ---------------------------------------------------------------------------

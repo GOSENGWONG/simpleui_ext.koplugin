@@ -45,15 +45,16 @@
 --   recent_exclude_paths  comma/newline-separated path fragments
 
 local logger = require("logger")
+local _      = require("sui_ext_i18n").translate
 
 local PATCH_ID = "recent_extra"
 
 local P = {}
 P.id              = PATCH_ID
-P.name            = "Recent Books Extra Options"
-P.description     = "Adds multi-row layout, row spacing and 'Exclude Paths from Recent' to the Recent Books module"
+P.name            = _("Recent Books Extra Options")
+P.description     = _("Adds multi-row layout, row spacing and 'Exclude Paths from Recent' to the Recent Books module")
 P.default_enabled = false  -- Opt-in: patches default to disabled
-local _applied   = false
+local _applied = false
 
 local SETTING_ROWS        = "recent_rows"
 local SETTING_ROW_GAP_PCT = "recent_row_gap_pct"
@@ -101,7 +102,7 @@ end
 
 local function _isExcluded(fp, excludes)
     if not fp or #excludes == 0 then return false end
-    for _, frag in ipairs(excludes) do
+    for _i, frag in ipairs(excludes) do
         if fp:find(frag, 1, true) then return true end
     end
     return false
@@ -123,7 +124,7 @@ local function _collectRecentFps(needed, excludes, current_fp, show_finished, pr
     if not RH.hist then return nil end
 
     local result = {}
-    for _, e in ipairs(RH.hist) do
+    for _i, e in ipairs(RH.hist) do
         local fp = e and e.file
         if fp and fp ~= current_fp
             and (not ok_lfs or lfs.attributes(fp, "mode") == "file")
@@ -211,7 +212,7 @@ function P.apply()
             if row_widget then
                 row_widgets[#row_widgets + 1] = row_widget
                 if row_widget._cover_slots then
-                    for _, slot in ipairs(row_widget._cover_slots) do
+                    for _i, slot in ipairs(row_widget._cover_slots) do
                         all_cover_slots[#all_cover_slots + 1] = slot
                     end
                 end
@@ -259,10 +260,9 @@ function P.apply()
         local items   = orig_getMenuItems(ctx_menu) or {}
         local pfx     = ctx_menu.pfx or ""
         local refresh = ctx_menu.refresh
-        local _lc     = ctx_menu._ or function(x) return x end
 
         items[#items + 1] = {
-            text_func      = function() return _lc("Rows") end,
+            text_func      = function() return _("Rows") end,
             value_func     = function() return tostring(_getRows(SUISettings, pfx)) end,
             separator      = true,
             keep_menu_open = true,
@@ -270,14 +270,14 @@ function P.apply()
                 local SpinWidget = require("ui/widget/spinwidget")
                 local UIManager  = require("ui/uimanager")
                 UIManager:show(SpinWidget:new{
-                    title_text    = _lc("Rows"),
-                    info_text     = _lc("Number of rows of recent books to display.\nEach row shows up to 5 books."),
+                    title_text    = _("Rows"),
+                    info_text     = _("Number of rows of recent books to display.\nEach row shows up to 5 books."),
                     value         = _getRows(SUISettings, pfx),
                     value_min     = 1,
                     value_max     = MAX_ROWS,
                     value_step    = 1,
-                    ok_text       = _lc("Apply"),
-                    cancel_text   = _lc("Cancel"),
+                    ok_text       = _("Apply"),
+                    cancel_text   = _("Cancel"),
                     default_value = 1,
                     callback      = function(spin)
                         SUISettings:saveSetting(pfx .. SETTING_ROWS, spin.value)
@@ -288,9 +288,9 @@ function P.apply()
         }
 
         local row_gap_item = require("sui_config").makeGapItem({
-            text_func = function() return _lc("Row Spacing") end,
-            title     = _lc("Row Spacing"),
-            info      = _lc("Vertical spacing between rows.\nOnly used when \"Rows\" is greater than 1."),
+            text_func = function() return _("Row Spacing") end,
+            title     = _("Row Spacing"),
+            info      = _("Vertical spacing between rows.\nOnly used when \"Rows\" is greater than 1."),
             get       = function() return _getRowGapPct(SUISettings, pfx) end,
             set       = function(v) SUISettings:saveSetting(pfx .. SETTING_ROW_GAP_PCT, v) end,
             refresh   = refresh,
@@ -302,11 +302,11 @@ function P.apply()
             text_func = function()
                 local raw = SUISettings:readSetting(pfx .. SETTING_EXCLUDE)
                 if not raw or raw == "" then
-                    return _lc("Exclude Paths from Recent")
+                    return _("Exclude Paths from Recent")
                 end
                 local n = 0
-                for _ in raw:gmatch("[^,\n]+") do n = n + 1 end
-                return string.format("%s (%d)", _lc("Exclude Paths from Recent"), n)
+                for _i in raw:gmatch("[^,\n]+") do n = n + 1 end
+                return string.format("%s (%d)", _("Exclude Paths from Recent"), n)
             end,
             keep_menu_open = true,
             callback = function()
@@ -315,18 +315,18 @@ function P.apply()
                 local raw = SUISettings:readSetting(pfx .. SETTING_EXCLUDE) or ""
                 local dlg
                 dlg = InputDialog:new{
-                    title       = _lc("Exclude Paths from Recent"),
+                    title       = _("Exclude Paths from Recent"),
                     input       = raw,
                     input_hint  = "/mnt/onboard/rss, instapaper",
-                    description = _lc("Comma-separated path fragments.\nBooks whose path contains any fragment will be skipped."),
+                    description = _("Comma-separated path fragments.\nBooks whose path contains any fragment will be skipped."),
                     allow_newline = false,
                     buttons = {{
                         {
-                            text     = _lc("Cancel"),
+                            text = _("Cancel"),
                             callback = function() UIManager:close(dlg) end,
                         },
                         {
-                            text             = _lc("Save"),
+                            text = _("Save"),
                             is_enter_default = true,
                             callback = function()
                                 local val = dlg:getInputText()

@@ -34,7 +34,7 @@ local DataStorage = require("datastorage")
 local LuaSettings = require("luasettings")
 local SQ3 = require("lua-ljsqlite3/init")
 local util = require("util")
-local _ = require("gettext")
+local _ = require("sui_ext_i18n").translate
 local lfs = require("libs/libkoreader-lfs")
 
 -- Inline reading data provider (shared cache with 2-reading-insights-popup.lua)
@@ -48,12 +48,12 @@ local cache_timestamps = ReadingInsightsDatabase:readSetting("readingInsights_ca
 }
 
 local MONTH_NAMES_SHORT = {
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+    _("Jan"), _("Feb"), _("Mar"), _("Apr"), _("May"), _("Jun"),
+    _("Jul"), _("Aug"), _("Sep"), _("Oct"), _("Nov"), _("Dec"),
 }
 local MONTH_NAMES_FULL = {
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December",
+    _("January"), _("February"), _("March"), _("April"), _("May"), _("June"),
+    _("July"), _("August"), _("September"), _("October"), _("November"), _("December"),
 }
 
 local function getDbModTime()
@@ -439,6 +439,19 @@ local function getInsightsData(pfx)
             or getMonthlyReadingDays(selected_year)
         local monthlyHours = (insightsCache.monthlyReadingHours and insightsCache.monthlyReadingHours[selected_year])
             or getMonthlyReadingHours(selected_year)
+
+       -- Re-translate the month tags (the cache may contain old values ​​that were hardcoded before MONTH_NAMES_SHORT, causing translation failure)，
+        for _i, m in ipairs(monthlyDays) do
+            local month_num = tonumber(m.month:sub(6,7)) or tonumber(m.month_num) or 1
+            m.label = MONTH_NAMES_SHORT[month_num]
+            m.label_full = MONTH_NAMES_FULL[month_num]
+        end
+        for _i, m in ipairs(monthlyHours) do
+            local month_num = tonumber(m.month:sub(6,7)) or tonumber(m.month_num) or 1
+            m.label = MONTH_NAMES_SHORT[month_num]
+            m.label_full = MONTH_NAMES_FULL[month_num]
+        end
+       -- Re-translate month labels (cache may contain stale values from before MONTH_NAMES_SHORT was hardcoded) END
         
         return {
             year = selected_year,
@@ -513,16 +526,16 @@ end
 
 local function formatHoursRead(seconds)
     if (not seconds) or (seconds < 60) then
-        return 0, "hours read"
+        return 0, _("hours read")
     end
 
     local h = math.floor(seconds / 3600)
     if h == 0 then
         h = math.floor((seconds / 3600) * 10) / 10
-        return h, "hours read"
+        return h, _("hours read")
     end
 
-    local h_unit = h == 1 and "hour read" or "hours read"
+    local h_unit = h == 1 and _("hour read") or _("hours read")
     return h, h_unit
 end
 
@@ -538,7 +551,7 @@ local function buildYearlyStatsRow(ctx, stats, mode, content_width, has_wp, UI)
         left_value, left_unit = formatHoursRead(stats.duration)
     else
         left_value = formatCount(stats.days)
-        left_unit = stats.days == 1 and "day read" or "days read"
+        left_unit = stats.days == 1 and _("day read") or _("days read")
     end
     
     local left_val_widget = TextWidget:new{
@@ -560,7 +573,7 @@ local function buildYearlyStatsRow(ctx, stats, mode, content_width, has_wp, UI)
         face = value_font,
     }
     local right_unit_widget = TextWidget:new{
-        text = stats.pages == 1 and "page read" or "pages read",
+        text = stats.pages == 1 and _("page read") or _("pages read"),
         face = label_font,
     }
     local right_content = HorizontalGroup:new{
@@ -595,7 +608,7 @@ local function showBooksForMonth(year_month, month_label)
     if lfs.attributes(db_path, "mode") ~= "file" then
         local InfoMessage = require("ui/widget/infomessage")
         UIManager:show(InfoMessage:new{
-            text = "Statistics database not found",
+            text = _("Statistics database not found"),
             timeout = 2,
         })
         return
@@ -621,7 +634,7 @@ local function showBooksForMonth(year_month, month_label)
         for row in stmt:rows() do
             local pages_curr = tonumber(row[3]) or 0
             table.insert(books, {
-                title = row[1] or "Unknown",
+                title = row[1] or _("Unknown"),
                 authors = row[2] or "",
                 pages = pages_curr,
             })
@@ -634,7 +647,7 @@ local function showBooksForMonth(year_month, month_label)
     if #books == 0 then
         local InfoMessage = require("ui/widget/infomessage")
         UIManager:show(InfoMessage:new{
-            text = "No books read in " .. month_label,
+            text = string.format(_("No books read in %s"), month_label),
             timeout = 2,
         })
         return
@@ -643,7 +656,7 @@ local function showBooksForMonth(year_month, month_label)
     local Menu = require("ui/widget/menu")
     local item_table = {}
     for i, book in ipairs(books) do
-        local pages_text = book.pages == 1 and "page" or "pages"
+        local pages_text = book.pages == 1 and _("page") or _("pages")
         local display_text = book.title
         if book.authors and book.authors ~= "" then
             display_text = display_text .. " (" .. book.authors .. ")"
@@ -656,8 +669,8 @@ local function showBooksForMonth(year_month, month_label)
     end
     
     local book_count = #books
-    local book_text = book_count == 1 and "book" or "books"
-    local page_text = pages_total == 1 and "page" or "pages"
+    local book_text = book_count == 1 and _("book") or _("books")
+    local page_text = pages_total == 1 and _("page") or _("pages")
     local title = string.format("%s - %s %s (%s %s)",
         month_label, formatCount(book_count), book_text,
         formatCount(pages_total), page_text)
@@ -685,7 +698,7 @@ local function buildMonthlyChart(ctx, monthly_data, mode, content_width, scale, 
     
     local value_key = mode == MODE_HOURS and "hours" or "days"
     local max_value = 1
-    for _, m in ipairs(monthly_data) do
+    for _i, m in ipairs(monthly_data) do
         local v = tonumber(m[value_key]) or 0
         if v > max_value then max_value = v end
     end
@@ -849,7 +862,7 @@ local function buildInsightsWidget(w, ctx, data)
         local start_year = current_month <= 11 and (current_year - 1) or current_year
         
         if start_year == current_year then
-            year_text_str = tostring(current_year) .. " (combined)"
+            year_text_str = tostring(current_year) .. _(" (combined)")
         else
             year_text_str = tostring(start_year) .. "-" .. tostring(current_year)
         end
@@ -962,16 +975,16 @@ end
 
 -- Kept separate from module.label: applyLabelToggle() mutates module.label to
 -- nil when the section label is hidden, so it can't also serve as its own default.
-local _DEFAULT_LABEL = "Reading Insights"
+local _DEFAULT_LABEL = _("Reading Insights")
 
 local module = {
-    id = "reading_insights",
-    name = "Reading Insights",
-    description = "Yearly reading statistics and monthly chart with tappable bars",
+    id              = "reading_insights",
+    name            = _("Reading Insights"),
+    description     = _("Yearly reading statistics and monthly chart with tappable bars"),
     default_enabled = true,   -- Loaded by simpleui_ext by default
-    label = _DEFAULT_LABEL,
-    enabled_key = "reading_insights",
-    default_on = false,
+    label           = _DEFAULT_LABEL,
+    enabled_key     = "reading_insights",
+    default_on      = false,
 }
 
 function module.build(w, ctx)
@@ -1010,30 +1023,29 @@ function module.getMenuItems(ctx_menu)
     
     local pfx = ctx_menu.pfx
     local refresh = ctx_menu.refresh
-    local _lc = ctx_menu._ or function(x) return x end
     local S = getSettings()
-    
+
     return {
-        Config.makeLabelToggleItem(module.id, module.name, refresh, _lc),
+        Config.makeLabelToggleItem(module.id, module.name, refresh, _),
         Config.makeScaleItem({
             text_func = function()
                 local pct = Config.getModuleScalePct("reading_insights", pfx)
                 return pct == 100
-                    and _lc("Scale")
-                    or string.format("%s (%d%%)", _lc("Scale"), pct)
+                    and _("Scale")
+                    or string.format("%s (%d%%)", _("Scale"), pct)
             end,
             enabled_func = function() return not Config.isScaleLinked() end,
-            title = _lc("Scale"),
-            info = _lc("Scale for this module.\n100% is the default size."),
+            title = _("Scale"),
+            info  = _("Scale for this module.\n100% is the default size."),
             get = function() return Config.getModuleScalePct("reading_insights", pfx) end,
             set = function(v) Config.setModuleScale(v, "reading_insights", pfx) end,
             refresh = refresh,
         }),
         {
-            text = _lc("Display Mode"),
+            text = _("Display Mode"),
             sub_item_table = {
                 {
-                    text = _lc("Days read per month"),
+                    text = _("Days read per month"),
                     checked_func = function() return getMode(pfx) == MODE_DAYS end,
                     callback = function()
                         if S then S:saveSetting(pfx .. SK_MODE, MODE_DAYS) S:flush() end
@@ -1041,7 +1053,7 @@ function module.getMenuItems(ctx_menu)
                     end,
                 },
                 {
-                    text = _lc("Hours read per month"),
+                    text = _("Hours read per month"),
                     checked_func = function() return getMode(pfx) == MODE_HOURS end,
                     callback = function()
                         if S then S:saveSetting(pfx .. SK_MODE, MODE_HOURS) S:flush() end
@@ -1051,10 +1063,10 @@ function module.getMenuItems(ctx_menu)
             },
         },
         {
-            text = _lc("Year Display Mode"),
+            text = _("Year Display Mode"),
             sub_item_table = {
                 {
-                    text = _lc("Year based"),
+                    text = _("Year based"),
                     checked_func = function() return getYearMode(pfx) == YEAR_MODE_BASED end,
                     callback = function()
                         if S then S:saveSetting(pfx .. SK_YEAR_MODE, YEAR_MODE_BASED) S:flush() end
@@ -1062,7 +1074,7 @@ function module.getMenuItems(ctx_menu)
                     end,
                 },
                 {
-                    text = _lc("Last 12 months"),
+                    text = _("Last 12 months"),
                     checked_func = function() return getYearMode(pfx) == YEAR_MODE_LAST12 end,
                     callback = function()
                         if S then S:saveSetting(pfx .. SK_YEAR_MODE, YEAR_MODE_LAST12) S:flush() end
