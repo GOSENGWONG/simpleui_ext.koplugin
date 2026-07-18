@@ -1097,7 +1097,7 @@ function M.getMenuItems(ctx_menu)
                     title       = _("Exclude Paths from Recent"),
                     input       = raw,
                     input_hint  = "/mnt/onboard/rss, instapaper",
-                    description = _("Comma separated path fragments.\nBooks whose path contains any fragment will be skipped."),
+                    description = _("Comma-separated path fragments.\nBooks whose path contains any fragment will be skipped."),
                     allow_newline = false,
                     buttons = {
                         {
