@@ -8,7 +8,7 @@
 --   3. Uses "simpleui_ext i18n" log tag for clearer diagnostics.
 --
 -- Adding a new language:
---   1. Copy `locale/simpleui_ext.pot` to `locale/<lang>.po` (e.g. `de.po`).
+--   1. Copy `locale/sui_ext.pot` to `locale/<lang>.po` (e.g. `de.po`).
 --   2. Populate the `msgstr` entries with your translations.
 --   3. Restart KOReader.
 

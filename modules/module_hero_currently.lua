@@ -962,7 +962,7 @@ function M.getMenuItems(ctx_menu)
 
     local function toggle_item(label, key)
         return {
-            text_func      = function() return _(label) end,
+            text_func      = function() return label end,
             checked_func   = function()
                 return Settings and Settings:isTrue(pfx .. key)
             end,
@@ -980,7 +980,7 @@ function M.getMenuItems(ctx_menu)
     -- Default-on toggle: nil (unset) is treated as true.
     local function toggle_item_on(label, key)
         return {
-            text_func      = function() return _(label) end,
+            text_func      = function() return label end,
             checked_func   = function()
                 return not Settings or Settings:readSetting(pfx .. key) ~= false
             end,

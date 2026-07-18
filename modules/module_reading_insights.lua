@@ -440,7 +440,8 @@ local function getInsightsData(pfx)
         local monthlyHours = (insightsCache.monthlyReadingHours and insightsCache.monthlyReadingHours[selected_year])
             or getMonthlyReadingHours(selected_year)
 
-       -- Re-translate the month tags (the cache may contain old values ​​that were hardcoded before MONTH_NAMES_SHORT, causing translation failure)，
+        -- Re-derive month labels from the current language: cached entries may
+        -- have been translated under a different locale than the active one.
         for _i, m in ipairs(monthlyDays) do
             local month_num = tonumber(m.month:sub(6,7)) or tonumber(m.month_num) or 1
             m.label = MONTH_NAMES_SHORT[month_num]
@@ -451,7 +452,6 @@ local function getInsightsData(pfx)
             m.label = MONTH_NAMES_SHORT[month_num]
             m.label_full = MONTH_NAMES_FULL[month_num]
         end
-       -- Re-translate month labels (cache may contain stale values from before MONTH_NAMES_SHORT was hardcoded) END
         
         return {
             year = selected_year,

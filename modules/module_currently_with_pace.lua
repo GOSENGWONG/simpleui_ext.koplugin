@@ -1182,7 +1182,7 @@ function M.getMenuItems(ctx_menu)
 
     local function toggle_item(label, key)
         return {
-            text_func    = function() return _(label) end,
+            text_func    = function() return label end,
             checked_func = function() return _showElem(pfx, key) end,
             keep_menu_open = true,
             callback     = function()
@@ -1221,7 +1221,7 @@ function M.getMenuItems(ctx_menu)
                 for _i, key in ipairs(_getElemOrder(pfx)) do
                     if _showElem(pfx, key) then
                         sort_items[#sort_items+1] = {
-                            text      = _(_ELEM_LABELS[key]),
+                            text      = _ELEM_LABELS[key],
                             orig_item = key,
                         }
                     end
