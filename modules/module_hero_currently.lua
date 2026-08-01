@@ -270,7 +270,7 @@ local function fetchAvgTimeFromDB(md5, db_conn)
     local result = nil
     pcall(function()
         local row = db_conn:exec(string.format([[
-            WITH b AS (SELECT id FROM book WHERE md5 = %q LIMIT 1),
+            WITH b AS (SELECT id FROM book WHERE md5 = '%s' LIMIT 1),
             ps_agg AS (
                 SELECT ps.page, sum(ps.duration) AS page_dur
                 FROM page_stat ps
@@ -279,7 +279,7 @@ local function fetchAvgTimeFromDB(md5, db_conn)
             )
             SELECT sum(min(page_dur, %d)), count(*)
             FROM ps_agg;
-        ]], md5, max_sec))
+        ]], md5:gsub("'", "''"), max_sec))
         if row and row[1] and row[1][1] then
             local capped = tonumber(row[1][1]) or 0
             local pages  = tonumber(row[2] and row[2][1]) or 0
@@ -299,7 +299,7 @@ local function fetchStatsFromDB(md5, db_conn)
     local result  = nil
     pcall(function()
         local row = db_conn:exec(string.format([[
-            WITH b AS (SELECT id FROM book WHERE md5 = %q LIMIT 1),
+            WITH b AS (SELECT id FROM book WHERE md5 = '%s' LIMIT 1),
             ps_agg AS (
                 SELECT ps.page,
                        sum(ps.duration)   AS page_dur,
@@ -314,7 +314,7 @@ local function fetchStatsFromDB(md5, db_conn)
                 count(*),
                 sum(min(page_dur, %d))
             FROM ps_agg;
-        ]], md5, max_sec))
+        ]], md5:gsub("'", "''"), max_sec))
         if row and row[1] and row[1][1] then
             local days   = tonumber(row[1][1]) or 0
             local secs   = tonumber(row[2] and row[2][1]) or 0

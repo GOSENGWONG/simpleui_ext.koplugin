@@ -308,10 +308,13 @@ local function openStatsDB()
     return conn
 end
 
+-- Uses a single-quoted SQL string literal (not Lua's %q, which double-quotes
+-- and is treated as an identifier by SQLite builds with DQS disabled,
+-- silently breaking the lookup).
 local function dbGetBookId(conn, md5)
     if not md5 then return nil end
     local id
-    pcall(function() id = conn:rowexec(string.format("SELECT id FROM book WHERE md5 = %q LIMIT 1;", md5)) end)
+    pcall(function() id = conn:rowexec(string.format("SELECT id FROM book WHERE md5 = '%s' LIMIT 1;", md5:gsub("'", "''"))) end)
     return id and tonumber(id) or nil
 end
 
