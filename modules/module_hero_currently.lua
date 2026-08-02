@@ -267,6 +267,52 @@ end
 local _PREWARM_TTL = 3600   -- seconds; entries older than this are re-queried
 local _prewarm_cache = {}   -- [md5] = { days, total_secs, avg_secs_per_page, fetched_at }
 
+-- Single source of truth for the stats-DB roundtrip, shared by
+-- fetchStatsFromDB, M.refreshStats and M.prewarm (previously copy-pasted
+-- in all three, which meant a future fix to this query had to be applied
+-- three times or risk cache/DB drift).
+-- Returns (result, query_ok):
+--   query_ok=false means the pcall itself threw (e.g. DB busy) — callers
+--   must NOT treat this as "no data" and must leave any existing cache
+--   entry untouched rather than wiping known-good stats on a transient error.
+--   query_ok=true, result=nil/avg_time=nil means the query ran fine and the
+--   book genuinely has no (capped) page_stat data.
+local function queryBookStats(md5, db_conn, max_sec)
+    local result = nil
+    local query_ok = pcall(function()
+        local row = db_conn:exec(string.format([[
+            WITH b AS (SELECT id FROM book WHERE md5 = '%s' LIMIT 1),
+            ps_agg AS (
+                SELECT ps.page,
+                       sum(ps.duration)   AS page_dur,
+                       min(ps.start_time) AS first_start
+                FROM page_stat ps
+                WHERE ps.id_book = (SELECT id FROM b)
+                GROUP BY ps.page
+            )
+            SELECT
+                count(DISTINCT date(first_start, 'unixepoch', 'localtime')),
+                sum(page_dur),
+                count(*),
+                sum(min(page_dur, %d))
+            FROM ps_agg;
+        ]], md5:gsub("'", "''"), max_sec))
+        if row and row[1] and row[1][1] then
+            local days   = tonumber(row[1][1]) or 0
+            local secs   = tonumber(row[2] and row[2][1]) or 0
+            local pages  = tonumber(row[3] and row[3][1]) or 0
+            local capped = tonumber(row[4] and row[4][1]) or 0
+            local avg    = (pages > 0 and capped > 0) and (capped / pages) or nil
+            result = {
+                days       = days,
+                total_secs = secs,
+                avg_time   = avg,
+            }
+        end
+    end)
+    return result, query_ok
+end
+
 -- Returns { days, total_secs, avg_time } for the given md5.
 -- avg_time is the capped per-page average in seconds (nil when the book
 -- has no page_stat rows). Single roundtrip; consults _prewarm_cache first.
@@ -299,47 +345,16 @@ local function fetchStatsFromDB(md5, db_conn)
     end
 
     local max_sec = getMaxTimePage()
-    local result  = nil
-    pcall(function()
-        local row = db_conn:exec(string.format([[
-            WITH b AS (SELECT id FROM book WHERE md5 = '%s' LIMIT 1),
-            ps_agg AS (
-                SELECT ps.page,
-                       sum(ps.duration)   AS page_dur,
-                       min(ps.start_time) AS first_start
-                FROM page_stat ps
-                WHERE ps.id_book = (SELECT id FROM b)
-                GROUP BY ps.page
-            )
-            SELECT
-                count(DISTINCT date(first_start, 'unixepoch', 'localtime')),
-                sum(page_dur),
-                count(*),
-                sum(min(page_dur, %d))
-            FROM ps_agg;
-        ]], md5:gsub("'", "''"), max_sec))
-        if row and row[1] and row[1][1] then
-            local days   = tonumber(row[1][1]) or 0
-            local secs   = tonumber(row[2] and row[2][1]) or 0
-            local pages  = tonumber(row[3] and row[3][1]) or 0
-            local capped = tonumber(row[4] and row[4][1]) or 0
-            local avg    = (pages > 0 and capped > 0) and (capped / pages) or nil
-            result = {
-                days       = days,
-                total_secs = secs,
-                avg_time   = avg,
-            }
-            -- Backfill the cache so subsequent builds within TTL skip the DB.
-            if avg then
-                _prewarm_cache[md5] = {
-                    days             = days,
-                    total_secs       = secs,
-                    avg_secs_per_page = avg,
-                    fetched_at       = os.time(),
-                }
-            end
-        end
-    end)
+    local result = queryBookStats(md5, db_conn, max_sec)
+    -- Backfill the cache so subsequent builds within TTL skip the DB.
+    if result and result.avg_time then
+        _prewarm_cache[md5] = {
+            days              = result.days,
+            total_secs        = result.total_secs,
+            avg_secs_per_page = result.avg_time,
+            fetched_at        = now,
+        }
+    end
     return result
 end
 
@@ -508,41 +523,23 @@ function M.refreshStats(books_state, db_conn)
     local max_sec = getMaxTimePage()
     local now     = os.time()
     for _, md5 in ipairs(md5s) do
-        _prewarm_cache[md5] = nil
-        pcall(function()
-            local row = db_conn:exec(string.format([[
-                WITH b AS (SELECT id FROM book WHERE md5 = '%s' LIMIT 1),
-                ps_agg AS (
-                    SELECT ps.page,
-                           sum(ps.duration)   AS page_dur,
-                           min(ps.start_time) AS first_start
-                    FROM page_stat ps
-                    WHERE ps.id_book = (SELECT id FROM b)
-                    GROUP BY ps.page
-                )
-                SELECT
-                    count(DISTINCT date(first_start, 'unixepoch', 'localtime')),
-                    sum(page_dur),
-                    count(*),
-                    sum(min(page_dur, %d))
-                FROM ps_agg;
-            ]], md5:gsub("'", "''"), max_sec))
-            if row and row[1] and row[1][1] then
-                local days   = tonumber(row[1][1]) or 0
-                local secs   = tonumber(row[2] and row[2][1]) or 0
-                local pages  = tonumber(row[3] and row[3][1]) or 0
-                local capped = tonumber(row[4] and row[4][1]) or 0
-                local avg    = (pages > 0 and capped > 0) and (capped / pages) or nil
-                if avg then
-                    _prewarm_cache[md5] = {
-                        days             = days,
-                        total_secs       = secs,
-                        avg_secs_per_page = avg,
-                        fetched_at       = now,
-                    }
-                end
+        local result, query_ok = queryBookStats(md5, db_conn, max_sec)
+        -- Only touch the cache once we know the query actually ran: a
+        -- transient failure (e.g. DB busy) must leave any existing entry
+        -- alone rather than wiping known-good stats out from under a
+        -- render that's relying on the stale-fallback path.
+        if query_ok then
+            if result and result.avg_time then
+                _prewarm_cache[md5] = {
+                    days              = result.days,
+                    total_secs        = result.total_secs,
+                    avg_secs_per_page = result.avg_time,
+                    fetched_at        = now,
+                }
+            else
+                _prewarm_cache[md5] = nil
             end
-        end)
+        end
     end
 end
 
@@ -579,37 +576,14 @@ function M.prewarm(books_state, db_conn)
                     end
                 end
                 if md5 and not _prewarm_cache[md5] then
-                    local row = db_conn:exec(string.format([[
-                        WITH b AS (SELECT id FROM book WHERE md5 = '%s' LIMIT 1),
-                        ps_agg AS (
-                            SELECT ps.page,
-                                   sum(ps.duration)   AS page_dur,
-                                   min(ps.start_time) AS first_start
-                            FROM page_stat ps
-                            WHERE ps.id_book = (SELECT id FROM b)
-                            GROUP BY ps.page
-                        )
-                        SELECT
-                            count(DISTINCT date(first_start, 'unixepoch', 'localtime')),
-                            sum(page_dur),
-                            count(*),
-                            sum(min(page_dur, %d))
-                        FROM ps_agg;
-                    ]], md5:gsub("'", "''"), max_sec))
-                    if row and row[1] and row[1][1] then
-                        local days   = tonumber(row[1][1]) or 0
-                        local secs   = tonumber(row[2] and row[2][1]) or 0
-                        local pages  = tonumber(row[3] and row[3][1]) or 0
-                        local capped = tonumber(row[4] and row[4][1]) or 0
-                        local avg    = (pages > 0 and capped > 0) and (capped / pages) or nil
-                        if avg then
-                            _prewarm_cache[md5] = {
-                                days             = days,
-                                total_secs       = secs,
-                                avg_secs_per_page = avg,
-                                fetched_at       = now,
-                            }
-                        end
+                    local result, query_ok = queryBookStats(md5, db_conn, max_sec)
+                    if query_ok and result and result.avg_time then
+                        _prewarm_cache[md5] = {
+                            days              = result.days,
+                            total_secs        = result.total_secs,
+                            avg_secs_per_page = result.avg_time,
+                            fetched_at        = now,
+                        }
                     end
                 end
             end)

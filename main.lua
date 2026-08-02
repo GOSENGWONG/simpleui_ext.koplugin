@@ -377,6 +377,17 @@ end
 function SimpleUIExtPlugin:_prewarmBookModuleCaches()
     if not self._mods or #self._mods == 0 then return end
 
+    -- Skip the DB connection + prefetchBooks() cost entirely when nothing
+    -- registered actually consumes it (e.g. Hero Currently Reading disabled).
+    local has_prewarm = false
+    for _i, mod in ipairs(self._mods) do
+        if type(mod.prewarm) == "function" then
+            has_prewarm = true
+            break
+        end
+    end
+    if not has_prewarm then return end
+
     pcall(function()
         local ok_cfg, Config = pcall(require, "sui_config")
         if not ok_cfg or not Config or type(Config.openStatsDB) ~= "function" then
