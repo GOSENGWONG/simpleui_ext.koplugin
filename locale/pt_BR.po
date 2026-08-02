@@ -19,6 +19,10 @@ msgstr ""
 msgid " (combined)"
 msgstr " (combinado)"
 
+#: patches/patch_module_copies.lua:53
+msgid " (Copy %d)"
+msgstr " (Cópia %d)"
+
 #: modules/module_currently_yanllsama_v1.lua:875
 #: modules/module_currently_yanllsama_v1.lua:887
 msgid " (Default)"

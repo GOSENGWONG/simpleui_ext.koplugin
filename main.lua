@@ -139,12 +139,16 @@ end
 function SimpleUIExtPlugin:init()
     -- Register menu (must be before _register for menu to appear)
     self.ui.menu:registerToMainMenu(self)
-    
+
     -- Delay registration by one scheduler tick so that all plugins
     -- (including SimpleUI itself) have finished their own init().
     local UIManager = require("ui/uimanager")
     UIManager:scheduleIn(0, function()
         self:_register()
+        -- Synchronous on purpose: by the time the user reaches the home
+        -- screen (separate code path, after file manager etc. close) the
+        -- stats cache is already warm.
+        self:_prewarmBookModuleCaches()
     end)
 end
 
@@ -363,15 +367,111 @@ function SimpleUIExtPlugin:_register()
     end
 end
 
--- Forwarded from ReaderUI when the user closes a book.
--- Invalidates any module caches so the homescreen shows fresh data
--- the moment the user returns (instead of waiting for the TTL to expire).
+-- Runs once after _register. Opens the stats DB, pulls the current +
+-- recent books from the shared prefetcher, and hands the result to every
+-- module that exposes a `prewarm` hook. Without this, the home screen's
+-- first paint runs under _defer_stats=true (db_conn=nil) and stats render
+-- empty; with this, the SQL has already run and the first paint has data.
+-- Every step is pcall-wrapped — a bad DB or any module's prewarm throwing
+-- does not abort registration.
+function SimpleUIExtPlugin:_prewarmBookModuleCaches()
+    if not self._mods or #self._mods == 0 then return end
+
+    pcall(function()
+        local ok_cfg, Config = pcall(require, "sui_config")
+        if not ok_cfg or not Config or type(Config.openStatsDB) ~= "function" then
+            return
+        end
+
+        local db_conn = Config.openStatsDB()
+        if not db_conn then return end
+
+        local ok_sh, SH = pcall(require, "desktop_modules/module_books_shared")
+        if not ok_sh or not SH or type(SH.prefetchBooks) ~= "function" then
+            pcall(function() db_conn:close() end)
+            return
+        end
+
+        local books_state
+        pcall(function()
+            -- 5 books: current + 4 most recent. Matches the typical
+            -- "Recently read" rail width and keeps prewarm well under
+            -- a frame even on cold cache.
+            books_state = SH.prefetchBooks(true, true, 5)
+        end)
+        if not books_state then
+            pcall(function() db_conn:close() end)
+            return
+        end
+
+        for _i, mod in ipairs(self._mods) do
+            if type(mod.prewarm) == "function" then
+                pcall(function() mod.prewarm(books_state, db_conn) end)
+            end
+        end
+
+        pcall(function() db_conn:close() end)
+    end)
+end
+
+-- Flags a deferred refresh; _runDeferredStatsRefresh() does the actual
+-- SQL re-query + repaint after the 2-second settle window.
 function SimpleUIExtPlugin:onCloseDocument()
     for _i, mod in ipairs(self._mods) do
         if type(mod.invalidateCache) == "function" then
             mod.invalidateCache()
         end
     end
+
+    -- Settle window: ReaderUI flushes page_stat rows synchronously on
+    -- close, but a brief defer avoids racing with whatever else KOReader
+    -- may still be writing (highlights, time-on-page). 2s gives the DB
+    -- a comfortable margin without making the stats feel stale.
+    local UIManager = require("ui/uimanager")
+    UIManager:scheduleIn(2, function()
+        -- Bail if the reader reopened during the settle window.
+        local ok_r, RUI = pcall(require, "apps/reader/readerui")
+        if not ok_r or (RUI and RUI.instance) then return end
+
+        -- Skip if the homescreen is not on screen — there is nothing to
+        -- repaint, and the next HS open pulls fresh data on its own.
+        local ok_hs, HS = pcall(require, "sui_homescreen")
+        if not ok_hs or not HS or not HS._instance then return end
+
+        self:_runDeferredStatsRefresh(HS._instance)
+    end)
+end
+
+-- Single-shot: open a stats DB connection, run refreshStats on every
+-- module that exposes it, close the connection, then trigger an HS
+-- rebuild so the freshly-cached values appear in the next render.
+--
+-- Why _updatePage(false) and not setDirty("ui"): setDirty only repaints
+-- existing widgets — fetchStatsFromDB lives inside the build path, so
+-- the new cache values would never be read unless we force a rebuild.
+-- _updatePage(false) clears _ctx_cache, so the next paint runs _buildCtx
+-- and every module's build() sees the new cache.
+function SimpleUIExtPlugin:_runDeferredStatsRefresh(hs_instance)
+    local ok_cfg, Config = pcall(require, "sui_config")
+    if not ok_cfg or not Config or type(Config.openStatsDB) ~= "function" then return end
+    local db_conn = Config.openStatsDB()
+    if not db_conn then return end
+
+    for _i, mod in ipairs(self._mods) do
+        if type(mod.refreshStats) == "function" then
+            pcall(function() mod.refreshStats(nil, db_conn) end)
+        end
+    end
+    pcall(function() db_conn:close() end)
+
+    -- pcall-wrapped: _updatePage drives a full module rebuild and can
+    -- throw if the homescreen is mid-teardown. UIManager:setDirty after
+    -- a successful rebuild nudges E-ink to repaint immediately.
+    pcall(function()
+        hs_instance:_updatePage(false)
+        local UIManager = require("ui/uimanager")
+        UIManager:setDirty(hs_instance, "ui")
+    end)
 end
 
 function SimpleUIExtPlugin:onClosePlugin()

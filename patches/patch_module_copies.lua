@@ -50,7 +50,7 @@ function patch.apply()
             wrapped_mod._original_id = mod.id
             wrapped_mod._original_name = mod.name
             wrapped_mod._copy_index  = copy_index
-            wrapped_mod.name         = mod.name .. " (Copy " .. copy_index .. ")"
+            wrapped_mod.name = mod.name .. string.format(_(" (Copy %d)"), copy_index)
 
             -- LayoutService.save() iterates Registry.list() and calls
             -- setEnabled(pfx, false) for every module not in the layout.

@@ -225,11 +225,6 @@ end
 --   “Some highlighted text.”
 --
 --   — Chapter 3 · p. 42
---
--- U+201C ", U+201D ", U+2018 ', U+2019 ', U+201E „, U+201A ‚
--- U+00AB «, U+00BB », U+2039 ‹, U+203A ›
--- U+2014 — (em dash), U+2013 – (en dash)
--- U+00B7 · (middle dot)
 
 local _LEADING_QUOTES  = '^["\'\xE2\x80\x9C\xE2\x80\x98\xE2\x80\x9E\xE2\x80\x9A\xC2\xAB\xE2\x80\xB9%s]+'
 local _TRAILING_QUOTES = '["\'\xE2\x80\x9D\xE2\x80\x99\xE2\x80\x9E\xE2\x80\x9A\xC2\xBB\xE2\x80\xBA%s]+$'
@@ -251,7 +246,7 @@ local function formatHighlight(h)
 end
 
 -- ---------------------------------------------------------------------------
--- Stats DB: avg reading time per page (same query as module_currently)
+-- Stats DB
 -- ---------------------------------------------------------------------------
 -- Read the cap from the Statistics plugin's own settings so the value always
 -- matches KOReader's "Time spent reading" figure (default 120 s = 2 minutes).
@@ -264,37 +259,45 @@ local function getMaxTimePage()
     return (ok and max and max > 0) and max or _DEFAULT_MAX_TIME_PER_PAGE
 end
 
-local function fetchAvgTimeFromDB(md5, db_conn)
-    if not md5 or not db_conn then return nil end
-    local max_sec = getMaxTimePage()
-    local result = nil
-    pcall(function()
-        local row = db_conn:exec(string.format([[
-            WITH b AS (SELECT id FROM book WHERE md5 = '%s' LIMIT 1),
-            ps_agg AS (
-                SELECT ps.page, sum(ps.duration) AS page_dur
-                FROM page_stat ps
-                WHERE ps.id_book = (SELECT id FROM b)
-                GROUP BY ps.page
-            )
-            SELECT sum(min(page_dur, %d)), count(*)
-            FROM ps_agg;
-        ]], md5:gsub("'", "''"), max_sec))
-        if row and row[1] and row[1][1] then
-            local capped = tonumber(row[1][1]) or 0
-            local pages  = tonumber(row[2] and row[2][1]) or 0
-            if pages > 0 and capped > 0 then
-                result = capped / pages
-            end
-        end
-    end)
-    return result
-end
+-- Module-level upvalue, NOT M._prewarm_cache: fetchStatsFromDB is defined
+-- above `local M = {}`, so it must read the cache via lexical scope. A
+-- later `local M = {}` is a different binding from the global _ENV.M the
+-- closure was already bound to — see git history for the runtime crash
+-- this comment exists to prevent re-introducing.
+local _PREWARM_TTL = 3600   -- seconds; entries older than this are re-queried
+local _prewarm_cache = {}   -- [md5] = { days, total_secs, avg_secs_per_page, fetched_at }
 
--- Fetches days read, total time read, and capped avg time per page from the
--- Stats DB.  Returns { days, total_secs, avg_time } or nil.
+-- Returns { days, total_secs, avg_time } for the given md5.
+-- avg_time is the capped per-page average in seconds (nil when the book
+-- has no page_stat rows). Single roundtrip; consults _prewarm_cache first.
 local function fetchStatsFromDB(md5, db_conn)
-    if not md5 or not db_conn then return nil end
+    if not md5 then return nil end
+
+    local entry = _prewarm_cache[md5]
+    local now   = os.time()
+    if entry and (now - (entry.fetched_at or 0)) < _PREWARM_TTL then
+        return {
+            days       = entry.days,
+            total_secs = entry.total_secs,
+            avg_time   = entry.avg_secs_per_page,
+        }
+    end
+
+    -- Stale fallback: homescreen's deferred first paint runs under
+    -- _defer_stats=true (db_conn=nil). Without this, the stats row would
+    -- flash-and-vanish on first render. The async refresh 50ms later
+    -- replaces it with fresh data.
+    if not db_conn then
+        if entry then
+            return {
+                days       = entry.days,
+                total_secs = entry.total_secs,
+                avg_time   = entry.avg_secs_per_page,
+            }
+        end
+        return nil
+    end
+
     local max_sec = getMaxTimePage()
     local result  = nil
     pcall(function()
@@ -320,11 +323,21 @@ local function fetchStatsFromDB(md5, db_conn)
             local secs   = tonumber(row[2] and row[2][1]) or 0
             local pages  = tonumber(row[3] and row[3][1]) or 0
             local capped = tonumber(row[4] and row[4][1]) or 0
+            local avg    = (pages > 0 and capped > 0) and (capped / pages) or nil
             result = {
                 days       = days,
                 total_secs = secs,
-                avg_time   = (pages > 0 and capped > 0) and (capped / pages) or nil,
+                avg_time   = avg,
             }
+            -- Backfill the cache so subsequent builds within TTL skip the DB.
+            if avg then
+                _prewarm_cache[md5] = {
+                    days             = days,
+                    total_secs       = secs,
+                    avg_secs_per_page = avg,
+                    fetched_at       = os.time(),
+                }
+            end
         end
     end)
     return result
@@ -433,6 +446,175 @@ M.needs           = { db = true }
 function M.reset()
     _SH = nil
     _hl_pick = { ctx = nil, fp = nil, text = nil }
+    _prewarm_cache = {}
+end
+
+-- Called by simpleui_ext/main.lua when the user closes a book. Without an
+-- argument the entire prewarm cache is dropped (next build re-queries the
+-- currently-displayed book from SQLite, harmless for other entries). Pass a
+-- specific md5 to drop just that one entry.
+function M.invalidateCache(md5)
+    if md5 then
+        _prewarm_cache[md5] = nil
+    else
+        _prewarm_cache = {}
+    end
+end
+
+-- Forwarded from simpleui_ext/main.lua when the homescreen becomes visible
+-- after a book close. Invalidates cache entries for books_state's current +
+-- recent fps, then re-queries so the next M.build() hits the cache.
+-- When books_state is nil, SH.prefetchBooks() is consulted to resolve it.
+-- db_conn=nil is a no-op — the stale fallback in fetchStatsFromDB keeps
+-- serving previous values until the homescreen opens its own connection.
+function M.refreshStats(books_state, db_conn)
+    if not db_conn then return end
+
+    local md5s = {}
+    pcall(function()
+        if not books_state then
+            local ok_sh, SH = pcall(require, "desktop_modules/module_books_shared")
+            if not ok_sh or not SH or type(SH.prefetchBooks) ~= "function" then return end
+            books_state = SH.prefetchBooks(true, true, 5)
+        end
+        if not books_state then return end
+
+        local ok_ds, DS = pcall(require, "docsettings")
+        local fps = {}
+        if books_state.current_fp then fps[#fps + 1] = books_state.current_fp end
+        if books_state.recent_fps then
+            for _, fp in ipairs(books_state.recent_fps) do
+                if fp then fps[#fps + 1] = fp end
+            end
+        end
+        for _, fp in ipairs(fps) do
+            if fp then
+                local pe  = books_state.prefetched_data and books_state.prefetched_data[fp]
+                local md5 = pe and pe.partial_md5_checksum
+                if not md5 and ok_ds and DS then
+                    local ok2, ds = pcall(DS.open, DS, fp)
+                    if ok2 and ds then
+                        md5 = ds:readSetting("partial_md5_checksum")
+                        pcall(function() ds:close() end)
+                    end
+                end
+                if md5 then md5s[#md5s + 1] = md5 end
+            end
+        end
+    end)
+
+    if #md5s == 0 then return end
+
+    local max_sec = getMaxTimePage()
+    local now     = os.time()
+    for _, md5 in ipairs(md5s) do
+        _prewarm_cache[md5] = nil
+        pcall(function()
+            local row = db_conn:exec(string.format([[
+                WITH b AS (SELECT id FROM book WHERE md5 = '%s' LIMIT 1),
+                ps_agg AS (
+                    SELECT ps.page,
+                           sum(ps.duration)   AS page_dur,
+                           min(ps.start_time) AS first_start
+                    FROM page_stat ps
+                    WHERE ps.id_book = (SELECT id FROM b)
+                    GROUP BY ps.page
+                )
+                SELECT
+                    count(DISTINCT date(first_start, 'unixepoch', 'localtime')),
+                    sum(page_dur),
+                    count(*),
+                    sum(min(page_dur, %d))
+                FROM ps_agg;
+            ]], md5:gsub("'", "''"), max_sec))
+            if row and row[1] and row[1][1] then
+                local days   = tonumber(row[1][1]) or 0
+                local secs   = tonumber(row[2] and row[2][1]) or 0
+                local pages  = tonumber(row[3] and row[3][1]) or 0
+                local capped = tonumber(row[4] and row[4][1]) or 0
+                local avg    = (pages > 0 and capped > 0) and (capped / pages) or nil
+                if avg then
+                    _prewarm_cache[md5] = {
+                        days             = days,
+                        total_secs       = secs,
+                        avg_secs_per_page = avg,
+                        fetched_at       = now,
+                    }
+                end
+            end
+        end)
+    end
+end
+
+-- Populated at KOReader startup by SimpleUIExtPlugin:_prewarmBookModuleCaches.
+-- Walks current + recent books, resolves each md5 (prefetched first,
+-- DocSettings sidecar fallback), runs a single SQLite roundtrip per md5,
+-- and stores the result in _prewarm_cache. pcall-wrapped per book so a
+-- single broken sidecar does not abort the whole pass.
+function M.prewarm(books_state, db_conn)
+    if not books_state or not db_conn then return end
+
+    local fps = {}
+    if books_state.current_fp then fps[#fps + 1] = books_state.current_fp end
+    if books_state.recent_fps then
+        for _, fp in ipairs(books_state.recent_fps) do
+            if fp then fps[#fps + 1] = fp end
+        end
+    end
+
+    local ok_ds, DS = pcall(require, "docsettings")
+    local max_sec    = getMaxTimePage()
+    local now        = os.time()
+
+    for _, fp in ipairs(fps) do
+        if fp then
+            pcall(function()
+                local pe  = books_state.prefetched_data and books_state.prefetched_data[fp]
+                local md5 = pe and pe.partial_md5_checksum
+                if not md5 and ok_ds and DS then
+                    local ok2, ds = pcall(DS.open, DS, fp)
+                    if ok2 and ds then
+                        md5 = ds:readSetting("partial_md5_checksum")
+                        pcall(function() ds:close() end)
+                    end
+                end
+                if md5 and not _prewarm_cache[md5] then
+                    local row = db_conn:exec(string.format([[
+                        WITH b AS (SELECT id FROM book WHERE md5 = '%s' LIMIT 1),
+                        ps_agg AS (
+                            SELECT ps.page,
+                                   sum(ps.duration)   AS page_dur,
+                                   min(ps.start_time) AS first_start
+                            FROM page_stat ps
+                            WHERE ps.id_book = (SELECT id FROM b)
+                            GROUP BY ps.page
+                        )
+                        SELECT
+                            count(DISTINCT date(first_start, 'unixepoch', 'localtime')),
+                            sum(page_dur),
+                            count(*),
+                            sum(min(page_dur, %d))
+                        FROM ps_agg;
+                    ]], md5:gsub("'", "''"), max_sec))
+                    if row and row[1] and row[1][1] then
+                        local days   = tonumber(row[1][1]) or 0
+                        local secs   = tonumber(row[2] and row[2][1]) or 0
+                        local pages  = tonumber(row[3] and row[3][1]) or 0
+                        local capped = tonumber(row[4] and row[4][1]) or 0
+                        local avg    = (pages > 0 and capped > 0) and (capped / pages) or nil
+                        if avg then
+                            _prewarm_cache[md5] = {
+                                days             = days,
+                                total_secs       = secs,
+                                avg_secs_per_page = avg,
+                                fetched_at       = now,
+                            }
+                        end
+                    end
+                end
+            end)
+        end
+    end
 end
 
 -- ---------------------------------------------------------------------------
@@ -598,9 +780,10 @@ function M.build(w, ctx)
     right_bottom[1] = HorizontalSpan:new{ width = tw }
     local pct = bd.percent or 0
 
-    -- Get book MD5 for Stats DB query (used by both progress and stats rows)
+    -- Book MD5: prefetch → sidecar; 
+    -- must not depend on ctx.db_conn, or stats are lost during deferred first render.
     local book_md5 = prefetched and prefetched.partial_md5_checksum
-    if not book_md5 and ctx.db_conn then
+    if not book_md5 then
         local ok_ds, DS = pcall(require, "docsettings")
         if ok_ds and DS then
             local ok2, ds = pcall(DS.open, DS, fp)
@@ -611,22 +794,23 @@ function M.build(w, ctx)
         end
     end
 
+    -- Single stats fetch shared by the progress bar ("Xh Ym left") and the
+    -- stats row (days / read time). fetchStatsFromDB consults the prewarm
+    -- cache first, so a warm home screen needs zero DB queries.
+    local bstats = book_md5 and fetchStatsFromDB(book_md5, ctx.db_conn) or nil
+
     -- Progress row: default on; hidden when the setting is explicitly false.
     if Settings:readSetting(pfx .. SK_SHOW_PROGRESS) ~= false then
-        -- avg_time: prefer Stats DB (capped per-page) over DocSettings totals
-        local avg_time = nil
-        if book_md5 and ctx.db_conn then
-            avg_time = fetchAvgTimeFromDB(book_md5, ctx.db_conn)
-        end
+        -- Prefer stats DB avg; fall back to DocSettings sidecar total.
+        local avg_time = bstats and bstats.avg_time
         if not avg_time or avg_time <= 0 then avg_time = bd.avg_time end
 
         local prog_left, prog_right
         if bd.pages and bd.pages > 0 then
             local cur  = math.floor(pct * bd.pages)
-            prog_left  = string.format("%d / %d", cur, bd.pages)  -- no "p." prefix (matches bookshelf)
-            -- Computed locally (rather than via SH.formatTimeLeft) so the
-            -- "Xh Ym" text goes through our own translatable fmtTime();
-            -- the base plugin's helper hardcodes English h/m.
+            prog_left  = string.format("%d / %d", cur, bd.pages)  -- matches bookshelf: no "p." prefix
+            -- Local format rather than SH.formatTimeLeft — ours is translatable
+            -- via fmtTime(); the base plugin's helper hardcodes English h/m.
             if avg_time and avg_time > 0 then
                 local remaining = math.floor(bd.pages * (1.0 - pct))
                 if remaining > 0 then
@@ -656,6 +840,7 @@ function M.build(w, ctx)
             height     = bar_h,
             percentage = math.min(pct, 1.0),
             style      = "bordered",  -- matches bookshelf bar_style = "bordered"
+            fillcolor  = Blitbuffer.COLOR_BLACK,
             ticks      = nil,
             last       = nil,
         }
@@ -670,43 +855,38 @@ function M.build(w, ctx)
         right_bottom[#right_bottom + 1] = prog_row
     end
 
-    -- ── Optional statistics row (below progress bar) ──────────────────────────
-    -- Shown only when "Show Statistics" is enabled in the module settings.
-    -- Displays days read and total time read in a compact single row.
-    -- Must be built before the description block so right_bottom:getSize().h
-    -- reflects the stats row when computing available space for the description.
-    if Settings:isTrue(pfx .. SK_SHOW_STATS) and book_md5 and ctx.db_conn then
-        local bstats = fetchStatsFromDB(book_md5, ctx.db_conn)
-        if bstats then
-            local parts = {}
-            if bstats.days and bstats.days > 0 then
-                parts[#parts+1] = string.format(
-                    bstats.days == 1 and _("%d day") or _("%d days"), bstats.days)
-            end
-            if bstats.total_secs and bstats.total_secs > 0 then
-                parts[#parts+1] = string.format(_("%s read"), fmtTime(bstats.total_secs))
-            end
-            if #parts > 0 then
-                local stats_row = HorizontalGroup:new{ align = "center" }
-                for i, part in ipairs(parts) do
-                    if i > 1 then
-                        stats_row[#stats_row+1] = TextWidget:new{
-                            text    = " · ",
-                            face    = face_prog,
-                            fgcolor = CLR_SUB,
-                        }
-                    end
+    -- Optional stats row (below progress). Built before the description so
+    -- right_bottom:getSize().h is accurate for layout. bstats already came
+    -- from the shared fetchStatsFromDB call above — no DB check needed here.
+    if Settings:isTrue(pfx .. SK_SHOW_STATS) and bstats then
+        local parts = {}
+        if bstats.days and bstats.days > 0 then
+            parts[#parts+1] = string.format(
+                bstats.days == 1 and _("%d day") or _("%d days"), bstats.days)
+        end
+        if bstats.total_secs and bstats.total_secs > 0 then
+            parts[#parts+1] = string.format(_("%s read"), fmtTime(bstats.total_secs))
+        end
+        if #parts > 0 then
+            local stats_row = HorizontalGroup:new{ align = "center" }
+            for i, part in ipairs(parts) do
+                if i > 1 then
                     stats_row[#stats_row+1] = TextWidget:new{
-                        text    = part,
+                        text    = " · ",
                         face    = face_prog,
                         fgcolor = CLR_SUB,
                     }
                 end
-                right_bottom[#right_bottom+1] = VerticalSpan:new{
-                    width = math.max(1, math.floor(Screen:scaleBySize(3) * scale))
+                stats_row[#stats_row+1] = TextWidget:new{
+                    text    = part,
+                    face    = face_prog,
+                    fgcolor = CLR_SUB,
                 }
-                right_bottom[#right_bottom+1] = stats_row
             end
+            right_bottom[#right_bottom+1] = VerticalSpan:new{
+                width = math.max(1, math.floor(Screen:scaleBySize(3) * scale))
+            }
+            right_bottom[#right_bottom+1] = stats_row
         end
     end
 
