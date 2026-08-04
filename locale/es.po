@@ -4,8 +4,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: simpleui_ext 1.13.2\n"
-"POT-Creation-Date: 2026-07-18 04:52+0800\n"
-"PO-Revision-Date: 2026-07-18 13:00+0800\n"
+"POT-Creation-Date: 2026-08-04 17:36+0800\n"
+"PO-Revision-Date: 2026-08-04 18:03+0800\n"
 "Last-Translator: \n"
 "Language-Team: Spanish\n"
 "Language: es\n"
@@ -14,7 +14,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: _meta.lua:4
 #: modules/module_reading_insights.lua:865
 msgid " (combined)"
 msgstr " (combinado)"
@@ -23,8 +22,8 @@ msgstr " (combinado)"
 msgid " (Copy %d)"
 msgstr " (Copia %d)"
 
-#: modules/module_currently_yanllsama_v1.lua:875
-#: modules/module_currently_yanllsama_v1.lua:887
+#: modules/module_currently_yanllsama_v1.lua:878
+#: modules/module_currently_yanllsama_v1.lua:890
 msgid " (Default)"
 msgstr " (Predeterminado)"
 
@@ -48,7 +47,7 @@ msgstr "%.1f pág/min"
 msgid "%/day"
 msgstr "%/día"
 
-#: modules/module_hero_currently.lua:674
+#: modules/module_hero_currently.lua:839
 #: patches/patch_screensaver_insights.lua:719
 #: patches/patch_screensaver_insights.lua:720
 msgid "%d day"
@@ -62,7 +61,7 @@ msgid_plural "%d days of reading"
 msgstr[0] "%d día de lectura"
 msgstr[1] "%d días de lectura"
 
-#: modules/module_hero_currently.lua:674
+#: modules/module_hero_currently.lua:839
 #: patches/patch_screensaver_insights.lua:719
 #: patches/patch_screensaver_insights.lua:720
 msgid "%d days"
@@ -134,7 +133,7 @@ msgstr "%dmin"
 #: modules/module_currently_with_pace.lua:702
 #: modules/module_currently_with_pace.lua:706
 #: modules/module_currently_with_pace.lua:851
-#: modules/module_hero_currently.lua:628
+#: modules/module_hero_currently.lua:793
 msgid "%s left"
 msgstr "%s restante"
 
@@ -142,7 +141,7 @@ msgstr "%s restante"
 #: modules/module_currently_with_pace.lua:694
 #: modules/module_currently_with_pace.lua:849
 #: modules/module_currently_with_pace.lua:882
-#: modules/module_hero_currently.lua:677
+#: modules/module_hero_currently.lua:842
 msgid "%s read"
 msgstr "%s leído"
 
@@ -155,11 +154,11 @@ msgstr "0 min"
 msgid "0m"
 msgstr "0min"
 
-#: modules/module_currently_yanllsama_v1.lua:528
+#: modules/module_currently_yanllsama_v1.lua:531
 msgid "[V1/Legacy] Enhanced reading dashboard with dynamic grid (1-4 cols, 1-6 rows), customizable headers, rich statistics (10 metrics), and 6 progress bar styles. Tap book/author for description."
 msgstr "[V1/Antiguo] Panel de lectura mejorado con cuadrícula dinámica (1-4 columnas, 1-6 filas), encabezados personalizables, estadísticas completas (10 métricas) y 6 estilos de barra de progreso. Toca el libro/autor para ver la descripción."
 
-#: modules/module_currently_yanllsama_v1.lua:719
+#: modules/module_currently_yanllsama_v1.lua:722
 msgid "a day"
 msgstr "al día"
 
@@ -179,15 +178,15 @@ msgstr "Añade una opción 'Mostrar información de lectura' a los ajustes del f
 msgid "Adds a 'Show SimpleUI Home Screen' option to the sleep screen Wallpaper settings"
 msgstr "Añade una opción 'Mostrar pantalla de inicio de SimpleUI' a los ajustes del fondo de la pantalla de reposo"
 
-#: patches/patch_recent_extra.lua:55
-msgid "Adds multi-row layout, row spacing and 'Exclude Paths from Recent' to the Recent Books module"
+#: patches/patch_recent_extra.lua:88
+msgid "Adds multi-row layout, row spacing, 'Exclude Paths from Recent' and 'Ignore First Book' to the Recent Books module"
 msgstr "Añade diseño multifila, espaciado de filas y 'Excluir rutas de Recientes' al módulo de Libros recientes"
 
 #: patches/patch_screensaver_insights.lua:809
 msgid "ALL TIME"
 msgstr "TODO EL TIEMPO"
 
-#: patches/patch_recent_extra.lua:279
+#: patches/patch_recent_extra.lua:396
 msgid "Apply"
 msgstr "Aplicar"
 
@@ -217,11 +216,11 @@ msgstr "Agosto"
 msgid "Author"
 msgstr "Autor"
 
-#: modules/module_currently_yanllsama_v1.lua:1063
+#: modules/module_currently_yanllsama_v1.lua:1066
 msgid "Author Name Font"
 msgstr "Tipo de letra del autor"
 
-#: modules/module_currently_yanllsama_v1.lua:1064
+#: modules/module_currently_yanllsama_v1.lua:1067
 msgid "Author Name Size"
 msgstr "Tamaño del nombre del autor"
 
@@ -251,8 +250,8 @@ msgstr "Mejor racha"
 msgid "BEST WEEKS"
 msgstr "MEJORES SEMANAS"
 
-#: modules/module_currently_yanllsama_v1.lua:938
-#: modules/module_currently_yanllsama_v1.lua:986
+#: modules/module_currently_yanllsama_v1.lua:941
+#: modules/module_currently_yanllsama_v1.lua:989
 msgid "Bold"
 msgstr "Negrita"
 
@@ -260,23 +259,24 @@ msgstr "Negrita"
 msgid "book"
 msgstr "libro"
 
-#: modules/module_recent_book_stats.lua:721 modules/module_recent_book_stats.lua:740
+#: modules/module_recent_book_stats.lua:724
+#: modules/module_recent_book_stats.lua:743
 msgid "BOOK"
 msgstr "LIBRO"
 
-#: modules/module_currently_yanllsama_v1.lua:1059
+#: modules/module_currently_yanllsama_v1.lua:1062
 msgid "Book and Author Settings"
 msgstr "Ajustes de libro y autor"
 
-#: modules/module_currently_yanllsama_v1.lua:1061
+#: modules/module_currently_yanllsama_v1.lua:1064
 msgid "Book Title Font"
 msgstr "Tipo de letra del título"
 
-#: modules/module_currently_yanllsama_v1.lua:1062
+#: modules/module_currently_yanllsama_v1.lua:1065
 msgid "Book Title Size"
 msgstr "Tamaño del título"
 
-#: modules/module_recent_book_stats.lua:717
+#: modules/module_recent_book_stats.lua:720
 msgid "BOOK: "
 msgstr "LIBRO: "
 
@@ -289,20 +289,22 @@ msgid "books finished"
 msgstr "libros terminados"
 
 #: modules/module_currently_with_pace.lua:1393
-#: modules/module_currently_yanllsama_v1.lua:996
-#: modules/module_currently_yanllsama_v1.lua:1011
-#: modules/module_currently_yanllsama_v1.lua:1026
-#: modules/module_currently_yanllsama_v1.lua:1041
-#: modules/module_currently_yanllsama_v1.lua:1105
-#: modules/module_hero_currently.lua:1189
-#: modules/module_recent_book_stats.lua:937
+#: modules/module_currently_yanllsama_v1.lua:999
+#: modules/module_currently_yanllsama_v1.lua:1014
+#: modules/module_currently_yanllsama_v1.lua:1029
+#: modules/module_currently_yanllsama_v1.lua:1044
+#: modules/module_currently_yanllsama_v1.lua:1108
+#: modules/module_hero_currently.lua:1353
+#: modules/module_recent_book_stats.lua:940
 #: patches/patch_coverdeck_description.lua:800
-#: patches/patch_coverdeck_exclude.lua:198 patches/patch_module_copies.lua:125
-#: patches/patch_recent_extra.lua:280 patches/patch_recent_extra.lua:325
+#: patches/patch_coverdeck_exclude.lua:198
+#: patches/patch_module_copies.lua:125
+#: patches/patch_recent_extra.lua:397
+#: patches/patch_recent_extra.lua:442
 msgid "Cancel"
 msgstr "Cancelar"
 
-#: modules/module_currently_yanllsama_v1.lua:975
+#: modules/module_currently_yanllsama_v1.lua:978
 msgid "Category Headers"
 msgstr "Encabezados de categoría"
 
@@ -310,19 +312,19 @@ msgstr "Encabezados de categoría"
 msgid "Center"
 msgstr "Centrado"
 
-#: modules/module_currently_yanllsama_v1.lua:990
+#: modules/module_currently_yanllsama_v1.lua:993
 msgid "Change Column 1 Header"
 msgstr "Cambiar encabezado de columna 1"
 
-#: modules/module_currently_yanllsama_v1.lua:1005
+#: modules/module_currently_yanllsama_v1.lua:1008
 msgid "Change Column 2 Header"
 msgstr "Cambiar encabezado de columna 2"
 
-#: modules/module_currently_yanllsama_v1.lua:1020
+#: modules/module_currently_yanllsama_v1.lua:1023
 msgid "Change Column 3 Header"
 msgstr "Cambiar encabezado de columna 3"
 
-#: modules/module_currently_yanllsama_v1.lua:1035
+#: modules/module_currently_yanllsama_v1.lua:1038
 msgid "Change Column 4 Header"
 msgstr "Cambiar encabezado de columna 4"
 
@@ -330,31 +332,32 @@ msgstr "Cambiar encabezado de columna 4"
 msgid "Clock: Chinese Date Format"
 msgstr "Reloj: formato de fecha chino"
 
-#: modules/module_currently_yanllsama_v1.lua:994
+#: modules/module_currently_yanllsama_v1.lua:997
 msgid "Column 1 Header"
 msgstr "Encabezado columna 1"
 
-#: modules/module_currently_yanllsama_v1.lua:1009
+#: modules/module_currently_yanllsama_v1.lua:1012
 msgid "Column 2 Header"
 msgstr "Encabezado columna 2"
 
-#: modules/module_currently_yanllsama_v1.lua:1024
+#: modules/module_currently_yanllsama_v1.lua:1027
 msgid "Column 3 Header"
 msgstr "Encabezado columna 3"
 
-#: modules/module_currently_yanllsama_v1.lua:1039
+#: modules/module_currently_yanllsama_v1.lua:1042
 msgid "Column 4 Header"
 msgstr "Encabezado columna 4"
 
-#: modules/module_currently_yanllsama_v1.lua:1054
+#: modules/module_currently_yanllsama_v1.lua:1057
 msgid "Columns"
 msgstr "Columnas"
 
 #: modules/module_currently_with_pace.lua:1389
-#: modules/module_currently_yanllsama_v1.lua:1100
-#: modules/module_hero_currently.lua:1185
-#: modules/module_recent_book_stats.lua:933
-#: patches/patch_coverdeck_exclude.lua:194 patches/patch_recent_extra.lua:321
+#: modules/module_currently_yanllsama_v1.lua:1103
+#: modules/module_hero_currently.lua:1349
+#: modules/module_recent_book_stats.lua:936
+#: patches/patch_coverdeck_exclude.lua:194
+#: patches/patch_recent_extra.lua:438
 msgid "Comma-separated path fragments.\nBooks whose path contains any fragment will be skipped."
 msgstr "Fragmentos de ruta separados por comas.\nSe omitirán los libros cuya ruta contenga alguno de estos fragmentos."
 
@@ -372,27 +375,27 @@ msgstr "Carrusel de portadas: rutas excluidas"
 
 #: modules/module_currently_with_pace.lua:1134
 #: modules/module_currently_with_pace.lua:1135
-#: modules/module_currently_yanllsama_v1.lua:920
-#: modules/module_hero_currently.lua:1090
-#: modules/module_hero_currently.lua:1091
-#: modules/module_hero_currently.lua:1101
+#: modules/module_currently_yanllsama_v1.lua:923
+#: modules/module_hero_currently.lua:1254
+#: modules/module_hero_currently.lua:1255
+#: modules/module_hero_currently.lua:1265
 msgid "Cover Size"
 msgstr "Tamaño de portada"
 
 #: modules/module_currently_with_pace.lua:1162
 #: modules/module_currently_with_pace.lua:1163
 #: modules/module_currently_with_pace.lua:1166
-#: modules/module_currently_yanllsama_v1.lua:924
-#: modules/module_currently_yanllsama_v1.lua:925
+#: modules/module_currently_yanllsama_v1.lua:927
+#: modules/module_currently_yanllsama_v1.lua:928
 msgid "Cover Spacing"
 msgstr "Espaciado de portada"
 
-#: modules/module_hero_currently.lua:1132
-#: modules/module_hero_currently.lua:1144
+#: modules/module_hero_currently.lua:1296
+#: modules/module_hero_currently.lua:1308
 msgid "Crop Threshold"
 msgstr "Umbral de recorte"
 
-#: modules/module_hero_currently.lua:1129
+#: modules/module_hero_currently.lua:1293
 msgid "Crop Threshold (disabled)"
 msgstr "Umbral de recorte (desactivado)"
 
@@ -414,10 +417,10 @@ msgid "Current streak"
 msgstr "Racha actual"
 
 #: modules/module_currently_with_pace.lua:494
-#: modules/module_currently_yanllsama_v1.lua:527
-#: modules/module_currently_yanllsama_v1.lua:928
-#: modules/module_currently_yanllsama_v1.lua:1133
-#: modules/module_hero_currently.lua:418
+#: modules/module_currently_yanllsama_v1.lua:530
+#: modules/module_currently_yanllsama_v1.lua:931
+#: modules/module_currently_yanllsama_v1.lua:1136
+#: modules/module_hero_currently.lua:446
 msgid "Currently Reading"
 msgstr "Leyendo ahora"
 
@@ -427,7 +430,7 @@ msgstr "Leyendo ahora"
 msgid "Currently Reading (with Pace)"
 msgstr "Leyendo ahora (con ritmo)"
 
-#: modules/module_currently_yanllsama_v1.lua:526
+#: modules/module_currently_yanllsama_v1.lua:529
 msgid "Currently Reading (Yanllsama v1)"
 msgstr "Leyendo ahora (Yanllsama v1)"
 
@@ -506,31 +509,33 @@ msgstr "Diciembre"
 msgid "Default"
 msgstr "Predeterminado"
 
-#: modules/module_hero_currently.lua:1018
-#: modules/module_hero_currently.lua:1022
+#: modules/module_hero_currently.lua:1182
+#: modules/module_hero_currently.lua:1186
 #: patches/patch_coverdeck_description.lua:647
 msgid "Description"
 msgstr "Descripción"
 
-#: modules/module_hero_currently.lua:1015
+#: modules/module_hero_currently.lua:1179
 msgid "Description Content"
 msgstr "Contenido de la descripción"
 
-#: modules/module_hero_currently.lua:1053
-#: modules/module_hero_currently.lua:1054
-#: modules/module_hero_currently.lua:1064
+#: modules/module_hero_currently.lua:1217
+#: modules/module_hero_currently.lua:1218
+#: modules/module_hero_currently.lua:1228
 msgid "Description Text Size"
 msgstr "Tamaño de texto de la descripción"
 
-#: main.lua:429 main.lua:465
+#: main.lua:540
+#: main.lua:576
 msgid "disabled"
 msgstr "desactivado"
 
-#: main.lua:192
+#: main.lua:196
 msgid "Disabled module (enable to load)"
 msgstr "Módulo desactivado (actívalo para cargarlo)"
 
-#: main.lua:273 main.lua:310
+#: main.lua:277
+#: main.lua:314
 msgid "Disabled patch (enable to load)"
 msgstr "Parche desactivado (actívalo para cargarlo)"
 
@@ -538,7 +543,7 @@ msgstr "Parche desactivado (actívalo para cargarlo)"
 msgid "Display Mode"
 msgstr "Modo de visualización"
 
-#: modules/module_currently_yanllsama_v1.lua:952
+#: modules/module_currently_yanllsama_v1.lua:955
 msgid "Edit Items"
 msgstr "Editar elementos"
 
@@ -546,26 +551,29 @@ msgstr "Editar elementos"
 msgid "Enable Description"
 msgstr "Activar descripción"
 
-#: main.lua:429 main.lua:465
+#: main.lua:540
+#: main.lua:576
 msgid "enabled"
 msgstr "activado"
 
 #: modules/module_currently_with_pace.lua:1374
 #: modules/module_currently_with_pace.lua:1378
 #: modules/module_currently_with_pace.lua:1386
-#: modules/module_currently_yanllsama_v1.lua:1088
-#: modules/module_currently_yanllsama_v1.lua:1090
-#: modules/module_currently_yanllsama_v1.lua:1097
-#: modules/module_hero_currently.lua:1170
-#: modules/module_hero_currently.lua:1174
-#: modules/module_hero_currently.lua:1182
-#: modules/module_recent_book_stats.lua:918
-#: modules/module_recent_book_stats.lua:922
-#: modules/module_recent_book_stats.lua:930
+#: modules/module_currently_yanllsama_v1.lua:1091
+#: modules/module_currently_yanllsama_v1.lua:1093
+#: modules/module_currently_yanllsama_v1.lua:1100
+#: modules/module_hero_currently.lua:1334
+#: modules/module_hero_currently.lua:1338
+#: modules/module_hero_currently.lua:1346
+#: modules/module_recent_book_stats.lua:921
+#: modules/module_recent_book_stats.lua:925
+#: modules/module_recent_book_stats.lua:933
 #: patches/patch_coverdeck_exclude.lua:178
 #: patches/patch_coverdeck_exclude.lua:182
-#: patches/patch_coverdeck_exclude.lua:191 patches/patch_recent_extra.lua:305
-#: patches/patch_recent_extra.lua:309 patches/patch_recent_extra.lua:318
+#: patches/patch_coverdeck_exclude.lua:191
+#: patches/patch_recent_extra.lua:422
+#: patches/patch_recent_extra.lua:426
+#: patches/patch_recent_extra.lua:435
 msgid "Exclude Paths from Recent"
 msgstr "Excluir rutas de Recientes"
 
@@ -597,23 +605,23 @@ msgstr "Filtrar rutas específicas del carrusel de libros recientes de Cover Dec
 msgid "Fixed Line Count"
 msgstr "Número de líneas fijo"
 
-#: modules/module_currently_yanllsama_v1.lua:1052
+#: modules/module_currently_yanllsama_v1.lua:1055
 msgid "Grid Dimensions"
 msgstr "Dimensiones de la cuadrícula"
 
-#: modules/module_currently_yanllsama_v1.lua:982
+#: modules/module_currently_yanllsama_v1.lua:985
 msgid "Header Thickness"
 msgstr "Grosor del encabezado"
 
-#: modules/module_hero_currently.lua:421
+#: modules/module_hero_currently.lua:449
 msgid "Hero Currently Reading"
 msgstr "Leyendo ahora (tarjeta grande)"
 
-#: modules/module_hero_currently.lua:1018
+#: modules/module_hero_currently.lua:1182
 msgid "Highlight"
 msgstr "Subrayado"
 
-#: modules/module_hero_currently.lua:1034
+#: modules/module_hero_currently.lua:1198
 msgid "Highlight (random, falls back to description)"
 msgstr "Subrayado (aleatorio, si no la descripción)"
 
@@ -630,7 +638,7 @@ msgid "Home screen page: Random"
 msgstr "Página de inicio: Aleatoria"
 
 #: modules/module_currently_with_pace.lua:1167
-#: modules/module_currently_yanllsama_v1.lua:925
+#: modules/module_currently_yanllsama_v1.lua:928
 msgid "Horizontal space between the cover and the text.\n100% is the default spacing."
 msgstr "Espacio horizontal entre la portada y el texto.\n100% es el espaciado predeterminado."
 
@@ -658,11 +666,11 @@ msgstr "horas leídas"
 msgid "Hours read per month"
 msgstr "Horas leídas por mes"
 
-#: modules/module_recent_book_stats.lua:873
+#: modules/module_recent_book_stats.lua:876
 msgid "Human"
 msgstr "Legible"
 
-#: modules/module_recent_book_stats.lua:878
+#: modules/module_recent_book_stats.lua:881
 msgid "Human (e.g. 3.5 hours)"
 msgstr "Legible (ej. 3,5 horas)"
 
@@ -714,19 +722,19 @@ msgstr "Junio"
 msgid "Justify"
 msgstr "Justificado"
 
-#: modules/module_currently_yanllsama_v1.lua:1076
+#: modules/module_currently_yanllsama_v1.lua:1079
 msgid "Label (Text) Settings"
 msgstr "Ajustes de etiquetas (texto)"
 
-#: modules/module_currently_yanllsama_v1.lua:1078
+#: modules/module_currently_yanllsama_v1.lua:1081
 msgid "Label Font"
 msgstr "Tipo de letra de etiquetas"
 
-#: modules/module_currently_yanllsama_v1.lua:1079
+#: modules/module_currently_yanllsama_v1.lua:1082
 msgid "Label Size"
 msgstr "Tamaño de etiquetas"
 
-#: modules/module_hero_currently.lua:422
+#: modules/module_hero_currently.lua:450
 msgid "Large hero card showing currently reading book with cover, progress, and details"
 msgstr "Tarjeta grande que muestra el libro en lectura con portada, progreso y detalles"
 
@@ -742,8 +750,8 @@ msgstr "ÚLTIMOS 7 DÍAS"
 msgid "Last Session Pages"
 msgstr "Páginas de la última sesión"
 
-#: modules/module_currently_yanllsama_v1.lua:715
-#: modules/module_currently_yanllsama_v1.lua:716
+#: modules/module_currently_yanllsama_v1.lua:718
+#: modules/module_currently_yanllsama_v1.lua:719
 msgid "left"
 msgstr "restante"
 
@@ -776,7 +784,7 @@ msgstr "Longitud máx. de la descripción"
 msgid "Max Length"
 msgstr "Longitud máx."
 
-#: modules/module_hero_currently.lua:1145
+#: modules/module_hero_currently.lua:1309
 msgid "Maximum aspect ratio distortion to prevent cropping.\n0% = always crop, 100% = never crop (allow stretching)"
 msgstr "Distorsión máxima de la relación de aspecto para evitar el recorte.\n0% = recortar siempre, 100% = no recortar nunca (permitir estirar)"
 
@@ -788,7 +796,7 @@ msgstr "Número máximo de caracteres mostrados en la franja.\nPredeterminado: 5
 msgid "May"
 msgstr "May"
 
-#: modules/module_currently_yanllsama_v1.lua:985
+#: modules/module_currently_yanllsama_v1.lua:988
 msgid "Medium"
 msgstr "Medio"
 
@@ -798,7 +806,7 @@ msgstr "Medio"
 msgid "min"
 msgstr "min"
 
-#: modules/module_currently_yanllsama_v1.lua:939
+#: modules/module_currently_yanllsama_v1.lua:942
 msgid "Minimal"
 msgstr "Mínimo"
 
@@ -806,7 +814,7 @@ msgstr "Mínimo"
 msgid "Mins/Session"
 msgstr "Min/Sesión"
 
-#: modules/module_currently_yanllsama_v1.lua:330
+#: modules/module_currently_yanllsama_v1.lua:333
 msgid "mins/session"
 msgstr "min/sesión"
 
@@ -819,7 +827,7 @@ msgstr "minuto"
 msgid "minutes"
 msgstr "minutos"
 
-#: main.lua:464
+#: main.lua:575
 msgid "Module '%s' %s.\n\nPlease restart KOReader for changes to take effect."
 msgstr "Módulo '%s' %s.\n\nReinicia KOReader para que los cambios surtan efecto."
 
@@ -827,7 +835,7 @@ msgstr "Módulo '%s' %s.\n\nReinicia KOReader para que los cambios surtan efecto
 msgid "Module Copies"
 msgstr "Copias de módulo"
 
-#: main.lua:403
+#: main.lua:514
 msgid "Modules"
 msgstr "Módulos"
 
@@ -855,7 +863,7 @@ msgstr "meses leyendo"
 msgid "months to go"
 msgstr "meses restantes"
 
-#: modules/module_currently_yanllsama_v1.lua:696
+#: modules/module_currently_yanllsama_v1.lua:699
 msgid "No additional description available for this book."
 msgstr "No hay descripción adicional disponible para este libro."
 
@@ -863,11 +871,11 @@ msgstr "No hay descripción adicional disponible para este libro."
 msgid "No books read in %s"
 msgstr "No se leyeron libros en %s"
 
-#: main.lua:474
+#: main.lua:585
 msgid "No modules available"
 msgstr "No hay módulos disponibles"
 
-#: main.lua:438
+#: main.lua:549
 msgid "No patches available"
 msgstr "No hay parches disponibles"
 
@@ -883,11 +891,11 @@ msgstr "Nov"
 msgid "November"
 msgstr "Noviembre"
 
-#: modules/module_currently_yanllsama_v1.lua:1068
+#: modules/module_currently_yanllsama_v1.lua:1071
 msgid "Number (Data) Settings"
 msgstr "Ajustes de números (datos)"
 
-#: modules/module_currently_yanllsama_v1.lua:1070
+#: modules/module_currently_yanllsama_v1.lua:1073
 msgid "Number Font"
 msgstr "Tipo de letra de números"
 
@@ -895,11 +903,11 @@ msgstr "Tipo de letra de números"
 msgid "Number of Copies"
 msgstr "Número de copias"
 
-#: patches/patch_recent_extra.lua:274
+#: patches/patch_recent_extra.lua:391
 msgid "Number of rows of recent books to display.\nEach row shows up to 5 books."
 msgstr "Número de filas de libros recientes a mostrar.\nCada fila muestra hasta 5 libros."
 
-#: modules/module_currently_yanllsama_v1.lua:1071
+#: modules/module_currently_yanllsama_v1.lua:1074
 msgid "Number Size"
 msgstr "Tamaño de números"
 
@@ -915,11 +923,11 @@ msgstr "Octubre"
 msgid "OK"
 msgstr "Aceptar"
 
-#: modules/module_currently_yanllsama_v1.lua:940
+#: modules/module_currently_yanllsama_v1.lua:943
 msgid "Outline"
 msgstr "Contorno"
 
-#: modules/module_recent_book_stats.lua:758
+#: modules/module_recent_book_stats.lua:761
 msgid "PACE"
 msgstr "RITMO"
 
@@ -928,7 +936,7 @@ msgstr "RITMO"
 msgid "page"
 msgstr "página"
 
-#: modules/module_recent_book_stats.lua:418
+#: modules/module_recent_book_stats.lua:421
 msgid "page per minute"
 msgstr "página por minuto"
 
@@ -936,13 +944,13 @@ msgstr "página por minuto"
 msgid "page read"
 msgstr "página leída"
 
-#: modules/module_currently_yanllsama_v1.lua:709
+#: modules/module_currently_yanllsama_v1.lua:712
 #: modules/module_reading_insights.lua:659
 #: modules/module_reading_insights.lua:673
 msgid "pages"
 msgstr "páginas"
 
-#: modules/module_currently_yanllsama_v1.lua:331
+#: modules/module_currently_yanllsama_v1.lua:334
 msgid "pages (last)"
 msgstr "páginas (última)"
 
@@ -954,7 +962,7 @@ msgstr "Páginas restantes"
 msgid "Pages per day"
 msgstr "Páginas por día"
 
-#: modules/module_recent_book_stats.lua:418
+#: modules/module_recent_book_stats.lua:421
 msgid "pages per minute"
 msgstr "páginas por minuto"
 
@@ -973,9 +981,9 @@ msgstr "páginas leídas"
 msgid "Pages read"
 msgstr "Páginas leídas"
 
-#: modules/module_currently_yanllsama_v1.lua:327
-#: modules/module_currently_yanllsama_v1.lua:408
-#: modules/module_recent_book_stats.lua:363
+#: modules/module_currently_yanllsama_v1.lua:330
+#: modules/module_currently_yanllsama_v1.lua:411
+#: modules/module_recent_book_stats.lua:366
 msgid "pages/min"
 msgstr "pág/min"
 
@@ -987,15 +995,15 @@ msgstr "Páginas/Minuto"
 msgid "Pairs (2 per line)"
 msgstr "Pares (2 por línea)"
 
-#: main.lua:428
+#: main.lua:539
 msgid "Patch '%s' %s.\n\nPlease restart KOReader for changes to take effect."
 msgstr "Parche '%s' %s.\n\nReinicia KOReader para que los cambios surtan efecto."
 
-#: main.lua:399
+#: main.lua:510
 msgid "Patches"
 msgstr "Parches"
 
-#: modules/module_recent_book_stats.lua:764
+#: modules/module_recent_book_stats.lua:767
 msgid "per day"
 msgstr "al día"
 
@@ -1008,7 +1016,7 @@ msgstr "Porcentaje leído"
 msgid "Position"
 msgstr "Posición"
 
-#: modules/module_hero_currently.lua:1125
+#: modules/module_hero_currently.lua:1289
 msgid "Prevent Cover Cropping"
 msgstr "Evitar recorte de portada"
 
@@ -1018,21 +1026,21 @@ msgid "Progress bar"
 msgstr "Barra de progreso"
 
 #: modules/module_currently_with_pace.lua:1266
-#: modules/module_currently_yanllsama_v1.lua:934
+#: modules/module_currently_yanllsama_v1.lua:937
 msgid "Progress bar style"
 msgstr "Estilo de la barra de progreso"
 
-#: modules/module_currently_yanllsama_v1.lua:341
-#: modules/module_currently_yanllsama_v1.lua:713
-#: modules/module_recent_book_stats.lua:753
+#: modules/module_currently_yanllsama_v1.lua:344
+#: modules/module_currently_yanllsama_v1.lua:716
+#: modules/module_recent_book_stats.lua:756
 msgid "read"
 msgstr "leído"
 
-#: modules/module_currently_yanllsama_v1.lua:945
+#: modules/module_currently_yanllsama_v1.lua:948
 msgid "Readable"
 msgstr "Legible"
 
-#: modules/module_currently_yanllsama_v1.lua:947
+#: modules/module_currently_yanllsama_v1.lua:950
 msgid "Readable (e.g. 3.5h)"
 msgstr "Legible (ej. 3,5h)"
 
@@ -1058,11 +1066,12 @@ msgstr "Rachas de lectura"
 msgid "reading time"
 msgstr "tiempo de lectura"
 
-#: modules/module_recent_book_stats.lua:569 modules/module_recent_book_stats.lua:572
+#: modules/module_recent_book_stats.lua:572
+#: modules/module_recent_book_stats.lua:575
 msgid "Recent Book Stats"
 msgstr "Estadísticas de libros recientes"
 
-#: patches/patch_recent_extra.lua:54
+#: patches/patch_recent_extra.lua:87
 msgid "Recent Books Extra Options"
 msgstr "Opciones adicionales de libros recientes"
 
@@ -1070,44 +1079,47 @@ msgstr "Opciones adicionales de libros recientes"
 msgid "Right"
 msgstr "Alineado a la derecha"
 
-#: patches/patch_recent_extra.lua:291 patches/patch_recent_extra.lua:292
+#: patches/patch_recent_extra.lua:408
+#: patches/patch_recent_extra.lua:409
 msgid "Row Spacing"
 msgstr "Espaciado de filas"
 
-#: modules/module_currently_yanllsama_v1.lua:1055 patches/patch_recent_extra.lua:265
-#: patches/patch_recent_extra.lua:273
+#: modules/module_currently_yanllsama_v1.lua:1058
+#: patches/patch_recent_extra.lua:382
+#: patches/patch_recent_extra.lua:390
 msgid "Rows"
 msgstr "Filas"
 
 #: modules/module_currently_with_pace.lua:1401
-#: modules/module_currently_yanllsama_v1.lua:997
-#: modules/module_currently_yanllsama_v1.lua:1012
-#: modules/module_currently_yanllsama_v1.lua:1027
-#: modules/module_currently_yanllsama_v1.lua:1042
-#: modules/module_currently_yanllsama_v1.lua:1112
-#: modules/module_hero_currently.lua:1193
-#: modules/module_recent_book_stats.lua:941
+#: modules/module_currently_yanllsama_v1.lua:1000
+#: modules/module_currently_yanllsama_v1.lua:1015
+#: modules/module_currently_yanllsama_v1.lua:1030
+#: modules/module_currently_yanllsama_v1.lua:1045
+#: modules/module_currently_yanllsama_v1.lua:1115
+#: modules/module_hero_currently.lua:1357
+#: modules/module_recent_book_stats.lua:944
 #: patches/patch_coverdeck_description.lua:804
-#: patches/patch_coverdeck_exclude.lua:202 patches/patch_recent_extra.lua:329
+#: patches/patch_coverdeck_exclude.lua:202
+#: patches/patch_recent_extra.lua:446
 msgid "Save"
 msgstr "Guardar"
 
 #: modules/module_currently_with_pace.lua:1121
 #: modules/module_currently_with_pace.lua:1123
-#: modules/module_currently_yanllsama_v1.lua:915
-#: modules/module_currently_yanllsama_v1.lua:916
-#: modules/module_hero_currently.lua:1004
-#: modules/module_hero_currently.lua:1005
-#: modules/module_hero_currently.lua:1008
+#: modules/module_currently_yanllsama_v1.lua:918
+#: modules/module_currently_yanllsama_v1.lua:919
+#: modules/module_hero_currently.lua:1168
+#: modules/module_hero_currently.lua:1169
+#: modules/module_hero_currently.lua:1172
 #: modules/module_reading_insights.lua:1034
 #: modules/module_reading_insights.lua:1035
 #: modules/module_reading_insights.lua:1038
 #: modules/module_reading_streaks.lua:431
 #: modules/module_reading_streaks.lua:432
 #: modules/module_reading_streaks.lua:435
-#: modules/module_recent_book_stats.lua:854
-#: modules/module_recent_book_stats.lua:855
+#: modules/module_recent_book_stats.lua:857
 #: modules/module_recent_book_stats.lua:858
+#: modules/module_recent_book_stats.lua:861
 msgid "Scale"
 msgstr "Escala"
 
@@ -1116,28 +1128,28 @@ msgid "Scale for all text elements (title, author, progress, time).\n100% is the
 msgstr "Escala para todos los elementos de texto (título, autor, progreso, tiempo).\n100% es el tamaño predeterminado."
 
 #: modules/module_currently_with_pace.lua:1136
-#: modules/module_currently_yanllsama_v1.lua:920
+#: modules/module_currently_yanllsama_v1.lua:923
 msgid "Scale for the cover thumbnail only.\n100% is the default size."
 msgstr "Escala solo para la miniatura de la portada.\n100% es el tamaño predeterminado."
 
 #: modules/module_currently_with_pace.lua:1124
-#: modules/module_currently_yanllsama_v1.lua:916
-#: modules/module_hero_currently.lua:1009
+#: modules/module_currently_yanllsama_v1.lua:919
+#: modules/module_hero_currently.lua:1173
 #: modules/module_reading_insights.lua:1039
 #: modules/module_reading_streaks.lua:436
-#: modules/module_recent_book_stats.lua:859
+#: modules/module_recent_book_stats.lua:862
 msgid "Scale for this module.\n100% is the default size."
 msgstr "Escala para este módulo.\n100% es el tamaño predeterminado."
 
-#: modules/module_hero_currently.lua:1065
+#: modules/module_hero_currently.lua:1229
 msgid "Scales the description font size relative to default.\nLarger text shows fewer lines; smaller shows more."
 msgstr "Escala el tamaño de fuente de la descripción respecto al predeterminado.\nUn texto más grande muestra menos líneas; uno más pequeño, más."
 
-#: modules/module_hero_currently.lua:1102
+#: modules/module_hero_currently.lua:1266
 msgid "Scales the hero card's book cover relative to default, independently of the card's text Scale setting.\nAspect ratio (3:2) is preserved; the text column resizes to fit."
 msgstr "Escala la portada de la tarjeta grande respecto al predeterminado, independientemente del ajuste de escala de texto de la tarjeta.\nSe conserva la relación de aspecto (3:2); la columna de texto se ajusta en consecuencia."
 
-#: modules/module_currently_yanllsama_v1.lua:941
+#: modules/module_currently_yanllsama_v1.lua:944
 msgid "Segmented"
 msgstr "Segmentado"
 
@@ -1153,9 +1165,9 @@ msgstr "Sep"
 msgid "September"
 msgstr "Septiembre"
 
-#: modules/module_hero_currently.lua:1072
-#: modules/module_hero_currently.lua:1109
-#: modules/module_hero_currently.lua:1152
+#: modules/module_hero_currently.lua:1236
+#: modules/module_hero_currently.lua:1273
+#: modules/module_hero_currently.lua:1316
 msgid "Set"
 msgstr "Establecer"
 
@@ -1168,19 +1180,19 @@ msgstr "Define cuántas copias de este módulo mostrar.\nCada copia se puede col
 msgid "Set page"
 msgstr "Establecer página"
 
-#: modules/module_hero_currently.lua:1121
+#: modules/module_hero_currently.lua:1285
 msgid "Show Frame"
 msgstr "Mostrar marco"
 
-#: modules/module_currently_yanllsama_v1.lua:978
+#: modules/module_currently_yanllsama_v1.lua:981
 msgid "Show Headers: Off"
 msgstr "Mostrar encabezados: No"
 
-#: modules/module_currently_yanllsama_v1.lua:978
+#: modules/module_currently_yanllsama_v1.lua:981
 msgid "Show Headers: On"
 msgstr "Mostrar encabezados: Sí"
 
-#: modules/module_hero_currently.lua:1123
+#: modules/module_hero_currently.lua:1287
 msgid "Show Progress Bar"
 msgstr "Mostrar barra de progreso"
 
@@ -1189,11 +1201,11 @@ msgid "Show Reading Insights on sleep screen"
 msgstr "Mostrar información de lectura en la pantalla de reposo"
 
 #: modules/module_currently_with_pace.lua:1365
-#: modules/module_currently_yanllsama_v1.lua:928
-#: modules/module_hero_currently.lua:998
-#: modules/module_reading_insights.lua:1030
+#: modules/module_currently_yanllsama_v1.lua:931
+#: modules/module_hero_currently.lua:1163
+#: modules/module_reading_insights.lua:1029
 #: modules/module_reading_streaks.lua:426
-#: modules/module_recent_book_stats.lua:847
+#: modules/module_recent_book_stats.lua:850
 msgid "Show section label"
 msgstr "Mostrar etiqueta de sección"
 
@@ -1201,7 +1213,7 @@ msgstr "Mostrar etiqueta de sección"
 msgid "Show SimpleUI home screen on sleep screen"
 msgstr "Mostrar pantalla de inicio de SimpleUI en la pantalla de reposo"
 
-#: modules/module_hero_currently.lua:1124
+#: modules/module_hero_currently.lua:1288
 msgid "Show Statistics"
 msgstr "Mostrar estadísticas"
 
@@ -1214,16 +1226,21 @@ msgid "Shows the homescreen clock date as \"2025年 6月3日 星期三\" instead
 msgstr "Muestra la fecha del reloj de la pantalla de inicio como \"2025年 6月3日 星期三\" en lugar de \"miércoles, 3 de junio\""
 
 #: modules/module_currently_with_pace.lua:1269
-#: modules/module_currently_yanllsama_v1.lua:936
+#: modules/module_currently_yanllsama_v1.lua:939
 msgid "Simple"
 msgstr "Simple"
 
-#: main.lua:395
+#: main.lua:506
 msgid "SimpleUI Extra"
 msgstr "SimpleUI Extra"
 
+#: _meta.lua:4
 msgid "SimpleUI Extra Modules"
 msgstr "Módulos adicionales de SimpleUI"
+
+#: patches/patch_recent_extra.lua:463
+msgid "Ignore First Book"
+msgstr "Ignora el primer libro"
 
 #: patches/patch_screensaver_insights.lua:36
 msgid "Sleep Screen: Reading Insights"
@@ -1233,15 +1250,15 @@ msgstr "Pantalla de reposo: Información de lectura"
 msgid "Sleep Screen: SimpleUI Home"
 msgstr "Pantalla de reposo: Inicio de SimpleUI"
 
-#: modules/module_hero_currently.lua:1122
+#: modules/module_hero_currently.lua:1286
 msgid "Solid Background"
 msgstr "Fondo sólido"
 
-#: modules/module_currently_yanllsama_v1.lua:956
+#: modules/module_currently_yanllsama_v1.lua:959
 msgid "Sort Items"
 msgstr "Ordenar elementos"
 
-#: modules/module_currently_yanllsama_v1.lua:963
+#: modules/module_currently_yanllsama_v1.lua:966
 msgid "Sort Statistics"
 msgstr "Ordenar estadísticas"
 
@@ -1249,7 +1266,7 @@ msgstr "Ordenar estadísticas"
 msgid "SPEED"
 msgstr "VELOCIDAD"
 
-#: modules/module_recent_book_stats.lua:573
+#: modules/module_recent_book_stats.lua:576
 msgid "Statistics cards for recently read books with progress and reading time"
 msgstr "Tarjetas de estadísticas de libros leídos recientemente con progreso y tiempo de lectura"
 
@@ -1257,7 +1274,7 @@ msgstr "Tarjetas de estadísticas de libros leídos recientemente con progreso y
 msgid "Statistics database not found"
 msgstr "Base de datos de estadísticas no encontrada"
 
-#: modules/module_currently_yanllsama_v1.lua:931
+#: modules/module_currently_yanllsama_v1.lua:934
 msgid "Statistics Layout & Appearance"
 msgstr "Diseño y apariencia de estadísticas"
 
@@ -1269,11 +1286,11 @@ msgstr "Agrupación de estadísticas (modo predeterminado)"
 msgid "Stats layout"
 msgstr "Diseño de estadísticas"
 
-#: modules/module_currently_yanllsama_v1.lua:856
+#: modules/module_currently_yanllsama_v1.lua:859
 msgid "System UI Font"
 msgstr "Tipo de letra del sistema"
 
-#: modules/module_recent_book_stats.lua:902
+#: modules/module_recent_book_stats.lua:905
 msgid "Tap to Open Book"
 msgstr "Toca para abrir el libro"
 
@@ -1287,7 +1304,7 @@ msgstr "Alineación del texto"
 msgid "Text Size"
 msgstr "Tamaño del texto"
 
-#: modules/module_currently_yanllsama_v1.lua:984
+#: modules/module_currently_yanllsama_v1.lua:987
 msgid "Thin"
 msgstr "Fina"
 
@@ -1303,8 +1320,8 @@ msgstr "ESTE MES"
 msgid "THIS WEEK"
 msgstr "ESTA SEMANA"
 
-#: modules/module_currently_yanllsama_v1.lua:945
-#: modules/module_recent_book_stats.lua:874
+#: modules/module_currently_yanllsama_v1.lua:948
+#: modules/module_recent_book_stats.lua:877
 msgid "Time Format"
 msgstr "Formato de tiempo"
 
@@ -1331,7 +1348,7 @@ msgstr "Tiempo invertido"
 msgid "Title"
 msgstr "Título"
 
-#: modules/module_recent_book_stats.lua:753
+#: modules/module_recent_book_stats.lua:756
 msgid "to go"
 msgstr "restante"
 
@@ -1339,7 +1356,7 @@ msgstr "restante"
 msgid "TODAY'S SUMMARY"
 msgstr "RESUMEN DE HOY"
 
-#: modules/module_currently_yanllsama_v1.lua:954
+#: modules/module_currently_yanllsama_v1.lua:957
 msgid "Toggle Visibility"
 msgstr "Alternar visibilidad"
 
@@ -1356,7 +1373,7 @@ msgstr "Tríos (3 por línea)"
 msgid "Unknown"
 msgstr "Desconocido"
 
-#: patches/patch_recent_extra.lua:293
+#: patches/patch_recent_extra.lua:410
 msgid "Vertical spacing between rows.\nOnly used when \"Rows\" is greater than 1."
 msgstr "Espaciado vertical entre filas.\nSolo se usa cuando \"Filas\" es mayor que 1."
 
@@ -1388,13 +1405,13 @@ msgstr "semanas leyendo"
 msgid "weeks to go"
 msgstr "semanas restantes"
 
-#: modules/module_currently_yanllsama_v1.lua:1072
-#: modules/module_currently_yanllsama_v1.lua:1080
+#: modules/module_currently_yanllsama_v1.lua:1075
+#: modules/module_currently_yanllsama_v1.lua:1083
 msgid "Weight: Bold"
 msgstr "Grosor: Negrita"
 
-#: modules/module_currently_yanllsama_v1.lua:1072
-#: modules/module_currently_yanllsama_v1.lua:1080
+#: modules/module_currently_yanllsama_v1.lua:1075
+#: modules/module_currently_yanllsama_v1.lua:1083
 msgid "Weight: Normal"
 msgstr "Grosor: Normal"
 
@@ -1403,17 +1420,17 @@ msgid "Which Reading Insights page to show on the sleep screen.\n0 = a different
 msgstr "Qué página de información de lectura mostrar en la pantalla de reposo.\n0 = una página aleatoria distinta cada vez."
 
 #: modules/module_currently_with_pace.lua:1279
-#: modules/module_currently_yanllsama_v1.lua:937
+#: modules/module_currently_yanllsama_v1.lua:940
 msgid "With percentage"
 msgstr "Con porcentaje"
 
-#: modules/module_recent_book_stats.lua:873
-#: modules/module_currently_yanllsama_v1:945
+#: modules/module_currently_yanllsama_v1.lua:948
+#: modules/module_recent_book_stats.lua:876
 msgid "XhYm"
 msgstr "XhYmin"
 
-#: modules/module_currently_yanllsama_v1.lua:948
-#: modules/module_recent_book_stats.lua:888
+#: modules/module_currently_yanllsama_v1.lua:951
+#: modules/module_recent_book_stats.lua:891
 msgid "XhYm (e.g. 3h30m)"
 msgstr "XhYmin (ej. 3h30min)"
 
@@ -1444,3 +1461,4 @@ msgstr "—d restante"
 #: modules/module_currently_with_pace.lua:728
 msgid "—wpm"
 msgstr "—pág/min"
+

@@ -4,8 +4,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: simpleui_ext 1.13.2\n"
-"POT-Creation-Date: 2026-07-18 04:52+0800\n"
-"PO-Revision-Date: 2026-07-18 11:54+0800\n"
+"POT-Creation-Date: 2026-08-04 17:36+0800\n"
+"PO-Revision-Date: 2026-08-04 18:03+0800\n"
 "Last-Translator: \n"
 "Language-Team: Chinese (Simplified)\n"
 "Language: zh_CN\n"
@@ -13,9 +13,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Poedit 3.9\n"
 
-#: _meta.lua:4
 #: modules/module_reading_insights.lua:865
 msgid " (combined)"
 msgstr " (合并)"
@@ -24,8 +22,8 @@ msgstr " (合并)"
 msgid " (Copy %d)"
 msgstr " (副本 %d)"
 
-#: modules/module_currently_yanllsama_v1.lua:875
-#: modules/module_currently_yanllsama_v1.lua:887
+#: modules/module_currently_yanllsama_v1.lua:878
+#: modules/module_currently_yanllsama_v1.lua:890
 msgid " (Default)"
 msgstr " (默认)"
 
@@ -49,7 +47,7 @@ msgstr "%.1f 字/分钟"
 msgid "%/day"
 msgstr "%/天"
 
-#: modules/module_hero_currently.lua:674
+#: modules/module_hero_currently.lua:839
 #: patches/patch_screensaver_insights.lua:719
 #: patches/patch_screensaver_insights.lua:720
 msgid "%d day"
@@ -63,7 +61,7 @@ msgid_plural "%d days of reading"
 msgstr[0] "%d 天在读"
 msgstr[1] "%d 天在读"
 
-#: modules/module_hero_currently.lua:674
+#: modules/module_hero_currently.lua:839
 #: patches/patch_screensaver_insights.lua:719
 #: patches/patch_screensaver_insights.lua:720
 msgid "%d days"
@@ -135,7 +133,7 @@ msgstr "%d 分"
 #: modules/module_currently_with_pace.lua:702
 #: modules/module_currently_with_pace.lua:706
 #: modules/module_currently_with_pace.lua:851
-#: modules/module_hero_currently.lua:628
+#: modules/module_hero_currently.lua:793
 msgid "%s left"
 msgstr "剩余时长 %s"
 
@@ -143,7 +141,7 @@ msgstr "剩余时长 %s"
 #: modules/module_currently_with_pace.lua:694
 #: modules/module_currently_with_pace.lua:849
 #: modules/module_currently_with_pace.lua:882
-#: modules/module_hero_currently.lua:677
+#: modules/module_hero_currently.lua:842
 msgid "%s read"
 msgstr "已读时长 %s"
 
@@ -156,7 +154,7 @@ msgstr "0 分钟"
 msgid "0m"
 msgstr "0 分"
 
-#: modules/module_currently_yanllsama_v1.lua:528
+#: modules/module_currently_yanllsama_v1.lua:531
 msgid ""
 "[V1/Legacy] Enhanced reading dashboard with dynamic grid (1-4 cols, 1-6 rows), "
 "customizable headers, rich statistics (10 metrics), and 6 progress bar styles. "
@@ -165,7 +163,7 @@ msgstr ""
 "[旧版] 增强型阅读仪表盘：支持动态网格布局 (1–4列，1–6行)、可自定义标题栏、10项"
 "详细阅读统计，并提供6种进度条样式。点击书名/作者可查看简介。"
 
-#: modules/module_currently_yanllsama_v1.lua:719
+#: modules/module_currently_yanllsama_v1.lua:722
 msgid "a day"
 msgstr "每天"
 
@@ -187,17 +185,17 @@ msgstr "休眠壁纸里新增「阅读分析」选项。"
 msgid "Adds a 'Show SimpleUI Home Screen' option to the sleep screen Wallpaper settings"
 msgstr "在休眠壁纸里新增「主屏幕」选项"
 
-#: patches/patch_recent_extra.lua:55
+#: patches/patch_recent_extra.lua:88
 msgid ""
-"Adds multi-row layout, row spacing and 'Exclude Paths from Recent' to the Recent "
-"Books module"
-msgstr "为“最近书籍”模块新增多行布局、行间距及“排除路径”功能。"
+"Adds multi-row layout, row spacing, 'Exclude Paths from Recent' and 'Ignore "
+"First Book' to the Recent Books module"
+msgstr "为“最近书籍”模块新增多行布局、行间距及排除功能。"
 
 #: patches/patch_screensaver_insights.lua:809
 msgid "ALL TIME"
 msgstr "全部时间"
 
-#: patches/patch_recent_extra.lua:279
+#: patches/patch_recent_extra.lua:396
 msgid "Apply"
 msgstr "应用"
 
@@ -227,11 +225,11 @@ msgstr "8月"
 msgid "Author"
 msgstr "作者"
 
-#: modules/module_currently_yanllsama_v1.lua:1063
+#: modules/module_currently_yanllsama_v1.lua:1066
 msgid "Author Name Font"
 msgstr "作者名字体"
 
-#: modules/module_currently_yanllsama_v1.lua:1064
+#: modules/module_currently_yanllsama_v1.lua:1067
 msgid "Author Name Size"
 msgstr "作者名字号"
 
@@ -261,8 +259,8 @@ msgstr "最长连续天数"
 msgid "BEST WEEKS"
 msgstr "最佳周数"
 
-#: modules/module_currently_yanllsama_v1.lua:938
-#: modules/module_currently_yanllsama_v1.lua:986
+#: modules/module_currently_yanllsama_v1.lua:941
+#: modules/module_currently_yanllsama_v1.lua:989
 msgid "Bold"
 msgstr "粗体"
 
@@ -270,23 +268,24 @@ msgstr "粗体"
 msgid "book"
 msgstr "本书"
 
-#: modules/module_recent_book_stats.lua:721 modules/module_recent_book_stats.lua:740
+#: modules/module_recent_book_stats.lua:724
+#: modules/module_recent_book_stats.lua:743
 msgid "BOOK"
 msgstr "书籍"
 
-#: modules/module_currently_yanllsama_v1.lua:1059
+#: modules/module_currently_yanllsama_v1.lua:1062
 msgid "Book and Author Settings"
 msgstr "书名和作者设置"
 
-#: modules/module_currently_yanllsama_v1.lua:1061
+#: modules/module_currently_yanllsama_v1.lua:1064
 msgid "Book Title Font"
 msgstr "书名字体"
 
-#: modules/module_currently_yanllsama_v1.lua:1062
+#: modules/module_currently_yanllsama_v1.lua:1065
 msgid "Book Title Size"
 msgstr "书名字号"
 
-#: modules/module_recent_book_stats.lua:717
+#: modules/module_recent_book_stats.lua:720
 msgid "BOOK: "
 msgstr "书籍："
 
@@ -299,20 +298,22 @@ msgid "books finished"
 msgstr "已读完"
 
 #: modules/module_currently_with_pace.lua:1393
-#: modules/module_currently_yanllsama_v1.lua:996
-#: modules/module_currently_yanllsama_v1.lua:1011
-#: modules/module_currently_yanllsama_v1.lua:1026
-#: modules/module_currently_yanllsama_v1.lua:1041
-#: modules/module_currently_yanllsama_v1.lua:1105
-#: modules/module_hero_currently.lua:1189
-#: modules/module_recent_book_stats.lua:937
+#: modules/module_currently_yanllsama_v1.lua:999
+#: modules/module_currently_yanllsama_v1.lua:1014
+#: modules/module_currently_yanllsama_v1.lua:1029
+#: modules/module_currently_yanllsama_v1.lua:1044
+#: modules/module_currently_yanllsama_v1.lua:1108
+#: modules/module_hero_currently.lua:1353
+#: modules/module_recent_book_stats.lua:940
 #: patches/patch_coverdeck_description.lua:800
-#: patches/patch_coverdeck_exclude.lua:198 patches/patch_module_copies.lua:125
-#: patches/patch_recent_extra.lua:280 patches/patch_recent_extra.lua:325
+#: patches/patch_coverdeck_exclude.lua:198
+#: patches/patch_module_copies.lua:125
+#: patches/patch_recent_extra.lua:397
+#: patches/patch_recent_extra.lua:442
 msgid "Cancel"
 msgstr "取消"
 
-#: modules/module_currently_yanllsama_v1.lua:975
+#: modules/module_currently_yanllsama_v1.lua:978
 msgid "Category Headers"
 msgstr "类别标题"
 
@@ -320,19 +321,19 @@ msgstr "类别标题"
 msgid "Center"
 msgstr "居中"
 
-#: modules/module_currently_yanllsama_v1.lua:990
+#: modules/module_currently_yanllsama_v1.lua:993
 msgid "Change Column 1 Header"
 msgstr "修改第 1 列标题"
 
-#: modules/module_currently_yanllsama_v1.lua:1005
+#: modules/module_currently_yanllsama_v1.lua:1008
 msgid "Change Column 2 Header"
 msgstr "修改第 2 列标题"
 
-#: modules/module_currently_yanllsama_v1.lua:1020
+#: modules/module_currently_yanllsama_v1.lua:1023
 msgid "Change Column 3 Header"
 msgstr "修改第 3 列标题"
 
-#: modules/module_currently_yanllsama_v1.lua:1035
+#: modules/module_currently_yanllsama_v1.lua:1038
 msgid "Change Column 4 Header"
 msgstr "修改第 4 列标题"
 
@@ -340,31 +341,32 @@ msgstr "修改第 4 列标题"
 msgid "Clock: Chinese Date Format"
 msgstr "时钟模块：中文日期格式支持"
 
-#: modules/module_currently_yanllsama_v1.lua:994
+#: modules/module_currently_yanllsama_v1.lua:997
 msgid "Column 1 Header"
 msgstr "第 1 列标题"
 
-#: modules/module_currently_yanllsama_v1.lua:1009
+#: modules/module_currently_yanllsama_v1.lua:1012
 msgid "Column 2 Header"
 msgstr "第 2 列标题"
 
-#: modules/module_currently_yanllsama_v1.lua:1024
+#: modules/module_currently_yanllsama_v1.lua:1027
 msgid "Column 3 Header"
 msgstr "第 3 列标题"
 
-#: modules/module_currently_yanllsama_v1.lua:1039
+#: modules/module_currently_yanllsama_v1.lua:1042
 msgid "Column 4 Header"
 msgstr "第 4 列标题"
 
-#: modules/module_currently_yanllsama_v1.lua:1054
+#: modules/module_currently_yanllsama_v1.lua:1057
 msgid "Columns"
 msgstr "列数"
 
 #: modules/module_currently_with_pace.lua:1389
-#: modules/module_currently_yanllsama_v1.lua:1100
-#: modules/module_hero_currently.lua:1185
-#: modules/module_recent_book_stats.lua:933
-#: patches/patch_coverdeck_exclude.lua:194 patches/patch_recent_extra.lua:321
+#: modules/module_currently_yanllsama_v1.lua:1103
+#: modules/module_hero_currently.lua:1349
+#: modules/module_recent_book_stats.lua:936
+#: patches/patch_coverdeck_exclude.lua:194
+#: patches/patch_recent_extra.lua:438
 msgid ""
 "Comma-separated path fragments.\n"
 "Books whose path contains any fragment will be skipped."
@@ -386,27 +388,27 @@ msgstr "封面轮播模块：增加排除路径功能"
 
 #: modules/module_currently_with_pace.lua:1134
 #: modules/module_currently_with_pace.lua:1135
-#: modules/module_currently_yanllsama_v1.lua:920
-#: modules/module_hero_currently.lua:1090
-#: modules/module_hero_currently.lua:1091
-#: modules/module_hero_currently.lua:1101
+#: modules/module_currently_yanllsama_v1.lua:923
+#: modules/module_hero_currently.lua:1254
+#: modules/module_hero_currently.lua:1255
+#: modules/module_hero_currently.lua:1265
 msgid "Cover Size"
 msgstr "封面大小"
 
 #: modules/module_currently_with_pace.lua:1162
 #: modules/module_currently_with_pace.lua:1163
 #: modules/module_currently_with_pace.lua:1166
-#: modules/module_currently_yanllsama_v1.lua:924
-#: modules/module_currently_yanllsama_v1.lua:925
+#: modules/module_currently_yanllsama_v1.lua:927
+#: modules/module_currently_yanllsama_v1.lua:928
 msgid "Cover Spacing"
 msgstr "封面间距"
 
-#: modules/module_hero_currently.lua:1132
-#: modules/module_hero_currently.lua:1144
+#: modules/module_hero_currently.lua:1296
+#: modules/module_hero_currently.lua:1308
 msgid "Crop Threshold"
 msgstr "裁剪阈值"
 
-#: modules/module_hero_currently.lua:1129
+#: modules/module_hero_currently.lua:1293
 msgid "Crop Threshold (disabled)"
 msgstr "裁剪阈值 (已禁用)"
 
@@ -428,10 +430,10 @@ msgid "Current streak"
 msgstr "连续天数"
 
 #: modules/module_currently_with_pace.lua:494
-#: modules/module_currently_yanllsama_v1.lua:527
-#: modules/module_currently_yanllsama_v1.lua:928
-#: modules/module_currently_yanllsama_v1.lua:1133
-#: modules/module_hero_currently.lua:418
+#: modules/module_currently_yanllsama_v1.lua:530
+#: modules/module_currently_yanllsama_v1.lua:931
+#: modules/module_currently_yanllsama_v1.lua:1136
+#: modules/module_hero_currently.lua:446
 msgid "Currently Reading"
 msgstr "当前阅读"
 
@@ -441,7 +443,7 @@ msgstr "当前阅读"
 msgid "Currently Reading (with Pace)"
 msgstr "当前阅读 (With Pace)"
 
-#: modules/module_currently_yanllsama_v1.lua:526
+#: modules/module_currently_yanllsama_v1.lua:529
 msgid "Currently Reading (Yanllsama v1)"
 msgstr "当前阅读 (Yanllsama Legacy)"
 
@@ -520,31 +522,33 @@ msgstr "12月"
 msgid "Default"
 msgstr "默认"
 
-#: modules/module_hero_currently.lua:1018
-#: modules/module_hero_currently.lua:1022
+#: modules/module_hero_currently.lua:1182
+#: modules/module_hero_currently.lua:1186
 #: patches/patch_coverdeck_description.lua:647
 msgid "Description"
 msgstr "书籍简介"
 
-#: modules/module_hero_currently.lua:1015
+#: modules/module_hero_currently.lua:1179
 msgid "Description Content"
 msgstr "简介内容"
 
-#: modules/module_hero_currently.lua:1053
-#: modules/module_hero_currently.lua:1054
-#: modules/module_hero_currently.lua:1064
+#: modules/module_hero_currently.lua:1217
+#: modules/module_hero_currently.lua:1218
+#: modules/module_hero_currently.lua:1228
 msgid "Description Text Size"
 msgstr "简介字号"
 
-#: main.lua:429 main.lua:465
+#: main.lua:540
+#: main.lua:576
 msgid "disabled"
 msgstr "已禁用"
 
-#: main.lua:192
+#: main.lua:196
 msgid "Disabled module (enable to load)"
 msgstr "模块已禁用 (启用后加载)"
 
-#: main.lua:273 main.lua:310
+#: main.lua:277
+#: main.lua:314
 msgid "Disabled patch (enable to load)"
 msgstr "补丁已禁用 (启用后加载)"
 
@@ -552,7 +556,7 @@ msgstr "补丁已禁用 (启用后加载)"
 msgid "Display Mode"
 msgstr "显示模式"
 
-#: modules/module_currently_yanllsama_v1.lua:952
+#: modules/module_currently_yanllsama_v1.lua:955
 msgid "Edit Items"
 msgstr "编辑项"
 
@@ -560,26 +564,29 @@ msgstr "编辑项"
 msgid "Enable Description"
 msgstr "启用简介"
 
-#: main.lua:429 main.lua:465
+#: main.lua:540
+#: main.lua:576
 msgid "enabled"
 msgstr "已启用"
 
 #: modules/module_currently_with_pace.lua:1374
 #: modules/module_currently_with_pace.lua:1378
 #: modules/module_currently_with_pace.lua:1386
-#: modules/module_currently_yanllsama_v1.lua:1088
-#: modules/module_currently_yanllsama_v1.lua:1090
-#: modules/module_currently_yanllsama_v1.lua:1097
-#: modules/module_hero_currently.lua:1170
-#: modules/module_hero_currently.lua:1174
-#: modules/module_hero_currently.lua:1182
-#: modules/module_recent_book_stats.lua:918
-#: modules/module_recent_book_stats.lua:922
-#: modules/module_recent_book_stats.lua:930
+#: modules/module_currently_yanllsama_v1.lua:1091
+#: modules/module_currently_yanllsama_v1.lua:1093
+#: modules/module_currently_yanllsama_v1.lua:1100
+#: modules/module_hero_currently.lua:1334
+#: modules/module_hero_currently.lua:1338
+#: modules/module_hero_currently.lua:1346
+#: modules/module_recent_book_stats.lua:921
+#: modules/module_recent_book_stats.lua:925
+#: modules/module_recent_book_stats.lua:933
 #: patches/patch_coverdeck_exclude.lua:178
 #: patches/patch_coverdeck_exclude.lua:182
-#: patches/patch_coverdeck_exclude.lua:191 patches/patch_recent_extra.lua:305
-#: patches/patch_recent_extra.lua:309 patches/patch_recent_extra.lua:318
+#: patches/patch_coverdeck_exclude.lua:191
+#: patches/patch_recent_extra.lua:422
+#: patches/patch_recent_extra.lua:426
+#: patches/patch_recent_extra.lua:435
 msgid "Exclude Paths from Recent"
 msgstr "从最近阅读中排除路径"
 
@@ -611,23 +618,23 @@ msgstr "从封面墙的最近阅读中过滤指定路径"
 msgid "Fixed Line Count"
 msgstr "固定行数"
 
-#: modules/module_currently_yanllsama_v1.lua:1052
+#: modules/module_currently_yanllsama_v1.lua:1055
 msgid "Grid Dimensions"
 msgstr "网格尺寸"
 
-#: modules/module_currently_yanllsama_v1.lua:982
+#: modules/module_currently_yanllsama_v1.lua:985
 msgid "Header Thickness"
 msgstr "标题粗细"
 
-#: modules/module_hero_currently.lua:421
+#: modules/module_hero_currently.lua:449
 msgid "Hero Currently Reading"
 msgstr "当前阅读 (Hero)"
 
-#: modules/module_hero_currently.lua:1018
+#: modules/module_hero_currently.lua:1182
 msgid "Highlight"
 msgstr "高亮"
 
-#: modules/module_hero_currently.lua:1034
+#: modules/module_hero_currently.lua:1198
 msgid "Highlight (random, falls back to description)"
 msgstr "高亮 (随机，无则显示书籍简介)"
 
@@ -644,7 +651,7 @@ msgid "Home screen page: Random"
 msgstr "主页页面：随机"
 
 #: modules/module_currently_with_pace.lua:1167
-#: modules/module_currently_yanllsama_v1.lua:925
+#: modules/module_currently_yanllsama_v1.lua:928
 msgid ""
 "Horizontal space between the cover and the text.\n"
 "100% is the default spacing."
@@ -676,11 +683,11 @@ msgstr "已读小时数"
 msgid "Hours read per month"
 msgstr "每月阅读小时数"
 
-#: modules/module_recent_book_stats.lua:873
+#: modules/module_recent_book_stats.lua:876
 msgid "Human"
 msgstr "合并"
 
-#: modules/module_recent_book_stats.lua:878
+#: modules/module_recent_book_stats.lua:881
 msgid "Human (e.g. 3.5 hours)"
 msgstr "合并 (如 3.5h)"
 
@@ -732,19 +739,19 @@ msgstr "6月"
 msgid "Justify"
 msgstr "两端对齐"
 
-#: modules/module_currently_yanllsama_v1.lua:1076
+#: modules/module_currently_yanllsama_v1.lua:1079
 msgid "Label (Text) Settings"
 msgstr "标签样式设置"
 
-#: modules/module_currently_yanllsama_v1.lua:1078
+#: modules/module_currently_yanllsama_v1.lua:1081
 msgid "Label Font"
 msgstr "标签字体"
 
-#: modules/module_currently_yanllsama_v1.lua:1079
+#: modules/module_currently_yanllsama_v1.lua:1082
 msgid "Label Size"
 msgstr "标签字号"
 
-#: modules/module_hero_currently.lua:422
+#: modules/module_hero_currently.lua:450
 msgid ""
 "Large hero card showing currently reading book with cover, progress, and details"
 msgstr "大幅主卡片：展示当前阅读书籍，含封面、进度及详情"
@@ -761,8 +768,8 @@ msgstr "最近 7 天"
 msgid "Last Session Pages"
 msgstr "上次会话页数"
 
-#: modules/module_currently_yanllsama_v1.lua:715
-#: modules/module_currently_yanllsama_v1.lua:716
+#: modules/module_currently_yanllsama_v1.lua:718
+#: modules/module_currently_yanllsama_v1.lua:719
 msgid "left"
 msgstr "剩余"
 
@@ -795,7 +802,7 @@ msgstr "简介最大长度"
 msgid "Max Length"
 msgstr "最大长度"
 
-#: modules/module_hero_currently.lua:1145
+#: modules/module_hero_currently.lua:1309
 msgid ""
 "Maximum aspect ratio distortion to prevent cropping.\n"
 "0% = always crop, 100% = never crop (allow stretching)"
@@ -815,7 +822,7 @@ msgstr ""
 msgid "May"
 msgstr "5月"
 
-#: modules/module_currently_yanllsama_v1.lua:985
+#: modules/module_currently_yanllsama_v1.lua:988
 msgid "Medium"
 msgstr "常规"
 
@@ -825,7 +832,7 @@ msgstr "常规"
 msgid "min"
 msgstr "分钟"
 
-#: modules/module_currently_yanllsama_v1.lua:939
+#: modules/module_currently_yanllsama_v1.lua:942
 msgid "Minimal"
 msgstr "极简"
 
@@ -833,7 +840,7 @@ msgstr "极简"
 msgid "Mins/Session"
 msgstr "分钟/次"
 
-#: modules/module_currently_yanllsama_v1.lua:330
+#: modules/module_currently_yanllsama_v1.lua:333
 msgid "mins/session"
 msgstr "分钟/次"
 
@@ -846,7 +853,7 @@ msgstr "分钟"
 msgid "minutes"
 msgstr "分钟"
 
-#: main.lua:464
+#: main.lua:575
 msgid ""
 "Module '%s' %s.\n"
 "\n"
@@ -860,7 +867,7 @@ msgstr ""
 msgid "Module Copies"
 msgstr "模块副本功能"
 
-#: main.lua:403
+#: main.lua:514
 msgid "Modules"
 msgstr "模块"
 
@@ -888,7 +895,7 @@ msgstr "阅读月数"
 msgid "months to go"
 msgstr "剩余月数"
 
-#: modules/module_currently_yanllsama_v1.lua:696
+#: modules/module_currently_yanllsama_v1.lua:699
 msgid "No additional description available for this book."
 msgstr "本书暂无简介。"
 
@@ -896,11 +903,11 @@ msgstr "本书暂无简介。"
 msgid "No books read in %s"
 msgstr "暂无 %s 阅读记录"
 
-#: main.lua:474
+#: main.lua:585
 msgid "No modules available"
 msgstr "暂无可用模块"
 
-#: main.lua:438
+#: main.lua:549
 msgid "No patches available"
 msgstr "暂无可用补丁"
 
@@ -916,11 +923,11 @@ msgstr "11月"
 msgid "November"
 msgstr "11月"
 
-#: modules/module_currently_yanllsama_v1.lua:1068
+#: modules/module_currently_yanllsama_v1.lua:1071
 msgid "Number (Data) Settings"
 msgstr "数字样式设置"
 
-#: modules/module_currently_yanllsama_v1.lua:1070
+#: modules/module_currently_yanllsama_v1.lua:1073
 msgid "Number Font"
 msgstr "数字字体"
 
@@ -928,7 +935,7 @@ msgstr "数字字体"
 msgid "Number of Copies"
 msgstr "副本数"
 
-#: patches/patch_recent_extra.lua:274
+#: patches/patch_recent_extra.lua:391
 msgid ""
 "Number of rows of recent books to display.\n"
 "Each row shows up to 5 books."
@@ -936,7 +943,7 @@ msgstr ""
 "最近书籍显示行数。\n"
 "每行最多显示 5 本书。"
 
-#: modules/module_currently_yanllsama_v1.lua:1071
+#: modules/module_currently_yanllsama_v1.lua:1074
 msgid "Number Size"
 msgstr "数字字号"
 
@@ -952,11 +959,11 @@ msgstr "10月"
 msgid "OK"
 msgstr "确定"
 
-#: modules/module_currently_yanllsama_v1.lua:940
+#: modules/module_currently_yanllsama_v1.lua:943
 msgid "Outline"
 msgstr "描边"
 
-#: modules/module_recent_book_stats.lua:758
+#: modules/module_recent_book_stats.lua:761
 msgid "PACE"
 msgstr "阅读速度"
 
@@ -965,7 +972,7 @@ msgstr "阅读速度"
 msgid "page"
 msgstr "页"
 
-#: modules/module_recent_book_stats.lua:418
+#: modules/module_recent_book_stats.lua:421
 msgid "page per minute"
 msgstr "页/分钟"
 
@@ -973,13 +980,13 @@ msgstr "页/分钟"
 msgid "page read"
 msgstr "已读页数"
 
-#: modules/module_currently_yanllsama_v1.lua:709
+#: modules/module_currently_yanllsama_v1.lua:712
 #: modules/module_reading_insights.lua:659
 #: modules/module_reading_insights.lua:673
 msgid "pages"
 msgstr "页"
 
-#: modules/module_currently_yanllsama_v1.lua:331
+#: modules/module_currently_yanllsama_v1.lua:334
 msgid "pages (last)"
 msgstr "页数 (上次)"
 
@@ -991,7 +998,7 @@ msgstr "剩余页数"
 msgid "Pages per day"
 msgstr "日均页数"
 
-#: modules/module_recent_book_stats.lua:418
+#: modules/module_recent_book_stats.lua:421
 msgid "pages per minute"
 msgstr "页/分钟"
 
@@ -1010,9 +1017,9 @@ msgstr "已读页数"
 msgid "Pages read"
 msgstr "已读页数"
 
-#: modules/module_currently_yanllsama_v1.lua:327
-#: modules/module_currently_yanllsama_v1.lua:408
-#: modules/module_recent_book_stats.lua:363
+#: modules/module_currently_yanllsama_v1.lua:330
+#: modules/module_currently_yanllsama_v1.lua:411
+#: modules/module_recent_book_stats.lua:366
 msgid "pages/min"
 msgstr "页/分钟"
 
@@ -1024,7 +1031,7 @@ msgstr "页/分钟"
 msgid "Pairs (2 per line)"
 msgstr "两组显示"
 
-#: main.lua:428
+#: main.lua:539
 msgid ""
 "Patch '%s' %s.\n"
 "\n"
@@ -1034,11 +1041,11 @@ msgstr ""
 "\n"
 "请重启 KOReader 以使更改生效。"
 
-#: main.lua:399
+#: main.lua:510
 msgid "Patches"
 msgstr "补丁"
 
-#: modules/module_recent_book_stats.lua:764
+#: modules/module_recent_book_stats.lua:767
 msgid "per day"
 msgstr "每天"
 
@@ -1051,7 +1058,7 @@ msgstr "已读百分比"
 msgid "Position"
 msgstr "位置"
 
-#: modules/module_hero_currently.lua:1125
+#: modules/module_hero_currently.lua:1289
 msgid "Prevent Cover Cropping"
 msgstr "防止封面被裁剪"
 
@@ -1061,21 +1068,21 @@ msgid "Progress bar"
 msgstr "进度条"
 
 #: modules/module_currently_with_pace.lua:1266
-#: modules/module_currently_yanllsama_v1.lua:934
+#: modules/module_currently_yanllsama_v1.lua:937
 msgid "Progress bar style"
 msgstr "进度条样式"
 
-#: modules/module_currently_yanllsama_v1.lua:341
-#: modules/module_currently_yanllsama_v1.lua:713
-#: modules/module_recent_book_stats.lua:753
+#: modules/module_currently_yanllsama_v1.lua:344
+#: modules/module_currently_yanllsama_v1.lua:716
+#: modules/module_recent_book_stats.lua:756
 msgid "read"
 msgstr "已读"
 
-#: modules/module_currently_yanllsama_v1.lua:945
+#: modules/module_currently_yanllsama_v1.lua:948
 msgid "Readable"
 msgstr "合并"
 
-#: modules/module_currently_yanllsama_v1.lua:947
+#: modules/module_currently_yanllsama_v1.lua:950
 msgid "Readable (e.g. 3.5h)"
 msgstr "合并 (如 3.5h)"
 
@@ -1107,11 +1114,12 @@ msgstr "阅读连胜"
 msgid "reading time"
 msgstr "阅读时间"
 
-#: modules/module_recent_book_stats.lua:569 modules/module_recent_book_stats.lua:572
+#: modules/module_recent_book_stats.lua:572
+#: modules/module_recent_book_stats.lua:575
 msgid "Recent Book Stats"
 msgstr "最近阅读统计"
 
-#: patches/patch_recent_extra.lua:54
+#: patches/patch_recent_extra.lua:87
 msgid "Recent Books Extra Options"
 msgstr "最近书籍模块：增加行数和排除路径功能"
 
@@ -1119,44 +1127,47 @@ msgstr "最近书籍模块：增加行数和排除路径功能"
 msgid "Right"
 msgstr "右侧"
 
-#: patches/patch_recent_extra.lua:291 patches/patch_recent_extra.lua:292
+#: patches/patch_recent_extra.lua:408
+#: patches/patch_recent_extra.lua:409
 msgid "Row Spacing"
 msgstr "行间距"
 
-#: modules/module_currently_yanllsama_v1.lua:1055 patches/patch_recent_extra.lua:265
-#: patches/patch_recent_extra.lua:273
+#: modules/module_currently_yanllsama_v1.lua:1058
+#: patches/patch_recent_extra.lua:382
+#: patches/patch_recent_extra.lua:390
 msgid "Rows"
 msgstr "行数"
 
 #: modules/module_currently_with_pace.lua:1401
-#: modules/module_currently_yanllsama_v1.lua:997
-#: modules/module_currently_yanllsama_v1.lua:1012
-#: modules/module_currently_yanllsama_v1.lua:1027
-#: modules/module_currently_yanllsama_v1.lua:1042
-#: modules/module_currently_yanllsama_v1.lua:1112
-#: modules/module_hero_currently.lua:1193
-#: modules/module_recent_book_stats.lua:941
+#: modules/module_currently_yanllsama_v1.lua:1000
+#: modules/module_currently_yanllsama_v1.lua:1015
+#: modules/module_currently_yanllsama_v1.lua:1030
+#: modules/module_currently_yanllsama_v1.lua:1045
+#: modules/module_currently_yanllsama_v1.lua:1115
+#: modules/module_hero_currently.lua:1357
+#: modules/module_recent_book_stats.lua:944
 #: patches/patch_coverdeck_description.lua:804
-#: patches/patch_coverdeck_exclude.lua:202 patches/patch_recent_extra.lua:329
+#: patches/patch_coverdeck_exclude.lua:202
+#: patches/patch_recent_extra.lua:446
 msgid "Save"
 msgstr "保存"
 
 #: modules/module_currently_with_pace.lua:1121
 #: modules/module_currently_with_pace.lua:1123
-#: modules/module_currently_yanllsama_v1.lua:915
-#: modules/module_currently_yanllsama_v1.lua:916
-#: modules/module_hero_currently.lua:1004
-#: modules/module_hero_currently.lua:1005
-#: modules/module_hero_currently.lua:1008
+#: modules/module_currently_yanllsama_v1.lua:918
+#: modules/module_currently_yanllsama_v1.lua:919
+#: modules/module_hero_currently.lua:1168
+#: modules/module_hero_currently.lua:1169
+#: modules/module_hero_currently.lua:1172
 #: modules/module_reading_insights.lua:1034
 #: modules/module_reading_insights.lua:1035
 #: modules/module_reading_insights.lua:1038
 #: modules/module_reading_streaks.lua:431
 #: modules/module_reading_streaks.lua:432
 #: modules/module_reading_streaks.lua:435
-#: modules/module_recent_book_stats.lua:854
-#: modules/module_recent_book_stats.lua:855
+#: modules/module_recent_book_stats.lua:857
 #: modules/module_recent_book_stats.lua:858
+#: modules/module_recent_book_stats.lua:861
 msgid "Scale"
 msgstr "缩放"
 
@@ -1169,7 +1180,7 @@ msgstr ""
 "默认比例为“100%”。"
 
 #: modules/module_currently_with_pace.lua:1136
-#: modules/module_currently_yanllsama_v1.lua:920
+#: modules/module_currently_yanllsama_v1.lua:923
 msgid ""
 "Scale for the cover thumbnail only.\n"
 "100% is the default size."
@@ -1178,11 +1189,11 @@ msgstr ""
 "默认比例为“100%”。"
 
 #: modules/module_currently_with_pace.lua:1124
-#: modules/module_currently_yanllsama_v1.lua:916
-#: modules/module_hero_currently.lua:1009
+#: modules/module_currently_yanllsama_v1.lua:919
+#: modules/module_hero_currently.lua:1173
 #: modules/module_reading_insights.lua:1039
 #: modules/module_reading_streaks.lua:436
-#: modules/module_recent_book_stats.lua:859
+#: modules/module_recent_book_stats.lua:862
 msgid ""
 "Scale for this module.\n"
 "100% is the default size."
@@ -1190,7 +1201,7 @@ msgstr ""
 "此模块缩放比例。\n"
 "默认比例为“100%”。"
 
-#: modules/module_hero_currently.lua:1065
+#: modules/module_hero_currently.lua:1229
 msgid ""
 "Scales the description font size relative to default.\n"
 "Larger text shows fewer lines; smaller shows more."
@@ -1198,7 +1209,7 @@ msgstr ""
 "相对于默认值缩放书籍简介字号。\n"
 "字号越大，显示行数越少；字号越小，显示行数越多。"
 
-#: modules/module_hero_currently.lua:1102
+#: modules/module_hero_currently.lua:1266
 msgid ""
 "Scales the hero card's book cover relative to default, independently of the "
 "card's text Scale setting.\n"
@@ -1207,7 +1218,7 @@ msgstr ""
 "相对于默认值独立缩放主卡片封面，不受卡片文字缩放设置影响。\n"
 "保持 3:2 宽高比；文字列会自动调整宽度以适配。"
 
-#: modules/module_currently_yanllsama_v1.lua:941
+#: modules/module_currently_yanllsama_v1.lua:944
 msgid "Segmented"
 msgstr "分段"
 
@@ -1227,9 +1238,9 @@ msgstr "9月"
 msgid "September"
 msgstr "9月"
 
-#: modules/module_hero_currently.lua:1072
-#: modules/module_hero_currently.lua:1109
-#: modules/module_hero_currently.lua:1152
+#: modules/module_hero_currently.lua:1236
+#: modules/module_hero_currently.lua:1273
+#: modules/module_hero_currently.lua:1316
 msgid "Set"
 msgstr "设置"
 
@@ -1246,19 +1257,19 @@ msgstr ""
 msgid "Set page"
 msgstr "设置页"
 
-#: modules/module_hero_currently.lua:1121
+#: modules/module_hero_currently.lua:1285
 msgid "Show Frame"
 msgstr "显示边框"
 
-#: modules/module_currently_yanllsama_v1.lua:978
+#: modules/module_currently_yanllsama_v1.lua:981
 msgid "Show Headers: Off"
 msgstr "显示标题：关"
 
-#: modules/module_currently_yanllsama_v1.lua:978
+#: modules/module_currently_yanllsama_v1.lua:981
 msgid "Show Headers: On"
 msgstr "显示标题：开"
 
-#: modules/module_hero_currently.lua:1123
+#: modules/module_hero_currently.lua:1287
 msgid "Show Progress Bar"
 msgstr "显示进度条"
 
@@ -1267,11 +1278,11 @@ msgid "Show Reading Insights on sleep screen"
 msgstr "在休眠屏幕上显示阅读分析"
 
 #: modules/module_currently_with_pace.lua:1365
-#: modules/module_currently_yanllsama_v1.lua:928
-#: modules/module_hero_currently.lua:998
-#: modules/module_reading_insights.lua:1030
+#: modules/module_currently_yanllsama_v1.lua:931
+#: modules/module_hero_currently.lua:1163
+#: modules/module_reading_insights.lua:1029
 #: modules/module_reading_streaks.lua:426
-#: modules/module_recent_book_stats.lua:847
+#: modules/module_recent_book_stats.lua:850
 msgid "Show section label"
 msgstr "显示分区标签"
 
@@ -1279,7 +1290,7 @@ msgstr "显示分区标签"
 msgid "Show SimpleUI home screen on sleep screen"
 msgstr "在休眠屏幕上显示 Simple UI 主页"
 
-#: modules/module_hero_currently.lua:1124
+#: modules/module_hero_currently.lua:1288
 msgid "Show Statistics"
 msgstr "显示统计"
 
@@ -1294,16 +1305,21 @@ msgid ""
 msgstr "将首页时钟日期显示为“2025年6月3日 星期三”，而非“Wednesday, 3 June”。"
 
 #: modules/module_currently_with_pace.lua:1269
-#: modules/module_currently_yanllsama_v1.lua:936
+#: modules/module_currently_yanllsama_v1.lua:939
 msgid "Simple"
 msgstr "简洁"
 
-#: main.lua:395
+#: main.lua:506
 msgid "SimpleUI Extra"
 msgstr "Simple UI 扩展"
 
+#: _meta.lua:4
 msgid "SimpleUI Extra Modules"
 msgstr "Simple UI 扩展模块"
+
+#: patches/patch_recent_extra.lua:463
+msgid "Ignore First Book"
+msgstr "忽略最近第一本书籍"
 
 #: patches/patch_screensaver_insights.lua:36
 msgid "Sleep Screen: Reading Insights"
@@ -1313,15 +1329,15 @@ msgstr "新增屏保：阅读分析屏保"
 msgid "Sleep Screen: SimpleUI Home"
 msgstr "新增屏保：主页屏保"
 
-#: modules/module_hero_currently.lua:1122
+#: modules/module_hero_currently.lua:1286
 msgid "Solid Background"
 msgstr "实心背景"
 
-#: modules/module_currently_yanllsama_v1.lua:956
+#: modules/module_currently_yanllsama_v1.lua:959
 msgid "Sort Items"
 msgstr "排序项目"
 
-#: modules/module_currently_yanllsama_v1.lua:963
+#: modules/module_currently_yanllsama_v1.lua:966
 msgid "Sort Statistics"
 msgstr "排序统计"
 
@@ -1329,7 +1345,7 @@ msgstr "排序统计"
 msgid "SPEED"
 msgstr "速度"
 
-#: modules/module_recent_book_stats.lua:573
+#: modules/module_recent_book_stats.lua:576
 msgid "Statistics cards for recently read books with progress and reading time"
 msgstr "最近阅读书籍的统计卡片，含进度和阅读时间"
 
@@ -1337,7 +1353,7 @@ msgstr "最近阅读书籍的统计卡片，含进度和阅读时间"
 msgid "Statistics database not found"
 msgstr "未找到统计数据库"
 
-#: modules/module_currently_yanllsama_v1.lua:931
+#: modules/module_currently_yanllsama_v1.lua:934
 msgid "Statistics Layout & Appearance"
 msgstr "统计布局与外观"
 
@@ -1349,11 +1365,11 @@ msgstr "统计分组 (默认模式)"
 msgid "Stats layout"
 msgstr "统计布局"
 
-#: modules/module_currently_yanllsama_v1.lua:856
+#: modules/module_currently_yanllsama_v1.lua:859
 msgid "System UI Font"
 msgstr "系统界面字体"
 
-#: modules/module_recent_book_stats.lua:902
+#: modules/module_recent_book_stats.lua:905
 msgid "Tap to Open Book"
 msgstr "点击打开书籍"
 
@@ -1367,7 +1383,7 @@ msgstr "文字对齐"
 msgid "Text Size"
 msgstr "字号"
 
-#: modules/module_currently_yanllsama_v1.lua:984
+#: modules/module_currently_yanllsama_v1.lua:987
 msgid "Thin"
 msgstr "细体"
 
@@ -1383,8 +1399,8 @@ msgstr "本月"
 msgid "THIS WEEK"
 msgstr "本周"
 
-#: modules/module_currently_yanllsama_v1.lua:945
-#: modules/module_recent_book_stats.lua:874
+#: modules/module_currently_yanllsama_v1.lua:948
+#: modules/module_recent_book_stats.lua:877
 msgid "Time Format"
 msgstr "时间格式"
 
@@ -1411,7 +1427,7 @@ msgstr "已用时间"
 msgid "Title"
 msgstr "书名"
 
-#: modules/module_recent_book_stats.lua:753
+#: modules/module_recent_book_stats.lua:756
 msgid "to go"
 msgstr "剩余"
 
@@ -1419,7 +1435,7 @@ msgstr "剩余"
 msgid "TODAY'S SUMMARY"
 msgstr "今日汇总"
 
-#: modules/module_currently_yanllsama_v1.lua:954
+#: modules/module_currently_yanllsama_v1.lua:957
 msgid "Toggle Visibility"
 msgstr "切换可见性"
 
@@ -1436,7 +1452,7 @@ msgstr "三组显示"
 msgid "Unknown"
 msgstr "未知"
 
-#: patches/patch_recent_extra.lua:293
+#: patches/patch_recent_extra.lua:410
 msgid ""
 "Vertical spacing between rows.\n"
 "Only used when \"Rows\" is greater than 1."
@@ -1472,13 +1488,13 @@ msgstr "阅读周数"
 msgid "weeks to go"
 msgstr "剩余周数"
 
-#: modules/module_currently_yanllsama_v1.lua:1072
-#: modules/module_currently_yanllsama_v1.lua:1080
+#: modules/module_currently_yanllsama_v1.lua:1075
+#: modules/module_currently_yanllsama_v1.lua:1083
 msgid "Weight: Bold"
 msgstr "字重：粗体"
 
-#: modules/module_currently_yanllsama_v1.lua:1072
-#: modules/module_currently_yanllsama_v1.lua:1080
+#: modules/module_currently_yanllsama_v1.lua:1075
+#: modules/module_currently_yanllsama_v1.lua:1083
 msgid "Weight: Normal"
 msgstr "字重：正常"
 
@@ -1491,17 +1507,17 @@ msgstr ""
 "设置为“0”则每次都随机显示不同页面。"
 
 #: modules/module_currently_with_pace.lua:1279
-#: modules/module_currently_yanllsama_v1.lua:937
+#: modules/module_currently_yanllsama_v1.lua:940
 msgid "With percentage"
 msgstr "带百分比"
 
-#: modules/module_recent_book_stats.lua:873
-#: modules/module_currently_yanllsama_v1:945
+#: modules/module_currently_yanllsama_v1.lua:948
+#: modules/module_recent_book_stats.lua:876
 msgid "XhYm"
 msgstr "拆分"
 
-#: modules/module_currently_yanllsama_v1.lua:948
-#: modules/module_recent_book_stats.lua:888
+#: modules/module_currently_yanllsama_v1.lua:951
+#: modules/module_recent_book_stats.lua:891
 msgid "XhYm (e.g. 3h30m)"
 msgstr "拆分 (如 3h30m)"
 
@@ -1532,3 +1548,4 @@ msgstr "— 天剩余"
 #: modules/module_currently_with_pace.lua:728
 msgid "—wpm"
 msgstr "— 字/分钟"
+
