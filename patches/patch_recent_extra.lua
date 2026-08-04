@@ -24,7 +24,21 @@
 --   P.description     string  — help text for menu
 --   P.default_enabled bool    — first-run default (false = opt-in for patches)
 --
--- HOW IT WORKS
+-- COMPATIBILITY: SimpleUI's stable release (2.1.1) still ships the old
+-- top-level desktop_modules/module_recent.lua. The rewrite described below
+-- (module_book_rows.lua's "recent" sub-module) only exists on SimpleUI's
+-- unreleased main branch as of this writing. Until SimpleUI cuts a release
+-- containing that rewrite, P.apply() below detects which API is present at
+-- runtime and wraps whichever one it finds:
+--
+--   api_mode = "sub"  — new sub-module (module_book_rows.lua), tried first
+--   api_mode = "flat" — old module_recent.lua, fallback for 2.1.1 and earlier
+--
+-- TODO: once SimpleUI releases a version containing module_book_rows.lua,
+-- drop the "flat" fallback path (and this compatibility note) and require
+-- that release as the plugin's minimum SimpleUI version.
+--
+-- HOW IT WORKS (api_mode == "sub")
 --   Since the SimpleUI refactor, the Recent Books sub-module is no longer
 --   the top-level module_recent.lua — it is one of three "row" sub-modules
 --   (recent / new_books / tbr) created by RowRenderer.makeModule() in
@@ -64,12 +78,26 @@
 --                ctx["_row_fps_recent"] with that slice for the duration
 --                of that single orig_build() call.
 --
+--   Both api_mode branches restore ctx.kb_recent_focus_idx (the keyboard/
+--   d-pad focus highlight index — see sui_book_row.lua's `ctx.kb_recent_
+--   focus_idx == i` check) translated to each row's local index, so the
+--   focus outline lands on the right cover instead of only ever
+--   considering row 1.
+--
+-- HOW IT WORKS (api_mode == "flat")
+--   Same idea, but against the old module_recent.lua contract: instead of
+--   writing the per-row slice into ctx["_row_fps_recent"], it's written
+--   directly to ctx.recent_fps (module_recent.build() reads that field,
+--   not a cache dict), and there's no _row_page_recent / paged concern
+--   because module_recent never had pagination.
+--
 --   M.getHeight() — scales the single-row height returned by the original
 --                M.getHeight() by the configured row count, adding the
 --                row spacing between rows.
 --
 --   M.getMenuItems() — appends "Rows", "Row Spacing", "Exclude Paths from
---                Recent" and "Ignore First Book" items to the sub-module's menu.
+--                Recent" and "Ignore First Book" items to the target
+--                module's menu (identical shape/behavior in both api_modes).
 --
 -- SETTING KEYS (all prefixed by pfx, e.g. "simpleui_hs_")
 --   recent_rows              integer 1..MAX_ROWS, default 1
@@ -244,35 +272,44 @@ end
 function P.apply()
     if _applied then return end
 
-    local ok, BR = pcall(require, "desktop_modules/module_book_rows")
-    if not ok or not BR or type(BR.sub_modules) ~= "table" then
-        logger.warn("recent_extra patch: cannot load module_book_rows — skipped")
-        return
-    end
     local ok_ss, SUISettings = pcall(require, "sui_store")
     if not ok_ss or not SUISettings then
         logger.warn("recent_extra patch: cannot load sui_store — skipped")
         return
     end
 
-    -- Locate the "recent" sub-module created by RowRenderer.makeModule.
-    -- Other row sub-modules (new_books, tbr) are intentionally left alone.
-    local recent_mod = nil
-    for _, sub in ipairs(BR.sub_modules) do
-        if sub and sub.id == "recent" then
-            recent_mod = sub
-            break
+    -- Locate the target module, preferring the new sub-module API and
+    -- falling back to the old flat module_recent.lua API. See the
+    -- "COMPATIBILITY" note at the top of this file.
+    local target_mod, api_mode = nil, nil
+
+    local ok_br, BR = pcall(require, "desktop_modules/module_book_rows")
+    if ok_br and BR and type(BR.sub_modules) == "table" then
+        for _, sub in ipairs(BR.sub_modules) do
+            if sub and sub.id == "recent" then
+                target_mod, api_mode = sub, "sub"
+                break
+            end
         end
     end
-    if not recent_mod then
-        logger.warn("recent_extra patch: 'recent' sub-module not found in module_book_rows — skipped")
+
+    if not target_mod then
+        local ok_mr, MR = pcall(require, "desktop_modules/module_recent")
+        if ok_mr and MR then
+            target_mod, api_mode = MR, "flat"
+        end
+    end
+
+    if not target_mod then
+        logger.warn("recent_extra patch: neither module_book_rows ('recent' sub-module) "
+                     .. "nor module_recent found — skipped")
         return
     end
     _applied = true
 
     -- ── wrap build() ──────────────────────────────────────────────────────
-    local orig_build = recent_mod.build
-    recent_mod.build = function(w, ctx)
+    local orig_build = target_mod.build
+    target_mod.build = function(w, ctx)
         local pfx          = (ctx and ctx.pfx) or ""
         local rows         = _getRows(SUISettings, pfx)
         local excludes     = _getExcludePaths(SUISettings, pfx)
@@ -285,8 +322,11 @@ function P.apply()
         end
 
         -- Self-collect up to (rows * PER_ROW) entries from ReadHistory,
-        -- applying excludes + ignore_first + the recent sub-module's own
-        -- finished-book filter. ctx is the live homescreen ctx.
+        -- applying excludes + ignore_first + the recent module's own
+        -- finished-book filter. ctx is the live homescreen ctx. This
+        -- collection logic is identical in both api_modes: it only reads
+        -- generic ctx fields (current_fp, prefetched), never the
+        -- module-specific cache.
         local fps = _collectRecentFps(rows * PER_ROW, excludes, ignore_first,
                                       show_finished, ctx)
         if not fps or #fps == 0 then
@@ -294,39 +334,62 @@ function P.apply()
         end
 
         -- Save originals so subsequent re-renders (e.g. the homescreen
-        -- refresh loop calling build() again) see the unmodified cache.
-        local orig_cache = ctx[CACHE_KEY]
+        -- refresh loop calling build() again) see the unmodified state.
+        local orig_cache = (api_mode == "sub") and ctx[CACHE_KEY] or ctx.recent_fps
+        local orig_focus_idx = ctx.kb_recent_focus_idx
 
         local row_widgets = {}
         for r = 1, rows do
             local from = (r - 1) * PER_ROW + 1
             if from > #fps then break end
             local to = math.min(r * PER_ROW, #fps)
-            -- Slice `fps[from..to]` and inject it as the row cache. The
-            -- original RowRenderer.build() reads `ctx[cache_key]` first
-            -- and renders `min(#fps, max_items)` covers from index 1 — so
-            -- writing the current row's slice here is the only reliable
-            -- way to get it to render row 2/3/... differently from row 1.
+            -- Slice `fps[from..to]` and inject it as the row source. The
+            -- original build() reads this slot first and renders
+            -- `min(#fps, max_items)` covers from index 1 — so writing the
+            -- current row's slice here is the only reliable way to get it
+            -- to render row 2/3/... differently from row 1.
             --
-            -- (Setting `ctx[PAGE_KEY] = r` is NOT enough: the recent
-            -- sub-module does not enable `paged = true` in its spec, so
-            -- RowRenderer.build's paged branch is never taken and the
-            -- page key is ignored — see RowRenderer.build line 152.)
+            -- (For api_mode == "sub", setting `ctx[PAGE_KEY] = r` is NOT
+            -- enough: the recent sub-module does not enable `paged = true`
+            -- in its spec, so RowRenderer.build's paged branch is never
+            -- taken and the page key is ignored — see RowRenderer.build
+            -- line 152.)
             local slice = {}
             for i = from, to do slice[#slice + 1] = fps[i] end
-            ctx[CACHE_KEY] = slice
+            if api_mode == "sub" then
+                ctx[CACHE_KEY] = slice
+            else
+                ctx.recent_fps = slice
+            end
+
+            -- Translate the global focus index into this row's local
+            -- index (both api_modes read ctx.kb_recent_focus_idx), so the
+            -- keyboard/d-pad highlight lands on the right cover instead of
+            -- only ever being checked against row 1's indices.
+            if orig_focus_idx then
+                local local_idx = orig_focus_idx - (from - 1)
+                ctx.kb_recent_focus_idx = (local_idx >= 1 and local_idx <= #slice) and local_idx or nil
+            else
+                ctx.kb_recent_focus_idx = nil
+            end
+
             local row_widget = orig_build(w, ctx)
             if row_widget then
                 row_widgets[#row_widgets + 1] = row_widget
             end
         end
 
-        -- Restore the original cache so the next pass through
-        -- RowRenderer.build (which the homescreen triggers on its own
-        -- refresh path) starts from getFileList/filterItem instead of
-        -- seeing a stale slice. In Lua, `t.x = nil` and "key absent"
-        -- are equivalent, so a single assignment handles both cases.
-        ctx[CACHE_KEY] = orig_cache
+        -- Restore the original state so the next pass through build()
+        -- (which the homescreen triggers on its own refresh path) starts
+        -- from the unmodified source instead of seeing a stale slice. In
+        -- Lua, `t.x = nil` and "key absent" are equivalent, so a single
+        -- assignment handles both cases.
+        if api_mode == "sub" then
+            ctx[CACHE_KEY] = orig_cache
+        else
+            ctx.recent_fps = orig_cache
+        end
+        ctx.kb_recent_focus_idx = orig_focus_idx
 
         if #row_widgets == 0 then return nil end
         if #row_widgets == 1 then return row_widgets[1] end
@@ -358,8 +421,8 @@ function P.apply()
     end
 
     -- ── wrap getHeight() ──────────────────────────────────────────────────
-    local orig_getHeight = recent_mod.getHeight
-    recent_mod.getHeight = function(ctx)
+    local orig_getHeight = target_mod.getHeight
+    target_mod.getHeight = function(ctx)
         local pfx  = (ctx and ctx.pfx) or ""
         local rows = _getRows(SUISettings, pfx)
         local h_one = orig_getHeight(ctx)
@@ -372,8 +435,8 @@ function P.apply()
     end
 
     -- ── wrap getMenuItems() ───────────────────────────────────────────────
-    local orig_getMenuItems = recent_mod.getMenuItems
-    recent_mod.getMenuItems = function(ctx_menu)
+    local orig_getMenuItems = target_mod.getMenuItems
+    target_mod.getMenuItems = function(ctx_menu)
         local items   = orig_getMenuItems(ctx_menu) or {}
         local pfx     = (ctx_menu and ctx_menu.pfx) or ""
         local refresh = ctx_menu.refresh
