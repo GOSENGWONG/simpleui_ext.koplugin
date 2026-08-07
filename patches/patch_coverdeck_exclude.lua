@@ -98,8 +98,14 @@ function P.apply()
         local c      = ctx.cfg and ctx.cfg.coverdeck
         local source = c and c.source
         if not source then
+            -- "flow_recent_source" is the pre-migration key name, kept as a
+            -- fallback for settings files main.lua has not rewritten yet.
+            -- Reading only that one makes every source look like "recent",
+            -- which would filter a collection-backed deck against the
+            -- recent-books exclude list.
             local ok2, S = pcall(require, "sui_store")
-            source = (ok2 and S and S:readSetting(pfx .. "flow_recent_source")) or "recent"
+            source = (ok2 and S and (S:readSetting(pfx .. "coverdeck_source")
+                                  or S:readSetting(pfx .. "flow_recent_source"))) or "recent"
         end
 
         if source == "recent" then

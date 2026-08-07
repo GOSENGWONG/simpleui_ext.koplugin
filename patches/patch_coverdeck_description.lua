@@ -22,8 +22,9 @@
 --                            amount of vertical space before the first build.
 --
 --     M.build(w, ctx)      — calls orig_build() to get the carousel, then
---                            reads the description of ctx.fps[coverdeck_cur_idx]
---                            (the centre book).  If a description exists it
+--                            reads the description of the centre book, taken
+--                            from the carousel's own _center_fp stamp (see
+--                            _getCenterFp).  If a description exists it
 --                            builds a tappable text strip and assembles a
 --                            VerticalGroup with [carousel, gap, strip] or
 --                            [strip, gap, carousel] depending on position.
@@ -91,10 +92,21 @@ local _truncate_cache = {}
 local _cache_count = 0
 local _cache_max_size = 20
 
+-- Cache for the (HTML-stripped) description of each book.
+-- Key: filepath.  Value: text, or false when the book has no description —
+-- false is cached too, so books without one don't re-open their sidecar on
+-- every carousel navigation.  Reading a description touches custom_metadata,
+-- BookInfoManager and the DocSettings sidecar, which is far too expensive to
+-- repeat for every swipe on e-ink.
+local _desc_cache = {}
+local _desc_cache_count = 0
+
 -- Cache invalidation: clear when settings change
 local function _clearCache()
     _truncate_cache = {}
     _cache_count = 0
+    _desc_cache = {}
+    _desc_cache_count = 0
 end
 
 -- ---------------------------------------------------------------------------
@@ -271,7 +283,7 @@ end
 -- Returns plain text (HTML stripped) or nil.
 -- ---------------------------------------------------------------------------
 
-local function _getDescription(fp)
+local function _readDescription(fp)
     if not fp then return nil end
     local ok_lfs, lfs = pcall(require, "libs/libkoreader-lfs")
     if not ok_lfs or lfs.attributes(fp, "mode") ~= "file" then return nil end
@@ -317,24 +329,51 @@ local function _getDescription(fp)
     return raw and _stripHTML(raw)
 end
 
+local function _getDescription(fp)
+    if not fp then return nil end
+    local hit = _desc_cache[fp]
+    if hit ~= nil then return hit or nil end   -- false = known to have none
+
+    local desc = _readDescription(fp)
+    if _desc_cache_count >= _cache_max_size then
+        _desc_cache = {}          -- simple eviction: clear all
+        _desc_cache_count = 0
+    end
+    _desc_cache[fp] = desc or false
+    _desc_cache_count = _desc_cache_count + 1
+    return desc
+end
+
 -- ---------------------------------------------------------------------------
--- Reconstruct the fps list the same way module_coverdeck does.
--- Called AFTER orig_build() so ctx.coverdeck_cur_idx is already normalised.
--- When patch_coverdeck_exclude is also active it will have pre-filtered
--- ctx.recent_fps (we are inside its wrapper), so the book we pick is always
--- the one actually visible at the centre of the carousel.
+-- Which book is at the centre of the carousel we just built?
+--
+-- Do NOT re-derive this from ctx: module_coverdeck builds its list from four
+-- possible sources ("recent", "tbr", "favorites", "collection:<name>") and
+-- additionally drops finished books when coverdeck_show_finished is off.  Any
+-- reconstruction here has to stay bit-for-bit in step with getFps() or the
+-- index lands in a different list than the one on screen — which is exactly
+-- how this patch used to show the currently-reading book's description (or a
+-- blank strip) for every position of a collection-backed deck.
+--
+-- build() already records the answer on the widget it returns, so read it back
+-- instead.  Both fallbacks below are for older module_coverdeck versions only.
 -- ---------------------------------------------------------------------------
 
+-- Reconstruct the fps list the way module_coverdeck does for the simple
+-- sources.  LAST RESORT ONLY — see _getCenterFp().
 local function _buildFps(ctx)
     local ok_s, S = pcall(require, "sui_store")
     local pfx    = ctx.pfx or ""
     local source
 
-    -- Read source the same way module_coverdeck does
+    -- Read source the same way module_coverdeck does.  "flow_recent_source" is
+    -- the pre-migration key name, kept as a fallback for settings files that
+    -- main.lua has not rewritten yet.
     local c = ctx.cfg and ctx.cfg.coverdeck
     source = c and c.source
     if not source then
-        source = (ok_s and S and S:readSetting(pfx .. "flow_recent_source")) or "recent"
+        source = (ok_s and S and (S:readSetting(pfx .. "coverdeck_source")
+                               or S:readSetting(pfx .. "flow_recent_source"))) or "recent"
     end
 
     -- TBR source
@@ -364,6 +403,27 @@ local function _buildFps(ctx)
         end
     end
     return fps
+end
+
+local function _getCenterFp(carousel, ctx)
+    -- 1) module_coverdeck stamps the centre book onto the widget it returns
+    --    (result._center_fp = fps[curIdx]).  Correct for every source.
+    if carousel._center_fp then return carousel._center_fp end
+
+    -- 2) Older builds: the cover slot table carries one entry per visible
+    --    cover; the centre one is tagged align = "center".
+    if carousel._cover_slots then
+        for _i, slot in ipairs(carousel._cover_slots) do
+            if slot.align == "center" and slot.fp then return slot.fp end
+        end
+    end
+
+    -- 3) Neither is present — reconstruct, accepting that this only tracks the
+    --    "recent" and "tbr" sources.
+    local fps    = _buildFps(ctx)
+    local curIdx = ctx.coverdeck_cur_idx or 1
+    if curIdx > #fps then curIdx = 1 end
+    return fps[curIdx]
 end
 
 -- ---------------------------------------------------------------------------
@@ -552,10 +612,9 @@ function P.apply()
         if not carousel then return nil end
 
         -- Determine which file is at the centre of the just-built carousel.
-        local fps    = _buildFps(ctx)
-        local curIdx = ctx.coverdeck_cur_idx or 1
-        if curIdx > #fps then curIdx = 1 end
-        local fp     = fps[curIdx]
+        -- Read back from the carousel itself so every source (recent / tbr /
+        -- favorites / collection) and the "show finished" filter are honoured.
+        local fp = _getCenterFp(carousel, ctx)
 
         local full_desc = fp and _getDescription(fp)
         local limit_mode = _getLimitMode(pfx, S)
