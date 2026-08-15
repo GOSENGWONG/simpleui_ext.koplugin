@@ -745,7 +745,7 @@ function M.build(w, ctx)
             face      = face_author,
             width     = tw,
             alignment = "left",
-            height    = math.ceil(face_author.size * 1.3), 
+            height    = math.ceil(face_author.size * 1.3),
             height_overflow_show_ellipsis = true,
             fgcolor   = CLR_SUB,
         }
