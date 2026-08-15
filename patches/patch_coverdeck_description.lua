@@ -191,11 +191,6 @@ local function _truncate(s, max_chars)
 end
 
 -- ---------------------------------------------------------------------------
--- Truncate text to fit within a specific number of rendered lines
--- Uses cache to avoid expensive re-calculation
--- ---------------------------------------------------------------------------
-
--- ---------------------------------------------------------------------------
 -- Book description reader — tries custom_metadata → BookInfoManager → sidecar
 -- Returns plain text (HTML stripped) or nil.
 -- ---------------------------------------------------------------------------
