@@ -740,11 +740,17 @@ function M.build(w, ctx)
     right_top[#right_top + 1] = title_tap
     if bd.authors and bd.authors ~= "" then
         right_top[#right_top + 1] = VerticalSpan:new{ width = author_gap }
-        right_top[#right_top + 1] = TextWidget:new{
-            text    = bd.authors,
-            face    = face_author,
-            fgcolor = CLR_SUB,
+        local author_args = {
+            text      = bd.authors,
+            face      = face_author,
+            width     = tw,
+            alignment = "left",
+            height    = math.ceil(face_author.size * 1.3), 
+            height_overflow_show_ellipsis = true,
+            fgcolor   = CLR_SUB,
         }
+        right_top[#right_top + 1] = (ctx.has_wallpaper and UI and UI.makeAlphaTextBox(author_args))
+                                      or TextBoxWidget:new(author_args)
     end
 
     -- ── right_bottom: progress row + optional stats, bottom-anchored ─────────

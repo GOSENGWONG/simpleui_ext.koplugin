@@ -84,28 +84,19 @@ local STRIP_LINES    = 3    -- default visual line cap for the description strip
 
 local _applied = false
 
--- Cache for truncated descriptions to avoid expensive re-calculation
--- Key: filepath .. "|" .. width .. "|" .. font_size .. "|" .. max_lines
--- Value: truncated text
--- Max 20 entries to prevent memory bloat
-local _truncate_cache = {}
-local _cache_count = 0
-local _cache_max_size = 20
-
 -- Cache for the (HTML-stripped) description of each book.
 -- Key: filepath.  Value: text, or false when the book has no description —
 -- false is cached too, so books without one don't re-open their sidecar on
 -- every carousel navigation.  Reading a description touches custom_metadata,
 -- BookInfoManager and the DocSettings sidecar, which is far too expensive to
 -- repeat for every swipe on e-ink.
-local _desc_cache = {}
+local _desc_cache       = {}
 local _desc_cache_count = 0
+local _cache_max_size   = 20
 
 -- Cache invalidation: clear when settings change
 local function _clearCache()
-    _truncate_cache = {}
-    _cache_count = 0
-    _desc_cache = {}
+    _desc_cache       = {}
     _desc_cache_count = 0
 end
 
@@ -203,80 +194,6 @@ end
 -- Truncate text to fit within a specific number of rendered lines
 -- Uses cache to avoid expensive re-calculation
 -- ---------------------------------------------------------------------------
-
-local function _truncateToLines(text, width, face, max_lines, cache_key)
-    if not text or text == "" or max_lines <= 0 then return "" end
-    
-    -- Check cache first (huge performance win for repeated calls)
-    if cache_key and _truncate_cache[cache_key] then
-        return _truncate_cache[cache_key]
-    end
-    
-    local RenderText = require("ui/rendertext")
-    local words = {}
-    for word in text:gmatch("%S+") do
-        words[#words + 1] = word
-    end
-    
-    -- Apply safety margin to prevent overflow on different devices (Android vs Kobo)
-    -- Font rendering can vary slightly, so we use 95% of available width
-    local safe_width = math.floor(width * 0.95)
-    
-    local lines = {}
-    local current_line = ""
-    local word_idx = 1
-    
-    while word_idx <= #words do
-        -- Stop immediately if we already have max_lines
-        if #lines >= max_lines then
-            return table.concat(lines, " ") .. "\xE2\x80\xA6"
-        end
-        
-        local word = words[word_idx]
-        local test_line = current_line == "" and word or (current_line .. " " .. word)
-        local w = RenderText:sizeUtf8Text(0, safe_width, face, test_line, true).x
-        
-        if w <= safe_width then
-            -- Word fits, add to current line
-            current_line = test_line
-            word_idx = word_idx + 1
-        else
-            -- Word doesn't fit, save current line and start new one
-            if current_line ~= "" then
-                -- Save the full line
-                lines[#lines + 1] = current_line
-                current_line = ""
-                -- Don't increment word_idx - retry this word on next line
-            else
-                -- Single word too long for line, add it anyway
-                lines[#lines + 1] = word
-                word_idx = word_idx + 1
-                current_line = ""
-            end
-        end
-    end
-    
-    -- Add remaining text if we haven't reached max_lines
-    if current_line ~= "" and #lines < max_lines then
-        lines[#lines + 1] = current_line
-    end
-    
-    local result = table.concat(lines, " ")
-    
-    -- Store in cache (with simple LRU: clear all if max size exceeded)
-    if cache_key then
-        if not _truncate_cache[cache_key] then
-            if _cache_count >= _cache_max_size then
-                _truncate_cache = {}  -- Simple eviction: clear all
-                _cache_count = 0
-            end
-            _cache_count = _cache_count + 1
-        end
-        _truncate_cache[cache_key] = result
-    end
-    
-    return result
-end
 
 -- ---------------------------------------------------------------------------
 -- Book description reader — tries custom_metadata → BookInfoManager → sidecar
@@ -468,28 +385,28 @@ local function _buildDescStrip(w, pfx, full_desc, bd_title, bd_author, S, scale,
     local max_lines, strip_text
     if limit_mode == "fixed_lines" then
         max_lines  = _getLineCount(pfx, S)
-        -- Pre-truncate text to exact line count to prevent overflow
-        -- Use cache key: filepath|width|fontsize|maxlines for performance
-        local cache_key = fp and (fp .. "|" .. desc_w .. "|" .. desc_fs .. "|" .. max_lines)
-        strip_text = _truncateToLines(full_desc, desc_w, face, max_lines, cache_key)
+        strip_text = full_desc  -- single-line already-cleaned string
     else  -- "max_length" (default)
         max_lines  = STRIP_LINES
-        local max_len = _getMaxLen(pfx, S)
-        strip_text = _truncate(full_desc, max_len)
+        strip_text = _truncate(full_desc, _getMaxLen(pfx, S))
     end
+
+    local line_h = math.ceil((face.size or desc_fs) * 1.4)
 
     -- Use makeAlphaTextBox so the text composites over whatever is already on
     -- the framebuffer — identical to the technique used by module_hero_currently.
     -- TextBoxWidget:new fills its own internal blitbuffer with white before
     -- drawing text; makeAlphaTextBox bypasses that fill entirely.
     local desc_opts = {
-        text        = strip_text,
-        face        = face,
-        width       = desc_w,
-        alignment   = align,
-        fgcolor     = CLR_TEXT,
-        max_lines   = max_lines,
-        line_height = 0.3,
+        text                          = strip_text,
+        face                          = face,
+        width                         = desc_w,
+        height                        = line_h * max_lines,
+        alignment                     = align,
+        fgcolor                       = CLR_TEXT,
+        max_lines                     = max_lines,
+        line_height                   = 0.3,
+        height_overflow_show_ellipsis = true,
     }
     local desc_widget
     if ok_ui and UI and UI.makeAlphaTextBox then
@@ -504,9 +421,7 @@ local function _buildDescStrip(w, pfx, full_desc, bd_title, bd_author, S, scale,
     -- Calculate height: fixed for fixed_lines mode, actual for max_length mode
     local actual_h
     if limit_mode == "fixed_lines" then
-        -- Use fixed height based on line count to keep layout stable
-        -- Text is already pre-truncated by _truncateToLines
-        local line_h = math.ceil((face.size or desc_fs) * 1.4)
+        -- Fixed block keeps the layout stable across books of different sizes
         actual_h = line_h * max_lines
     else
         -- Use actual rendered height for max_length mode
