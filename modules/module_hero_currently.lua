@@ -108,23 +108,30 @@ end
 -- falling back to "first author et al."
 --
 -- Strategy:
---   1. Cap the author count at MAX_AUTHORS (5). Anything beyond is dropped;
+--   1. Split on newlines only — see below.
+--   2. Cap the author count at MAX_AUTHORS (5). Anything beyond is dropped;
 --      this bounds the worst-case FFI call count below and avoids spending
 --      any cycles on author #6+ for anthology / collection volumes where the
 --      marginal names carry diminishing information.
---   2. If only one author remains, return it verbatim (no et al.).
---   3. Try "A, B, C, ..." (all of them); if it fits, return it.
---   4. Otherwise try "A, B, ..., k et al." for k = #parts, #parts-1, ..., 2.
---   5. Fallback: "first author et al." (best-effort; never empty).
+--   3. If only one author remains, return it verbatim (no et al.).
+--   4. Try "A, B, C, ..." (all of them); if it fits, return it.
+--   5. Otherwise try "A, B, ..., k et al." for k = #parts, #parts-1, ..., 3.
+--   6. Fallback: "first author et al." (best-effort; never empty).
 -- ---------------------------------------------------------------------------
 local MAX_AUTHORS = 5
 
 local function formatAuthors(authors_str, available_width, face)
     if not authors_str or authors_str == "" then return nil end
-    local normalized = authors_str:gsub("%s*[\r\n]+%s*", ", ")
 
+    -- KOReader separates multiple authors with newlines, never commas:
+    -- filemanagerbookinfo sets allow_newline for the "authors" prop, and core
+    -- itself does authors:gsub("\n.*", " et al.") in bookmarkbrowser and
+    -- bookmetadataarchive.  SimpleUI's own coverPlaceholder splits on "\n" too.
+    -- Splitting on commas would break "Tolkien, J. R. R." — a single author in
+    -- "Last, First" form, as OPF dc:creator and PDF metadata commonly store it —
+    -- into two names and render it as "Tolkien et al.".
     local parts = {}
-    for piece in normalized:gmatch("[^,]+") do
+    for piece in (authors_str .. "\n"):gmatch("(.-)\r?\n") do
         local trimmed = piece:match("^%s*(.-)%s*$")
         if trimmed ~= "" then
             parts[#parts + 1] = trimmed
@@ -147,10 +154,11 @@ local function formatAuthors(authors_str, available_width, face)
 
     local all_str = table.concat(parts, ", ")
     if fits(all_str) then return all_str end
-    for k = #parts, 2, -1 do
+    for k = #parts, 3, -1 do
         local candidate = table.concat(parts, ", ", 1, k - 1) .. _(" et al.")
         if fits(candidate) then return candidate end
     end
+    -- k == 2 would produce exactly this, so it doubles as the last resort.
     return parts[1] .. _(" et al.")
 end
 
@@ -982,7 +990,10 @@ function M.build(w, ctx)
                 local DescTap = InputContainer:extend{}
                 local _full_desc  = desc_text
                 local _book_title  = bd.title or ""
-                local _book_author = formatAuthors(bd.authors, tw, face_author)
+                -- The viewer is fullscreen, so it has room for every author:
+                -- only normalise the separators, don't width-fit against tw.
+                local _book_author = bd.authors
+                                     and bd.authors:gsub("%s*[\r\n]+%s*", ", ")
                 function DescTap:onTap()
                     local TextViewer = require("ui/widget/textviewer")
                     local UIManager  = require("ui/uimanager")

@@ -27,8 +27,8 @@ msgstr " (Kopya %d)"
 msgid " (Default)"
 msgstr " (Varsayılan)"
 
-#: modules/module_hero_currently.lua:151
-#: modules/module_hero_currently.lua:154
+#: modules/module_hero_currently.lua:158
+#: modules/module_hero_currently.lua:162
 msgid " et al."
 msgstr " ve diğ."
 

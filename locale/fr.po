@@ -27,8 +27,8 @@ msgstr " (Copie %d)"
 msgid " (Default)"
 msgstr " (Défaut)"
 
-#: modules/module_hero_currently.lua:151
-#: modules/module_hero_currently.lua:154
+#: modules/module_hero_currently.lua:158
+#: modules/module_hero_currently.lua:162
 msgid " et al."
 msgstr " et al."
 

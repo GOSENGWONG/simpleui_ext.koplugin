@@ -27,8 +27,8 @@ msgstr " (副本 %d)"
 msgid " (Default)"
 msgstr " (默认)"
 
-#: modules/module_hero_currently.lua:151
-#: modules/module_hero_currently.lua:154
+#: modules/module_hero_currently.lua:158
+#: modules/module_hero_currently.lua:162
 msgid " et al."
 msgstr " 等人"
 
