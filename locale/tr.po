@@ -27,6 +27,11 @@ msgstr " (Kopya %d)"
 msgid " (Default)"
 msgstr " (Varsayılan)"
 
+#: modules/module_hero_currently.lua:151
+#: modules/module_hero_currently.lua:154
+msgid " et al."
+msgstr " ve diğ."
+
 #: modules/module_currently_with_pace.lua:726
 #: modules/module_currently_with_pace.lua:864
 msgid "%.0fwpm"
