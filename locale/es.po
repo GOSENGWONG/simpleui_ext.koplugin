@@ -27,6 +27,11 @@ msgstr " (Copia %d)"
 msgid " (Default)"
 msgstr " (Predeterminado)"
 
+#: modules/module_hero_currently.lua:151
+#: modules/module_hero_currently.lua:154
+msgid " et al."
+msgstr " et al."
+
 #: modules/module_currently_with_pace.lua:726
 #: modules/module_currently_with_pace.lua:864
 msgid "%.0fwpm"
