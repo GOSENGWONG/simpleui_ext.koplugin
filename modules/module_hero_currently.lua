@@ -103,6 +103,66 @@ local function stripHTML(s)
 end
 
 -- ---------------------------------------------------------------------------
+-- Format a (possibly multi-author) string for a single-line label or title.
+-- Responsive to available width: greedily fits as many authors as possible,
+-- falling back to "first author et al."
+--
+-- Strategy:
+--   1. Split on newlines only — see below.
+--   2. Cap the author count at MAX_AUTHORS (5). Anything beyond is dropped;
+--      this bounds the worst-case FFI call count below and avoids spending
+--      any cycles on author #6+ for anthology / collection volumes where the
+--      marginal names carry diminishing information.
+--   3. If only one author remains, return it verbatim (no et al.).
+--   4. Try "A, B, C, ..." (all of them); if it fits, return it.
+--   5. Otherwise try "A, B, ..., k et al." for k = #parts, #parts-1, ..., 3.
+--   6. Fallback: "first author et al." (best-effort; never empty).
+-- ---------------------------------------------------------------------------
+local MAX_AUTHORS = 5
+
+local function formatAuthors(authors_str, available_width, face)
+    if not authors_str or authors_str == "" then return nil end
+
+    -- KOReader separates multiple authors with newlines, never commas:
+    -- filemanagerbookinfo sets allow_newline for the "authors" prop, and core
+    -- itself does authors:gsub("\n.*", " et al.") in bookmarkbrowser and
+    -- bookmetadataarchive.  SimpleUI's own coverPlaceholder splits on "\n" too.
+    -- Splitting on commas would break "Tolkien, J. R. R." — a single author in
+    -- "Last, First" form, as OPF dc:creator and PDF metadata commonly store it —
+    -- into two names and render it as "Tolkien et al.".
+    local parts = {}
+    for piece in (authors_str .. "\n"):gmatch("(.-)\r?\n") do
+        local trimmed = piece:match("^%s*(.-)%s*$")
+        if trimmed ~= "" then
+            parts[#parts + 1] = trimmed
+        end
+    end
+
+    if #parts > MAX_AUTHORS then
+        local trimmed = {}
+        for i = 1, MAX_AUTHORS do trimmed[i] = parts[i] end
+        parts = trimmed
+    end
+    if #parts == 0 then return nil end
+    if #parts == 1 then return parts[1] end
+
+    local RenderText = require("ui/rendertext")
+    local function fits(s)
+        return RenderText:sizeUtf8Text(0, available_width, face, s, true).x
+            <= available_width
+    end
+
+    local all_str = table.concat(parts, ", ")
+    if fits(all_str) then return all_str end
+    for k = #parts, 3, -1 do
+        local candidate = table.concat(parts, ", ", 1, k - 1) .. _(" et al.")
+        if fits(candidate) then return candidate end
+    end
+    -- k == 2 would produce exactly this, so it doubles as the last resort.
+    return parts[1] .. _(" et al.")
+end
+
+-- ---------------------------------------------------------------------------
 -- Time formatter: seconds → "Xh Ym" / "Xh" / "Ym"
 -- ---------------------------------------------------------------------------
 local function fmtTime(secs)
@@ -714,7 +774,6 @@ function M.build(w, ctx)
         face      = face_title,
         width     = tw,
         alignment = "left",
-        max_lines = 2,
         fgcolor   = CLR_TEXT,
         bold      = true,
     }
@@ -740,11 +799,17 @@ function M.build(w, ctx)
     right_top[#right_top + 1] = title_tap
     if bd.authors and bd.authors ~= "" then
         right_top[#right_top + 1] = VerticalSpan:new{ width = author_gap }
-        right_top[#right_top + 1] = TextWidget:new{
-            text    = bd.authors,
-            face    = face_author,
-            fgcolor = CLR_SUB,
+        local author_args = {
+            text      = formatAuthors(bd.authors, tw, face_author),
+            face      = face_author,
+            width     = tw,
+            alignment = "left",
+            height    = math.ceil(face_author.size * 1.3),
+            height_overflow_show_ellipsis = true,
+            fgcolor   = CLR_SUB,
         }
+        right_top[#right_top + 1] = (ctx.has_wallpaper and UI and UI.makeAlphaTextBox(author_args))
+                                      or TextBoxWidget:new(author_args)
     end
 
     -- ── right_bottom: progress row + optional stats, bottom-anchored ─────────
@@ -925,7 +990,10 @@ function M.build(w, ctx)
                 local DescTap = InputContainer:extend{}
                 local _full_desc  = desc_text
                 local _book_title  = bd.title or ""
+                -- The viewer is fullscreen, so it has room for every author:
+                -- only normalise the separators, don't width-fit against tw.
                 local _book_author = bd.authors
+                                     and bd.authors:gsub("%s*[\r\n]+%s*", ", ")
                 function DescTap:onTap()
                     local TextViewer = require("ui/widget/textviewer")
                     local UIManager  = require("ui/uimanager")
