@@ -103,6 +103,58 @@ local function stripHTML(s)
 end
 
 -- ---------------------------------------------------------------------------
+-- Format a (possibly multi-author) string for a single-line label or title.
+-- Responsive to available width: greedily fits as many authors as possible,
+-- falling back to "first author et al."
+--
+-- Strategy:
+--   1. Cap the author count at MAX_AUTHORS (5). Anything beyond is dropped;
+--      this bounds the worst-case FFI call count below and avoids spending
+--      any cycles on author #6+ for anthology / collection volumes where the
+--      marginal names carry diminishing information.
+--   2. If only one author remains, return it verbatim (no et al.).
+--   3. Try "A, B, C, ..." (all of them); if it fits, return it.
+--   4. Otherwise try "A, B, ..., k et al." for k = #parts, #parts-1, ..., 2.
+--   5. Fallback: "first author et al." (best-effort; never empty).
+-- ---------------------------------------------------------------------------
+local MAX_AUTHORS = 5
+
+local function formatAuthors(authors_str, available_width, face)
+    if not authors_str or authors_str == "" then return nil end
+    local normalized = authors_str:gsub("%s*[\r\n]+%s*", ", ")
+
+    local parts = {}
+    for piece in normalized:gmatch("[^,]+") do
+        local trimmed = piece:match("^%s*(.-)%s*$")
+        if trimmed ~= "" then
+            parts[#parts + 1] = trimmed
+        end
+    end
+
+    if #parts > MAX_AUTHORS then
+        local trimmed = {}
+        for i = 1, MAX_AUTHORS do trimmed[i] = parts[i] end
+        parts = trimmed
+    end
+    if #parts == 0 then return nil end
+    if #parts == 1 then return parts[1] end
+
+    local RenderText = require("ui/rendertext")
+    local function fits(s)
+        return RenderText:sizeUtf8Text(0, available_width, face, s, true).x
+            <= available_width
+    end
+
+    local all_str = table.concat(parts, ", ")
+    if fits(all_str) then return all_str end
+    for k = #parts, 2, -1 do
+        local candidate = table.concat(parts, ", ", 1, k - 1) .. _(" et al.")
+        if fits(candidate) then return candidate end
+    end
+    return parts[1] .. _(" et al.")
+end
+
+-- ---------------------------------------------------------------------------
 -- Time formatter: seconds → "Xh Ym" / "Xh" / "Ym"
 -- ---------------------------------------------------------------------------
 local function fmtTime(secs)
@@ -714,7 +766,6 @@ function M.build(w, ctx)
         face      = face_title,
         width     = tw,
         alignment = "left",
-        max_lines = 2,
         fgcolor   = CLR_TEXT,
         bold      = true,
     }
@@ -741,7 +792,7 @@ function M.build(w, ctx)
     if bd.authors and bd.authors ~= "" then
         right_top[#right_top + 1] = VerticalSpan:new{ width = author_gap }
         local author_args = {
-            text      = bd.authors,
+            text      = formatAuthors(bd.authors, tw, face_author),
             face      = face_author,
             width     = tw,
             alignment = "left",
@@ -931,7 +982,7 @@ function M.build(w, ctx)
                 local DescTap = InputContainer:extend{}
                 local _full_desc  = desc_text
                 local _book_title  = bd.title or ""
-                local _book_author = bd.authors
+                local _book_author = formatAuthors(bd.authors, tw, face_author)
                 function DescTap:onTap()
                     local TextViewer = require("ui/widget/textviewer")
                     local UIManager  = require("ui/uimanager")
