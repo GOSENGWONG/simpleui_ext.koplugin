@@ -380,7 +380,16 @@ local function _buildDescStrip(w, pfx, full_desc, bd_title, bd_author, S, scale,
     local max_lines, strip_text
     if limit_mode == "fixed_lines" then
         max_lines  = _getLineCount(pfx, S)
-        strip_text = full_desc  -- single-line already-cleaned string
+        -- Length insurance: TextBoxWidget:_splitToLines() (textboxwidget.lua:336)
+        -- has no early exit at lines_per_page -- its outer loop runs
+        -- `while idx and idx <= size do`, so a 3000-character blurb gets fully
+        -- measured even though only N lines will render. Capping the input to
+        -- ~max_lines*200 chars keeps the C-side (xtext) measurement bounded
+        -- for outliers without losing visible content -- anything beyond this
+        -- would be ellipsized by height_overflow_show_ellipsis anyway. The
+        -- old _truncateToLines() had this early-break + cache; cheap to
+        -- reproduce as a Lua-side character cap.
+        strip_text = _truncate(full_desc, max_lines * 200)
     else  -- "max_length" (default)
         max_lines  = STRIP_LINES
         strip_text = _truncate(full_desc, _getMaxLen(pfx, S))
@@ -399,7 +408,6 @@ local function _buildDescStrip(w, pfx, full_desc, bd_title, bd_author, S, scale,
         height                        = line_h * max_lines,
         alignment                     = align,
         fgcolor                       = CLR_TEXT,
-        max_lines                     = max_lines,
         line_height                   = 0.3,
         height_overflow_show_ellipsis = true,
     }
@@ -413,15 +421,7 @@ local function _buildDescStrip(w, pfx, full_desc, bd_title, bd_author, S, scale,
         desc_widget = TextBoxWidget:new(desc_opts)
     end
 
-    -- Calculate height: fixed for fixed_lines mode, actual for max_length mode
-    local actual_h
-    if limit_mode == "fixed_lines" then
-        -- Fixed block keeps the layout stable across books of different sizes
-        actual_h = line_h * max_lines
-    else
-        -- Use actual rendered height for max_length mode
-        actual_h = desc_widget:getSize().h
-    end
+    local actual_h = line_h * max_lines
 
     -- Tappable wrapper: opens full description in a scrollable viewer
     local DescTap = InputContainer:extend{}
@@ -542,7 +542,7 @@ function P.apply()
             local pre = ctx.prefetched and ctx.prefetched[fp]
             local bd  = SH.getBookData(fp, pre)
             bd_title  = bd and bd.title
-            bd_author = bd and bd.authors
+            bd_author = bd and bd.authors and bd.authors:gsub("\r?\n+", ", ")
         end
 
         -- Read the same scale values module_coverdeck uses for its own text.
