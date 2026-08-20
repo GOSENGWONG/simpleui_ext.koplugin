@@ -985,6 +985,9 @@ local module = {
     label           = _DEFAULT_LABEL,
     enabled_key     = "reading_insights",
     default_on      = false,
+    -- See the note in module_hero_currently.lua: SimpleUI 2.5's engine
+    -- only opens the shared stats DB for an external module that asks.
+    needs           = { db = true },
 }
 
 function module.build(w, ctx)
@@ -995,17 +998,17 @@ function module.build(w, ctx)
     
     local ok, data = pcall(getInsightsData, ctx.pfx)
     if not ok then
-        logger.warn("Reading Insights: Error getting data:", data)
+        logger.dbg("Reading Insights: Error getting data:", data)
         return nil
     end
     if not data or not data.yearlyStats then
-        logger.warn("Reading Insights: No data or yearlyStats")
+        logger.dbg("Reading Insights: No data or yearlyStats")
         return nil
     end
     
     local ok_widget, widget = pcall(buildInsightsWidget, w, ctx, data)
     if not ok_widget then
-        logger.warn("Reading Insights: Error building widget:", widget)
+        logger.dbg("Reading Insights: Error building widget:", widget)
         return nil
     end
     

@@ -40,24 +40,24 @@ function P.apply()
 
     local ok, ClockMod = pcall(require, "desktop_modules/module_clock")
     if not ok then
-        logger.warn "simpleui_ext/patch_clock_date_cn: failed to load module_clock"
+        logger.dbg "simpleui_ext/patch_clock_date_cn: failed to load module_clock"
         return
     end
 
     local err = hotfix(_localDateCN, ClockMod.build, "build -> _localDate")
     if err then
-        logger.warn("simpleui_ext/patch_clock_date_cn: failed to apply hotfix: " .. err)
+        logger.dbg("simpleui_ext/patch_clock_date_cn: failed to apply hotfix: " .. err)
         return
     end
 
     local _build = ClockMod.build
     ---@diagnostic disable-next-line: duplicate-set-field
     ClockMod.build = function(...)
-        logger.warn "simpleui_ext/patch_clock_date_cn: hooked build"
+        logger.dbg "simpleui_ext/patch_clock_date_cn: hooked build"
         return _build(...)
     end
 
-    logger.info "simpleui_ext/patch_clock_date_cn: applied patch"
+    logger.dbg "simpleui_ext/patch_clock_date_cn: applied patch"
 end
 
 return P

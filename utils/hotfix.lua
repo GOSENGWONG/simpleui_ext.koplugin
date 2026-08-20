@@ -16,13 +16,13 @@
 --     # use `hotfix.set` or simply call `hotfix` directly, they are the same.
 --     local err = hotfix(_myProxy, Mod.method, "name1 -> name2")
 --     if err then
---         logger.warn("failed to hotfix: " .. err)
+--         logger.dbg("failed to hotfix: " .. err)
 --     end
 --
 --     # get a function or table
 --     local err, val = hotfix.get(Mod.method, "name1 -> name2")
 --     if err then
---         logger.warn("failed to get upvalue: " .. err)
+--         logger.dbg("failed to get upvalue: " .. err)
 --     end
 --     # call the function or change the table
 ---@overload fun(proxy: any, root: function, path: string): string?

@@ -579,7 +579,7 @@ M.label           = _DEFAULT_LABEL
 M.enabled_key     = "recent_book_stats"
 M.default_on      = false
 M.is_book_mod     = true   -- suppresses the homescreen "no books yet" empty-state
-M.needs           = { db = true }  -- request shared stats DB conn from homescreen
+M.needs           = { db = true, books = true }  -- request shared stats DB conn from homescreen
 
 function M.reset()
     _Config      = nil

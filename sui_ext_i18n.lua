@@ -235,7 +235,7 @@ local function loadTranslations()
         local entries, pluralizer = parsePO(path)
         if entries and next(entries) then
             local n = 0; for _i in pairs(entries) do n = n + 1 end
-            logger.info("simpleui_ext i18n: loaded " .. path .. " - " .. n .. " strings")
+            logger.dbg("simpleui_ext i18n: loaded " .. path .. " - " .. n .. " strings")
             return { entries = entries, plural = pluralizer }
         end
     end
@@ -311,7 +311,7 @@ end
 local function reset()
     _translations = nil
     _loaded       = false
-    logger.info("simpleui_ext i18n: translation cache cleared")
+    logger.dbg("simpleui_ext i18n: translation cache cleared")
 end
 
 return {

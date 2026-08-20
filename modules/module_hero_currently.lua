@@ -40,10 +40,40 @@ local function getSH()
     if not _SH then
         local ok, m = pcall(require, "desktop_modules/module_books_shared")
         if ok and m then _SH = m else
-            logger.warn("simpleui_ext: hero_currently: cannot load module_books_shared")
+            logger.dbg("simpleui_ext: hero_currently: cannot load module_books_shared")
         end
     end
     return _SH
+end
+
+-- ---------------------------------------------------------------------------
+-- fetchCover(SH, fp, w, h, stretch_limit)
+--
+-- SimpleUI <=2.4 had ONE cover getter with a hybrid policy:
+--   SH.getBookCover(fp, w, h, align, stretch_limit)
+--     -> stretch when the aspect distortion is within stretch_limit,
+--        crop-to-fill otherwise.
+--
+-- SimpleUI 2.5 split that in two and dropped the hybrid:
+--   SH.getBookCover(fp, w, h)                 -> always stretch
+--   SH.getCroppedBookCover(fp, w, h, align)   -> always crop-to-fill
+-- The old call still "works" there, but silently ignores the extra args —
+-- which is why "Prevent Cover Cropping" stopped doing anything after the
+-- 2.5 upgrade.
+--
+-- On 2.5 we map the toggle onto the two endpoints it used to be able to
+-- reach (threshold 100% and 0%):
+--   Prevent Cover Cropping ON  -> stretch, never crops
+--   Prevent Cover Cropping OFF -> crop-to-fill
+-- The threshold slider only has a middle ground to express on <=2.4, which
+-- still gets the original 5-arg hybrid call.
+-- ---------------------------------------------------------------------------
+local function fetchCover(SH, fp, w, h, stretch_limit)
+    if type(SH.getCroppedBookCover) == "function" then     -- SimpleUI 2.5+
+        if stretch_limit then return SH.getBookCover(fp, w, h) end
+        return SH.getCroppedBookCover(fp, w, h, nil)
+    end
+    return SH.getBookCover(fp, w, h, nil, stretch_limit)   -- SimpleUI <=2.4
 end
 
 local function getConfig()
@@ -515,7 +545,7 @@ M.default_on      = false
 M.has_covers      = true    -- activates e-ink dithering and cover poll
 M.is_book_mod     = true    -- suppresses "No books opened yet" empty-state
 -- Declare DB need so the homescreen opens a stats connection when we are active.
-M.needs           = { db = true }
+M.needs           = { db = true, books = true }
 
 -- Called by the homescreen on hot-reload to drop cached references
 function M.reset()
@@ -733,7 +763,7 @@ function M.build(w, ctx)
         local threshold = Settings:readSetting(pfx .. SK_CROP_THRESHOLD) or 50
         stretch_limit = threshold / 100.0
     end
-    local cover = SH.getBookCover(fp, COVER_W, COVER_H, nil, stretch_limit)
+    local cover = fetchCover(SH, fp, COVER_W, COVER_H, stretch_limit)
                   or SH.coverPlaceholder(bd.title, bd.authors, COVER_W, COVER_H)
 
     -- Description-area content: either the book blurb, or (when the
@@ -1143,7 +1173,7 @@ function M.updateCovers(widget, _ctx)
 
     local all_done = true
     for _i, slot in ipairs(tappable._cover_slots) do
-        local new_cover = SH.getBookCover(slot.fp, slot.w, slot.h, slot.align, slot.stretch)
+        local new_cover = fetchCover(SH, slot.fp, slot.w, slot.h, slot.stretch)
         if new_cover then
             slot.container[slot.idx] = new_cover
         elseif Config and not Config.isCoverMissing(slot.fp) then

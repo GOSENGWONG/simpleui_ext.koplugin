@@ -44,7 +44,7 @@ local function getSH()
     if not _SH then
         local ok, m = pcall(require, "desktop_modules/module_books_shared")
         if ok and m then _SH = m
-        else logger.warn("simpleui_ext: module_currently_with_pace: cannot load module_books_shared: " .. tostring(m)) end
+        else logger.dbg("simpleui_ext: module_currently_with_pace: cannot load module_books_shared: " .. tostring(m)) end
     end
     return _SH
 end
@@ -265,7 +265,7 @@ local function fetchBookStats(md5, shared_conn, ctx)
         end
     end)
     if not ok then
-        logger.warn("simpleui: module_currently: fetchBookStats failed: " .. tostring(err))
+        logger.dbg("simpleui: module_currently: fetchBookStats failed: " .. tostring(err))
         -- Signal to the homescreen that the shared connection is unusable so it
         -- can be discarded and reopened on the next render.
         if shared_conn and ctx and Config.isFatalDbError(err) then
@@ -348,7 +348,7 @@ M.enabled_key     = "currently_with_pace"
 M.default_on      = false
 M.has_covers      = true   -- activates e-ink dithering and cover poll
 M.is_book_mod     = true   -- suppresses empty-state when active
-M.needs           = { db = true }  -- Declare DB need for stats queries
+M.needs           = { db = true, books = true }  -- Declare DB need for stats queries
 
 
 -- ---------------------------------------------------------------------------
@@ -554,6 +554,10 @@ function M.build(w, ctx)
     -- cleared and prefetchBooks() re-reads the sidecar, so this is always fresh.
     local prefetched_entry = ctx.prefetched and ctx.prefetched[current_fp]
     local bd    = SH.getBookData(current_fp, prefetched_entry)
+    -- NOTE: SimpleUI 2.5+ ignores the align/stretch_limit args — its
+    -- getBookCover is stretch-only (crop lives in getCroppedBookCover).
+    -- Kept for SimpleUI <=2.4; on 2.5 the cover is always stretched,
+    -- same as SimpleUI's own module_currently.
     local cover = SH.getBookCover(current_fp, D.COVER_W, D.COVER_H, nil, 0.10)
                   or SH.coverPlaceholder(bd.title, bd.authors, D.COVER_W, D.COVER_H)
 
@@ -1062,9 +1066,17 @@ function M.getHeight(_ctx)
     local pct_gap   = math.max(1, math.floor(_BASE_PCT_GAP        * scale))
 
     -- Ask the font engine for the real line height (includes ascender+descender).
+    --
+    -- face.size is a plain number in current KOReader, not a table -- so the
+    -- old `face.size.height` test threw "attempt to index field 'size' (a
+    -- number value)" instead of falling through to the approximation below,
+    -- taking getHeight() (and with it this module's whole render) down. Guard
+    -- on the type so an API shape we do not recognise degrades to the
+    -- fallback, which is what the fallback is for.
     local function faceH(fs)
         local ok, face = pcall(Font.getFace, Font, "smallinfofont", fs)
-        if ok and face and face.size and face.size.height then
+        if ok and type(face) == "table" and type(face.size) == "table"
+           and type(face.size.height) == "number" then
             return face.size.height
         end
         -- fallback: font size * 1.8 approximates typical line height

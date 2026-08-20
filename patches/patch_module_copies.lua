@@ -11,17 +11,17 @@ local patch = {
 function patch.apply()
     local ok_reg, Registry = pcall(require, "desktop_modules/moduleregistry")
     if not ok_reg or not Registry then
-        logger.warn("simpleui_ext: patch_module_copies: moduleregistry not available")
+        logger.dbg("simpleui_ext: patch_module_copies: moduleregistry not available")
         return
     end
 
     local ok_sui, SUISettings = pcall(require, "sui_store")
     if not ok_sui or not SUISettings then
-        logger.warn("simpleui_ext: patch_module_copies: sui_store not available")
+        logger.dbg("simpleui_ext: patch_module_copies: sui_store not available")
         return
     end
 
-    logger.info("simpleui_ext: patch_module_copies: applying module copies patch")
+    logger.dbg("simpleui_ext: patch_module_copies: applying module copies patch")
 
     local original_get = Registry.get
     local wrapped_cache = {}
@@ -323,7 +323,7 @@ function patch.apply()
         return result
     end
 
-    logger.info("simpleui_ext: patch_module_copies: patch applied successfully")
+    logger.dbg("simpleui_ext: patch_module_copies: patch applied successfully")
 end
 
 return patch

@@ -123,7 +123,22 @@ local SETTING_EXCLUDE      = "recent_exclude_paths"
 local SETTING_IGNORE_FIRST = "recent_ignore_first"
 
 local MAX_ROWS = 4
-local PER_ROW  = 5  -- matches the recent sub-module's hard-coded max_items
+local PER_ROW  = 5  -- fallback: the recent module's default max_items
+
+-- Covers per row. SimpleUI 2.5's Recent Books lets the user choose 4 or 5
+-- columns (GridRenderer spec.cols_choice), and its build() only paints that
+-- many cells — so slicing at a hard-coded 5 would silently drop the last
+-- book of every row for anyone who picked 4. Ask the grid engine for the
+-- effective value where it exists; PER_ROW covers SimpleUI <=2.4, which had
+-- no such setting.
+local function _perRow(pfx)
+    local ok, GridRenderer = pcall(require, "engines/sui_book_grid")
+    if ok and GridRenderer and type(GridRenderer.getGridCols) == "function" then
+        local n = GridRenderer.getGridCols(pfx or "", "recent", PER_ROW)
+        if type(n) == "number" and n > 0 then return n end
+    end
+    return PER_ROW
+end
 
 -- Cache key used by RowRenderer.build() for the "recent" sub-module
 -- (default = "_row_fps_" .. id). Matches the hard-coded default in
@@ -274,7 +289,7 @@ function P.apply()
 
     local ok_ss, SUISettings = pcall(require, "sui_store")
     if not ok_ss or not SUISettings then
-        logger.warn("recent_extra patch: cannot load sui_store — skipped")
+        logger.dbg("recent_extra patch: cannot load sui_store — skipped")
         return
     end
 
@@ -301,10 +316,15 @@ function P.apply()
     end
 
     if not target_mod then
-        logger.warn("recent_extra patch: neither module_book_rows ('recent' sub-module) "
+        logger.dbg("recent_extra patch: neither module_book_rows ('recent' sub-module) "
                      .. "nor module_recent found — skipped")
         return
     end
+
+    -- api_mode is now only a label for the log: build() below writes the
+    -- per-row slice into both possible slots, so nothing depends on getting
+    -- this right. See the comment on orig_recent/orig_cache_key in build().
+
     _applied = true
 
     -- ── wrap build() ──────────────────────────────────────────────────────
@@ -327,7 +347,8 @@ function P.apply()
         -- collection logic is identical in both api_modes: it only reads
         -- generic ctx fields (current_fp, prefetched), never the
         -- module-specific cache.
-        local fps = _collectRecentFps(rows * PER_ROW, excludes, ignore_first,
+        local per_row = _perRow(pfx)
+        local fps = _collectRecentFps(rows * per_row, excludes, ignore_first,
                                       show_finished, ctx)
         if not fps or #fps == 0 then
             return orig_build(w, ctx)
@@ -335,14 +356,29 @@ function P.apply()
 
         -- Save originals so subsequent re-renders (e.g. the homescreen
         -- refresh loop calling build() again) see the unmodified state.
-        local orig_cache = (api_mode == "sub") and ctx[CACHE_KEY] or ctx.recent_fps
+        --
+        -- Both slots, because the per-row slice below is written to both
+        -- rather than to whichever one a detection heuristic picks:
+        --   ctx.recent_fps  — read by the pre-2.5 hand-written module_recent
+        --   ctx[CACHE_KEY]  — read by GridRenderer's per-module file-list
+        --                     cache (SimpleUI 2.5's module_recent)
+        -- Exactly one is consulted by the installed SimpleUI; the other is an
+        -- unused key, so writing both is always correct and never needs to
+        -- know which implementation is in front of it. The previous version
+        -- guessed from which FILE the module lived in, and SimpleUI 2.5 broke
+        -- that guess: module_book_rows was split back into module_recent.lua
+        -- while keeping the grid implementation, so the test said "flat", the
+        -- slice went to the ignored slot, and rows 2..n silently re-rendered
+        -- row 1's books.
+        local orig_recent    = ctx.recent_fps
+        local orig_cache_key = ctx[CACHE_KEY]
         local orig_focus_idx = ctx.kb_recent_focus_idx
 
         local row_widgets = {}
         for r = 1, rows do
-            local from = (r - 1) * PER_ROW + 1
+            local from = (r - 1) * per_row + 1
             if from > #fps then break end
-            local to = math.min(r * PER_ROW, #fps)
+            local to = math.min(r * per_row, #fps)
             -- Slice `fps[from..to]` and inject it as the row source. The
             -- original build() reads this slot first and renders
             -- `min(#fps, max_items)` covers from index 1 — so writing the
@@ -356,11 +392,8 @@ function P.apply()
             -- line 152.)
             local slice = {}
             for i = from, to do slice[#slice + 1] = fps[i] end
-            if api_mode == "sub" then
-                ctx[CACHE_KEY] = slice
-            else
-                ctx.recent_fps = slice
-            end
+            ctx.recent_fps = slice
+            ctx[CACHE_KEY] = slice
 
             -- Translate the global focus index into this row's local
             -- index (both api_modes read ctx.kb_recent_focus_idx), so the
@@ -384,11 +417,8 @@ function P.apply()
         -- from the unmodified source instead of seeing a stale slice. In
         -- Lua, `t.x = nil` and "key absent" are equivalent, so a single
         -- assignment handles both cases.
-        if api_mode == "sub" then
-            ctx[CACHE_KEY] = orig_cache
-        else
-            ctx.recent_fps = orig_cache
-        end
+        ctx.recent_fps          = orig_recent
+        ctx[CACHE_KEY]          = orig_cache_key
         ctx.kb_recent_focus_idx = orig_focus_idx
 
         if #row_widgets == 0 then return nil end
@@ -536,7 +566,7 @@ function P.apply()
         return items
     end
 
-    logger.info("simpleui_ext: patch_recent_extra: applied")
+    logger.dbg("simpleui_ext: patch_recent_extra: applied")
 end
 
 return P

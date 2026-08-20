@@ -24,6 +24,7 @@
 local logger = require("logger")
 local _      = require("sui_ext_i18n").translate
 local T      = require("ffi/util").template
+local SUICompat = require("utils/sui_compat")
 
 local PATCH_ID   = "screensaver_insights"
 local TYPE_VALUE = "simpleui_insights"
@@ -48,7 +49,7 @@ function P.apply()
         if not (type(tbl) == "table"
                 and type(tbl[1]) == "table"
                 and type(tbl[1].sub_item_table) == "table") then
-            logger.warn("screensaver_insights: unexpected screensaver_menu structure")
+            logger.dbg("screensaver_insights: unexpected screensaver_menu structure")
             return
         end
         local sub = tbl[1].sub_item_table
@@ -128,12 +129,12 @@ function P.apply()
 
     local ok_sty, SUIStyle = pcall(require, "sui_style")
     if not ok_sty or not SUIStyle then
-        logger.warn("screensaver_insights: sui_style unavailable — aborting")
+        logger.dbg("screensaver_insights: sui_style unavailable — aborting")
         return
     end
     local ok_cfg, Config = pcall(require, "sui_config")
     if not ok_cfg or not Config then
-        logger.warn("screensaver_insights: sui_config unavailable — aborting")
+        logger.dbg("screensaver_insights: sui_config unavailable — aborting")
         return
     end
     local ok_ui, UI = pcall(require, "sui_core")
@@ -820,7 +821,7 @@ function P.apply()
         end)
 
         if ok and type(result) == "table" then return result end
-        logger.warn("screensaver_insights: buildPage page=" .. tostring(page_num)
+        logger.dbg("screensaver_insights: buildPage page=" .. tostring(page_num)
                     .. " error: " .. tostring(result))
         return VG:new{}
     end
@@ -833,10 +834,11 @@ function P.apply()
         if _last_wp_widget then
             pcall(function() _last_wp_widget:free() end); _last_wp_widget = nil
         end
-        local HS2 = package.loaded["sui_homescreen"]
-        if not HS2 then return nil end
-        if not (HS2.styleGetWallpaperEnabled and HS2.styleGetWallpaperEnabled()) then return nil end
-        local path = HS2.styleGetWallpaper and HS2.styleGetWallpaper()
+        -- sui_compat resolves the table that owns the wallpaper getters:
+        -- sui_homescreen on SimpleUI <=2.4, features/sui_wallpaper on 2.5+.
+        local WP = SUICompat.wallpaperAPI()
+        if not WP or not WP.styleGetWallpaperEnabled() then return nil end
+        local path = WP.styleGetWallpaper()
         if not path then return nil end
         local ok, w = pcall(ImageWidget.new, ImageWidget, {
             file=path, width=sw, height=sh, scale_factor=0, file_do_cache=false, alpha=true,
@@ -866,7 +868,7 @@ function P.apply()
 
         local ok_pg, vg = pcall(buildPage, page_num, iw, screen_h)
         if not ok_pg or not vg then
-            logger.warn("screensaver_insights: buildPage threw: " .. tostring(vg))
+            logger.dbg("screensaver_insights: buildPage threw: " .. tostring(vg))
             return white()
         end
 
@@ -904,7 +906,7 @@ function P.apply()
         if type(orig_show) ~= "function" then
             local mt = type(orig_show) == "table" and getmetatable(orig_show)
             if not (mt and mt.__call) then
-                logger.warn("screensaver_insights: show not callable — cannot patch")
+                logger.dbg("screensaver_insights: show not callable — cannot patch")
                 return false
             end
         end
@@ -913,7 +915,7 @@ function P.apply()
         Screensaver.show = function(self)
             if self.screensaver_type ~= TYPE_VALUE then return orig_show(self) end
             if not self.ui then
-                logger.warn("screensaver_insights: show() aborting — self.ui nil"); return
+                logger.dbg("screensaver_insights: show() aborting — self.ui nil"); return
             end
 
             Device.screen_saver_mode = true
@@ -938,7 +940,7 @@ function P.apply()
             local target_page = G_reader_settings:readSetting(SK_PAGE) or 0
             local ok_b, hs = pcall(buildInsightsWidget, sw, sh, target_page)
             if not ok_b then
-                logger.warn("screensaver_insights: buildInsightsWidget: " .. tostring(hs)); hs = nil
+                logger.dbg("screensaver_insights: buildInsightsWidget: " .. tostring(hs)); hs = nil
             end
 
             local snap
@@ -960,11 +962,11 @@ function P.apply()
                             if _bb then pcall(function() _bb:free() end); _bb = nil end
                         end
                     else
-                        logger.warn("screensaver_insights: paintTo failed")
+                        logger.dbg("screensaver_insights: paintTo failed")
                         pcall(function() bb:free() end)
                     end
                 else
-                    logger.warn("screensaver_insights: Blitbuffer.new failed")
+                    logger.dbg("screensaver_insights: Blitbuffer.new failed")
                     pcall(function() if hs and hs.free then hs:free() end end)
                 end
             end
@@ -1027,7 +1029,7 @@ function P.apply()
                         if _patchShow(result) then
                             _G.require = _orig_req_for_ss
                         else
-                            logger.warn("screensaver_insights: require patch of show() failed")
+                            logger.dbg("screensaver_insights: require patch of show() failed")
                         end
                     end
                 else

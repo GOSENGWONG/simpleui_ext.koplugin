@@ -49,6 +49,7 @@
 local logger = require("logger")
 local _      = require("sui_ext_i18n").translate
 local T      = require("ffi/util").template
+local SUICompat = require("utils/sui_compat")
 
 local PATCH_ID   = "screensaver_homescreen"
 local TYPE_VALUE = "simpleui_homescreen"   -- value stored in screensaver_type
@@ -82,7 +83,7 @@ function P.apply()
         if not (type(tbl) == "table"
                 and type(tbl[1]) == "table"
                 and type(tbl[1].sub_item_table) == "table") then
-            logger.warn("screensaver_homescreen: unexpected screensaver_menu structure")
+            logger.dbg("screensaver_homescreen: unexpected screensaver_menu structure")
             return
         end
 
@@ -167,25 +168,25 @@ function P.apply()
 
     local ok_reg, Registry = pcall(require, "desktop_modules/moduleregistry")
     if not ok_reg or not Registry then
-        logger.warn("screensaver_homescreen: moduleregistry unavailable — show() not patched")
+        logger.dbg("screensaver_homescreen: moduleregistry unavailable — show() not patched")
         return
     end
 
     local ok_hs, Homescreen = pcall(require, "sui_homescreen")
     if not ok_hs or not Homescreen then
-        logger.warn("screensaver_homescreen: sui_homescreen unavailable — show() not patched")
+        logger.dbg("screensaver_homescreen: sui_homescreen unavailable — show() not patched")
         return
     end
 
     local ok_cfg, Config = pcall(require, "sui_config")
     if not ok_cfg or not Config then
-        logger.warn("screensaver_homescreen: sui_config unavailable — show() not patched")
+        logger.dbg("screensaver_homescreen: sui_config unavailable — show() not patched")
         return
     end
 
     local ok_sts, SUISettings = pcall(require, "sui_store")
     if not ok_sts or not SUISettings then
-        logger.warn("screensaver_homescreen: sui_store unavailable — show() not patched")
+        logger.dbg("screensaver_homescreen: sui_store unavailable — show() not patched")
         return
     end
 
@@ -292,11 +293,13 @@ function P.apply()
             _last_wp_widget = nil
         end
 
-        -- Use the freshest sui_homescreen reference available (the new plugin
-        -- instance re-requires it after every context switch).
-        local live_HS = package.loaded["sui_homescreen"] or Homescreen
-        if not live_HS.styleGetWallpaperEnabled() then return nil end
-        local path = live_HS.styleGetWallpaper()
+        -- Resolved per call, not cached: the new plugin instance re-requires
+        -- these modules after every context switch. sui_compat picks the
+        -- table that owns the getters — sui_homescreen on SimpleUI <=2.4,
+        -- features/sui_wallpaper on 2.5+.
+        local WP = SUICompat.wallpaperAPI()
+        if not WP or not WP.styleGetWallpaperEnabled() then return nil end
+        local path = WP.styleGetWallpaper()
         if not path then return nil end
         local ok, w = pcall(ImageWidget.new, ImageWidget, {
             file          = path,
@@ -310,7 +313,7 @@ function P.apply()
             _last_wp_widget = w   -- remember for cleanup on next call
             return w
         end
-        logger.warn("screensaver_homescreen: wallpaper load failed: " .. tostring(path))
+        logger.dbg("screensaver_homescreen: wallpaper load failed: " .. tostring(path))
         return nil
     end
 
@@ -392,7 +395,7 @@ function P.apply()
         end
 
         if #mods == 0 then
-            logger.info("screensaver_homescreen: page " .. tostring(page_idx)
+            logger.dbg("screensaver_homescreen: page " .. tostring(page_idx)
                         .. " has no enabled modules — showing white screen")
             return _whiteWidget()
         end
@@ -428,7 +431,7 @@ function P.apply()
                 end
                 body[#body + 1] = widget
             else
-                logger.warn("screensaver_homescreen: build() failed for "
+                logger.dbg("screensaver_homescreen: build() failed for "
                             .. tostring(mod.id) .. ": " .. tostring(widget))
             end
         end
@@ -440,7 +443,7 @@ function P.apply()
 
         -- If every build() call failed, body is empty → show white.
         if #body == 0 then
-            logger.warn("screensaver_homescreen: all module builds failed — showing white screen")
+            logger.dbg("screensaver_homescreen: all module builds failed — showing white screen")
             return _whiteWidget()
         end
 
@@ -540,7 +543,7 @@ function P.apply()
     local function _patchScreensaverShow(Screensaver)
         if _show_patched then return true end
         if type(Screensaver) ~= "table" then
-            logger.warn("screensaver_homescreen: _patchScreensaverShow: not a table")
+            logger.dbg("screensaver_homescreen: _patchScreensaverShow: not a table")
             return false
         end
         -- `show` may be a plain function OR a callable table (e.g. a KOReader
@@ -553,11 +556,11 @@ function P.apply()
             local mt = type(orig_show) == "table" and getmetatable(orig_show)
             if not (mt and mt.__call) then
                 -- Not callable at all — do not patch, as orig_show(self) would crash.
-                logger.warn("screensaver_homescreen: Screensaver.show is not callable (type="
+                logger.dbg("screensaver_homescreen: Screensaver.show is not callable (type="
                             .. orig_show_type .. ") — cannot patch")
                 return false
             end
-            logger.info("screensaver_homescreen: Screensaver.show is callable table — patching")
+            logger.dbg("screensaver_homescreen: Screensaver.show is callable table — patching")
         end
         _show_patched = true
 
@@ -566,7 +569,7 @@ function P.apply()
                 return orig_show(self)
             end
             if not self.ui then
-                logger.warn("screensaver_homescreen: show() aborting — self.ui is nil (setup() may have failed)")
+                logger.dbg("screensaver_homescreen: show() aborting — self.ui is nil (setup() may have failed)")
                 return
             end
 
@@ -604,7 +607,7 @@ function P.apply()
             -- Step 1: build the homescreen widget tree
             local ok_build, hs_widget = pcall(_buildHomescreenWidget, screen_w, screen_h, target_page)
             if not ok_build then
-                logger.warn("screensaver_homescreen: _buildHomescreenWidget threw: " .. tostring(hs_widget))
+                logger.dbg("screensaver_homescreen: _buildHomescreenWidget threw: " .. tostring(hs_widget))
                 hs_widget = nil
             end
 
@@ -641,11 +644,11 @@ function P.apply()
                             if _bb then pcall(function() _bb:free() end); _bb = nil end
                         end
                     else
-                        logger.warn("screensaver_homescreen: paintTo failed — using white fallback")
+                        logger.dbg("screensaver_homescreen: paintTo failed — using white fallback")
                         pcall(function() bb:free() end)
                     end
                 else
-                    logger.warn("screensaver_homescreen: Blitbuffer.new failed — using white fallback")
+                    logger.dbg("screensaver_homescreen: Blitbuffer.new failed — using white fallback")
                     pcall(function() if hs_widget and hs_widget.free then hs_widget:free() end end)
                     hs_widget = nil
                 end
@@ -744,12 +747,12 @@ function P.apply()
                             -- Restore immediately — no further interception needed.
                             _G.require = _orig_require_for_ss
                         else
-                            logger.warn("screensaver_homescreen: require(ui/screensaver) patch failed: "
+                            logger.dbg("screensaver_homescreen: require(ui/screensaver) patch failed: "
                                         .. "show=" .. type(result.show)
                                         .. " setup=" .. type(result.setup))
                         end
                     else
-                        logger.warn("screensaver_homescreen: require(ui/screensaver) returned non-table: "
+                        logger.dbg("screensaver_homescreen: require(ui/screensaver) returned non-table: "
                                     .. type(result))
                     end
                 else
@@ -774,7 +777,7 @@ function P.apply()
                     _patchScreensaverShow(ss)
                 elseif not _show_patched then
                     if not _patchScreensaverShow(ss) then
-                        logger.warn("screensaver_homescreen: show() not patched after dofile; type="
+                        logger.dbg("screensaver_homescreen: show() not patched after dofile; type="
                                     .. type(ss.show))
                     end
                     _G.require = _orig_require_for_ss

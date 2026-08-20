@@ -77,7 +77,7 @@ function P.apply()
 
     local ok, M = pcall(require, "desktop_modules/module_coverdeck")
     if not ok or not M then
-        logger.warn("coverdeck_exclude patch: cannot load module_coverdeck — skipped")
+        logger.dbg("coverdeck_exclude patch: cannot load module_coverdeck — skipped")
         return
     end
     _applied = true

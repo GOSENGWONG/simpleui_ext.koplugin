@@ -60,7 +60,7 @@ local _SH = nil
 local function getSH()
     if not _SH then
         local ok, m = pcall(require, "desktop_modules/module_books_shared")
-        if ok and m then _SH = m else logger.warn("simpleui: cannot load module_books_shared") end
+        if ok and m then _SH = m else logger.dbg("simpleui: cannot load module_books_shared") end
     end
     return _SH
 end
@@ -534,7 +534,7 @@ M.enabled_key     = "currently_yanllsama_v1"
 M.default_on      = false
 M.has_covers      = true   
 M.is_book_mod     = true   
-M.needs           = { db = true } 
+M.needs           = { db = true, books = true } 
 
 function M.reset()
     _SH = nil; _SUIStyle = nil; _cache = nil
@@ -1156,6 +1156,10 @@ function M.build(w, ctx)
     
     local prefetched_entry = ctx.prefetched and ctx.prefetched[current_fp]
     local bd    = SH.getBookData(current_fp, prefetched_entry)
+    -- NOTE: SimpleUI 2.5+ ignores the align/stretch_limit args — its
+    -- getBookCover is stretch-only (crop lives in getCroppedBookCover).
+    -- Kept for SimpleUI <=2.4; on 2.5 the cover is always stretched,
+    -- same as SimpleUI's own module_currently.
     local cover = SH.getBookCover(current_fp, D.COVER_W, D.COVER_H, nil, 0.10)
                   or SH.coverPlaceholder(bd.title, bd.authors, D.COVER_W, D.COVER_H)
 

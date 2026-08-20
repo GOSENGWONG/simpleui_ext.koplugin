@@ -395,6 +395,9 @@ local module = {
     label           = _DEFAULT_LABEL,
     enabled_key     = "reading_streaks",
     default_on      = false,
+    -- See the note in module_hero_currently.lua: SimpleUI 2.5's engine
+    -- only opens the shared stats DB for an external module that asks.
+    needs           = { db = true },
 }
 
 function module.build(w, ctx)
