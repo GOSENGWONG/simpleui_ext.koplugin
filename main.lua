@@ -22,7 +22,7 @@ require("utils/sui_compat")
 local WidgetContainer = require("ui/widget/container/widgetcontainer")
 local LuaSettings     = require("luasettings")
 local logger          = require("logger")
-local _ = require("sui_ext_i18n").translate
+local _ = require("utils/suie_i18n").translate
 
 -- Settings file path helper - computed at runtime to ensure consistency
 local function getSettingsFilePath()

@@ -29,7 +29,7 @@ local VerticalGroup    = require("ui/widget/verticalgroup")
 local VerticalSpan     = require("ui/widget/verticalspan")
 local Size             = require("ui/size")
 local logger           = require("logger")
-local _                = require("sui_ext_i18n").translate
+local _                = require("utils/suie_i18n").translate
 
 -- ---------------------------------------------------------------------------
 -- Lazy-loaded SimpleUI helpers (not available until SimpleUI is loaded)

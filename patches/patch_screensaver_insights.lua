@@ -22,7 +22,7 @@
 --   screensaver_insights_page     0–3  (0 = random each time, default 0)
 
 local logger = require("logger")
-local _      = require("sui_ext_i18n").translate
+local _      = require("utils/suie_i18n").translate
 local T      = require("ffi/util").template
 local SUICompat = require("utils/sui_compat")
 

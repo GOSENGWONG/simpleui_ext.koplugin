@@ -1,8 +1,8 @@
--- sui_ext_i18n.lua — SimpleUI Extra Modules
+-- suie_i18n.lua — SimpleUI Extra Modules
 -- Translation loader (companion to simpleui.koplugin/sui_i18n.lua).
 --
 -- Key differences from base sui_i18n:
---   1. Unique module name (`sui_ext_i18n`) avoids conflicts in package.loaded.
+--   1. Unique module name (`suie_i18n`) avoids conflicts in package.loaded.
 --   2. Path resolution is anchored to this ext-plugin root; `locale/` must be
 --      placed inside this plugin directory.
 --   3. Uses "simpleui_ext i18n" log tag for clearer diagnostics.
@@ -17,7 +17,7 @@ local logger = require("logger")
 -- ---------------------------------------------------------------------------
 -- Resolve the root directory of this ext-plugin automatically
 -- ---------------------------------------------------------------------------
--- Source path pattern: @..../simpleui_ext.koplugin/sui_ext_i18n.lua
+-- Source path pattern: @..../simpleui_ext.koplugin/utils/suie_i18n.lua
 -- We need to extract the base path: ..../simpleui_ext.koplugin/
 -- This intentionally verbose approach ensures correct path resolution even
 -- when the module is injected via dofile().
@@ -37,7 +37,7 @@ local function detectExtDir()
         local info = debug.getinfo(i, "S")
         if not info then break end
         if type(info.source) == "string" then
-            local d = info.source:match("^@(.+)/sui_ext_i18n%.lua$")
+            local d = info.source:match("^@(.+)/suie_i18n%.lua$")
             if d then
                 if d:sub(-1) ~= "/" then d = d .. "/" end
                 return d

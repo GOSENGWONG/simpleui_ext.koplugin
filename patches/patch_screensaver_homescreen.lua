@@ -47,7 +47,7 @@
 --   screensaver_simpleui_hs_page   number  — page to show (default 1)
 
 local logger = require("logger")
-local _      = require("sui_ext_i18n").translate
+local _      = require("utils/suie_i18n").translate
 local T      = require("ffi/util").template
 local SUICompat = require("utils/sui_compat")
 

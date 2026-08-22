@@ -106,7 +106,7 @@
 --   recent_ignore_first      bool, default false
 
 local logger = require("logger")
-local _      = require("sui_ext_i18n").translate
+local _      = require("utils/suie_i18n").translate
 
 local PATCH_ID = "recent_extra"
 

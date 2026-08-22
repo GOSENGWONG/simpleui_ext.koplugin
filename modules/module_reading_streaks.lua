@@ -34,7 +34,7 @@ local LuaSettings = require("luasettings")
 local SQ3 = require("lua-ljsqlite3/init")
 local util = require("util")
 local lfs = require("libs/libkoreader-lfs")
-local _ = require("sui_ext_i18n").translate
+local _ = require("utils/suie_i18n").translate
 
 -- Inline reading data provider (shared cache with 2-reading-insights-popup.lua)
 local db_path = DataStorage:getSettingsDir() .. "/statistics.sqlite3"

@@ -34,7 +34,7 @@ local DataStorage = require("datastorage")
 local LuaSettings = require("luasettings")
 local SQ3 = require("lua-ljsqlite3/init")
 local util = require("util")
-local _ = require("sui_ext_i18n").translate
+local _ = require("utils/suie_i18n").translate
 local lfs = require("libs/libkoreader-lfs")
 
 -- Inline reading data provider (shared cache with 2-reading-insights-popup.lua)

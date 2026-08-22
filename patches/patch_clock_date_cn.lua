@@ -10,7 +10,7 @@
 
 local logger = require "logger"
 local hotfix = require "utils/hotfix"
-local _      = require("sui_ext_i18n").translate
+local _      = require("utils/suie_i18n").translate
 
 
 local P = {

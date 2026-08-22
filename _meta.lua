@@ -1,4 +1,4 @@
-local _ = require("sui_ext_i18n").translate
+local _ = require("utils/suie_i18n").translate
 return {
     name        = "simpleui_ext",
     fullname    = _("SimpleUI Extra Modules"),

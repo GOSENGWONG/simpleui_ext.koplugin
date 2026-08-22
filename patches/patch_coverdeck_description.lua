@@ -56,7 +56,7 @@
 --   coverdeck_desc_font_size  number  — base font size in pt (default 8; multiplied by module scale)
 
 local logger = require("logger")
-local _      = require("sui_ext_i18n").translate
+local _      = require("utils/suie_i18n").translate
 
 -- ---------------------------------------------------------------------------
 -- PATCH_ID must match the filename: patch_<PATCH_ID>.lua

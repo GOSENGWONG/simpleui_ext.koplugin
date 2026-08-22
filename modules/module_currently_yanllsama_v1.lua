@@ -24,8 +24,8 @@
 
 local Device  = require("device")
 local Screen  = Device.screen
-local _       = require("sui_ext_i18n").translate
-local N_      = require("sui_ext_i18n").ngettext
+local _       = require("utils/suie_i18n").translate
+local N_      = require("utils/suie_i18n").ngettext
 local logger  = require("logger")
 
 local Blitbuffer      = require("ffi/blitbuffer")
